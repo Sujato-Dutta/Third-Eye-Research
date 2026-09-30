@@ -1,0 +1,3 @@
+{"id": "synthetic-ood_dev-0", "prompt": "What is 60 plus 2?", "answer": "#### 62", "split": "ood_dev", "task": "math", "difficulty": "easy", "metadata": {"synthetic": true}}
+{"id": "synthetic-ood_dev-1", "prompt": "What is 61 plus 2?", "answer": "#### 63", "split": "ood_dev", "task": "math", "difficulty": "hard", "metadata": {"synthetic": true}}
+{"id": "synthetic-ood_dev-2", "prompt": "What is 62 plus 2?", "answer": "#### 64", "split": "ood_dev", "task": "math", "difficulty": "easy", "metadata": {"synthetic": true}}

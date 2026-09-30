@@ -1,0 +1,3 @@
+-r requirements.txt
+# Optional NF4 QLoRA backend; ordinary LoRA does not need this package.
+bitsandbytes==0.47.0

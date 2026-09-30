@@ -1,0 +1,3 @@
+[lint.per-file-ignores]
+# Script entrypoints add src to sys.path because this repo uses requirements.txt.
+"experiments/*.py" = ["E402"]

@@ -1,0 +1,31 @@
+# Local environments and secrets
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.DS_Store
+.idea/
+.vscode/
+# Research artifacts: keep benchmark data, weights, and outputs out of Git
+data/raw/
+data/processed/
+data/manifests/
+models/*
+!models/README.md
+runs/
+outputs/
+logs/
+*.safetensors
+*.pt
+*.pth
+*.bin
+wandb/

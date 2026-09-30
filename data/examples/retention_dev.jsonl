@@ -1,0 +1,3 @@
+{"id": "synthetic-retention_dev-0", "prompt": "What is 90 plus 2?", "answer": "#### 92", "split": "retention_dev", "task": "math", "difficulty": "easy", "metadata": {"synthetic": true}}
+{"id": "synthetic-retention_dev-1", "prompt": "What is 91 plus 2?", "answer": "#### 93", "split": "retention_dev", "task": "math", "difficulty": "hard", "metadata": {"synthetic": true}}
+{"id": "synthetic-retention_dev-2", "prompt": "What is 92 plus 2?", "answer": "#### 94", "split": "retention_dev", "task": "math", "difficulty": "easy", "metadata": {"synthetic": true}}

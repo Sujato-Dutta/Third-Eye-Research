@@ -1,0 +1,12 @@
+{"id": "synthetic-train-0", "prompt": "What is 1 plus 2?", "answer": "#### 3", "split": "train", "task": "math", "difficulty": "easy", "metadata": {"synthetic": true}}
+{"id": "synthetic-train-1", "prompt": "What is 2 plus 2?", "answer": "#### 4", "split": "train", "task": "math", "difficulty": "hard", "metadata": {"synthetic": true}}
+{"id": "synthetic-train-2", "prompt": "What is 3 plus 2?", "answer": "#### 5", "split": "train", "task": "math", "difficulty": "easy", "metadata": {"synthetic": true}}
+{"id": "synthetic-train-3", "prompt": "What is 4 plus 2?", "answer": "#### 6", "split": "train", "task": "math", "difficulty": "hard", "metadata": {"synthetic": true}}
+{"id": "synthetic-train-4", "prompt": "What is 5 plus 2?", "answer": "#### 7", "split": "train", "task": "math", "difficulty": "easy", "metadata": {"synthetic": true}}
+{"id": "synthetic-train-5", "prompt": "What is 6 plus 2?", "answer": "#### 8", "split": "train", "task": "math", "difficulty": "hard", "metadata": {"synthetic": true}}
+{"id": "synthetic-train-6", "prompt": "What is 7 plus 2?", "answer": "#### 9", "split": "train", "task": "math", "difficulty": "easy", "metadata": {"synthetic": true}}
+{"id": "synthetic-train-7", "prompt": "What is 8 plus 2?", "answer": "#### 10", "split": "train", "task": "math", "difficulty": "hard", "metadata": {"synthetic": true}}
+{"id": "synthetic-train-8", "prompt": "What is 9 plus 2?", "answer": "#### 11", "split": "train", "task": "math", "difficulty": "easy", "metadata": {"synthetic": true}}
+{"id": "synthetic-train-9", "prompt": "What is 10 plus 2?", "answer": "#### 12", "split": "train", "task": "math", "difficulty": "hard", "metadata": {"synthetic": true}}
+{"id": "synthetic-train-10", "prompt": "What is 11 plus 2?", "answer": "#### 13", "split": "train", "task": "math", "difficulty": "easy", "metadata": {"synthetic": true}}
+{"id": "synthetic-train-11", "prompt": "What is 12 plus 2?", "answer": "#### 14", "split": "train", "task": "math", "difficulty": "hard", "metadata": {"synthetic": true}}
