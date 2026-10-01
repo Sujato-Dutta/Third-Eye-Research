@@ -1,5 +1,8 @@
 # Local environments and secrets
 .venv/
+.tmp/
+.local-deps/
+docs/DGX_A100_training_Doc.pdf
 venv/
 .env
 .env.*
@@ -9,6 +12,7 @@ venv/
 __pycache__/
 *.py[cod]
 .pytest_cache/
+pytest-cache-files-*/
 .ruff_cache/
 .coverage
 htmlcov/

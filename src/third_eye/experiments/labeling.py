@@ -24,10 +24,12 @@ class LabelGenerator:
         output,
         manifest_hash,
         feature_extractor=extract_features,
+        trajectory_id=None,
     ):
         self.backend, self.config, self.splits = backend, config, splits
         self.verifier, self.output = verifier, Path(output)
         self.manifest_hash, self.feature_extractor = manifest_hash, feature_extractor
+        self.trajectory_id = trajectory_id or digest(str(self.output.resolve()))[:20]
         self.output.mkdir(parents=True, exist_ok=True)
 
     def label_state(self, generation, history=()):
@@ -118,6 +120,8 @@ class LabelGenerator:
                 delta1, delta2 = t1.delta(baseline), t2.delta(baseline)
                 record = {
                     "schema_version": 1,
+                    "protocol_status": p.status,
+                    "trajectory_id": self.trajectory_id,
                     "state_id": state_id,
                     "candidate_id": candidate_id,
                     "generation": generation,
@@ -129,7 +133,9 @@ class LabelGenerator:
                     "candidate_adapter_hash": t1_hash,
                     "batch_hash": batch_hash(batch),
                     "candidate_size": len(batch),
+                    "utility_weights": list(p.utility_weights),
                     "precommit": {
+                        "generation": generation,
                         "state": baseline.to_dict(),
                         "history": list(history),
                         "features": features,
@@ -195,7 +201,14 @@ class LabelGenerator:
 
 
 def run_trajectory(
-    labeler, policy="random", start_generation=0, history=(), selector=None
+    labeler,
+    policy="random",
+    start_generation=0,
+    history=(),
+    selector=None,
+    prune=False,
+    keep_accepted=5,
+    generations=None,
 ):
     """An external selector receives only pre-commit fields, never labels."""
     import random
@@ -206,7 +219,10 @@ def run_trajectory(
         raise ValueError("External policy needs a selector callback")
     cfg, b, output = labeler.config, labeler.backend, labeler.output
     history, accepted = list(history), []
-    for generation in range(start_generation, start_generation + cfg.protocol.depth):
+    count = cfg.protocol.depth if generations is None else generations
+    if not 1 <= count <= cfg.protocol.depth or start_generation + count > 5:
+        raise ValueError("Requested trajectory exceeds its frozen depth or T=5")
+    for generation in range(start_generation, start_generation + count):
         if generation >= 5:
             raise ValueError("T=5 limit exceeded")
         try:
@@ -257,9 +273,11 @@ def run_trajectory(
             "generation": generation + 1,
             "history": history[-3:],
             "policy": policy,
+            "mode": "labels",
             "state_id": record["state_id"],
             "candidate_id": record["candidate_id"],
             "manifest_hash": labeler.manifest_hash,
+            "trajectory_id": labeler.trajectory_id,
         }
         committed = output / "accepted" / f"generation_{generation + 1}"
         b.save_checkpoint(committed, metadata)
@@ -269,4 +287,12 @@ def run_trajectory(
             {**metadata, "status": "accepted", "checkpoint": str(committed.resolve())},
         )
         accepted.append(metadata)
+        if prune:
+            from third_eye.storage import prune_branches
+
+            prune_branches(output, record["state_id"])
+        if keep_accepted < 5:
+            from third_eye.storage import prune_accepted
+
+            prune_accepted(output, generation + 1, keep_accepted)
     return accepted

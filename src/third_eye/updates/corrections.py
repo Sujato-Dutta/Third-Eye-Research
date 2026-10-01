@@ -9,10 +9,15 @@ def collect_corrections(backend, train_examples, verifier, protocol, seed):
     if any(ex.split != "train" for ex in train_examples):
         raise ValueError("Correction generation accepts training prompts only")
     pool, failures, attempted = [], 0, 0
+    generated_words, generated_tokens = 0, 0
+    tokenizer = getattr(backend, "tokenizer", None)
     for i, example in enumerate(train_examples):
         initial = backend.generate(
             example.prompt, protocol.max_new_tokens, seed=seed + i
         )
+        generated_words += len(initial.split())
+        if tokenizer is not None:
+            generated_tokens += len(tokenizer.encode(initial, add_special_tokens=False))
         if verifier.verify(example, initial):
             continue
         failures += 1
@@ -36,6 +41,11 @@ def collect_corrections(backend, train_examples, verifier, protocol, seed):
                 seed=seed + 100_000 + i * protocol.correction_attempts + attempt,
                 temperature=protocol.correction_temperature,
             )
+            generated_words += len(completion.split())
+            if tokenizer is not None:
+                generated_tokens += len(
+                    tokenizer.encode(completion, add_special_tokens=False)
+                )
             if verifier.verify(example, completion):
                 pool.append(Correction(example, completion, attempt + 1))
                 break
@@ -45,4 +55,7 @@ def collect_corrections(backend, train_examples, verifier, protocol, seed):
         "revision_attempts": attempted,
         "verified_corrections": len(pool),
         "verifier_pass_rate": len(pool) / attempted if attempted else 0.0,
+        "generated_completions": len(train_examples) + attempted,
+        "generated_words": generated_words,
+        **({"generated_tokens": generated_tokens} if tokenizer is not None else {}),
     }

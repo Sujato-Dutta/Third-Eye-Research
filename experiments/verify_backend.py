@@ -169,6 +169,9 @@ def main():
     parser.add_argument("--quantization", choices=("none", "nf4"), default="none")
     parser.add_argument("--output", default="runs/verification/backend.json")
     args = parser.parse_args()
+    from third_eye.cluster import require_gpu_allocation
+
+    require_gpu_allocation(args.device)
     report = verify(args.device, args.quantization)
     write_json(args.output, report)
     print(

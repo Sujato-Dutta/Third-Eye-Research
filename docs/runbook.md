@@ -1,80 +1,155 @@
-# Running and recovering training jobs
+# DGX execution runbook
 
-Run from the repository root. Install dependencies in `.venv`; SLURM scripts
-honor an alternative path through `THIRD_EYE_VENV`. Never train on a cluster
-login node. Submit work through the scheduler.
+All setup/data/verification/training executes through SLURM. The login node is
+for transfer, scheduler inspection and submission. Repository code rejects
+GPU execution without an allocation or on a hostname containing `login`.
+Do not store cluster/Hugging Face credentials in source, configs or job logs.
 
-## GPU verification on MU DGX
+## Provision and verify
 
-The supplied DGX guide specifies campus-network access and the `gpu_student`
-partition. Resource names and entitlements depend on the current cluster
-configuration. Check `sinfo` and your account limits before submitting.
+Submit from the repository root under the account's home directory:
 
 ```bash
+sinfo -o '%P %a %l %D %G'
+squeue -u "$USER"
+quota -s
+sbatch experiments/jobs/bootstrap.slurm
+# After the setup job succeeds:
+sbatch experiments/jobs/prepare_data.slurm
 sbatch --partition=gpu_student --gres=gpu:a100_1g.5gb:1 \
-  experiments/jobs/verify_gpu.slurm
+  --export=ALL,THIRD_EYE_VERIFY_NF4=1 experiments/jobs/verify_gpu.slurm
 ```
 
-This tiny-model smoke job fits a small MIG allocation. To additionally test
-NF4, install `requirements-gpu.txt` and submit with
-`--export=ALL,THIRD_EYE_VERIFY_NF4=1`. Inspect the job's output and the JSON
-reports under `runs/gpu_verification/<job_id>/`.
+The guide names `gpu_student` and a 5GB MIG example. Use the live scheduler's
+actual allowed resource names; the tiny verification fitting 5GB does not
+establish that a research backbone fits. A larger MIG/full A100 allocation may
+be required. Bootstrap defaults to PyTorch cu126; set `THIRD_EYE_TORCH_INDEX`
+to the compatible official wheel index after inspecting the driver. Record the
+runtime dependency snapshot. `HF_HOME` defaults to `models/hf_cache`.
 
-## Qwen/Llama pilot
+Llama and Gemma need approved gated-model access. Configure the standard HF
+authentication outside logs. Code runs also require the approved isolated
+verifier described in [integration.md](integration.md). Verify container
+availability on the allocated node before spending a code-label budget.
+Set `THIRD_EYE_VERIFIER=module:factory` to use a trusted cluster-approved
+implementation in both trajectory jobs and final evaluation.
 
-A tiny-model smoke job does not establish that a 4B model fits a 5GB MIG.
-Choose a full or larger MIG resource appropriate to your model/config and
-account. Validate the actual allocation with `nvidia-smi` inside the job.
+## Pilot and freeze
 
 ```bash
-export THIRD_EYE_MANIFEST="$PWD/data/manifests/math_v1.json"
 export THIRD_EYE_CONFIG=experiments/configs/qwen3_4b_pilot.json
-sbatch --partition=<your_allowed_partition> \
-  --gres=<your_allowed_gpu_resource> experiments/jobs/pilot.slurm
+export THIRD_EYE_MANIFEST="$PWD/data/processed/v1/math/selection.json"
+sbatch --partition=gpu_student --gres=<allowed_larger_gpu_resource> \
+  experiments/jobs/pilot.slurm
 ```
 
-For Llama-small, set `THIRD_EYE_CONFIG` to
-`experiments/configs/llama3_2_3b_pilot.json` after Qwen labeling is stable.
-Authenticate to HF outside logs if gated weights require it. Never commit
-tokens, SSH keys, scheduler credentials, or the GPU access document.
-
-## Resume completed accepted updates
+Review verified-pool size, token budgets, throughput, memory and all K=3 H=2
+branches. Uniformly adjust candidate size/LR/rank/steps only during pilots.
+Freeze the settings that actually produced a completed pilot:
 
 ```bash
-python experiments/run.py \
-  --config experiments/configs/qwen3_4b_frozen.json \
-  --manifest data/manifests/math_v1.json \
-  --resume runs/trajectory_part1/accepted/generation_1 \
-  --output runs/trajectory_part2 --policy random
+python experiments/freeze_protocol.py \
+  --config experiments/configs/qwen3_4b_pilot.json \
+  --pilot-run runs/pilot/<job_id> --depth 5 \
+  --output experiments/configs/qwen3_4b_frozen.json
 ```
 
-The config, resolved model revision, split manifest, and policy must match.
-With depth=1 this adds one accepted generation. The runner restores cumulative
-adapter weights, accepted history, and generation count; it resets AdamW for
-the next update. It does not resume halfway through a training step. Keep the
-same manifest paths on that machine or materialize a documented relocated
-manifest as a distinct experiment version.
+Repeat for Llama-small. Frozen configs pin the actual 40-character model
+commit. A depth change affects the number of accepted updates, not measured
+per-update training budgets. All five backbone pilot templates are supplied;
+8B pilots themselves require a previously passed Gate 2; set
+`THIRD_EYE_GATE2` to that decision artifact when using `pilot.slurm`.
 
-## Failures and diagnostics
+## Staged core study
 
-- Insufficient verified corrections: review `correction_pool.json` and
-  `failure.json`. Repilot a smaller **uniform** candidate size or enlarge the
-  fixed training pool. Do not shrink one candidate or invent its H=2 label.
-- Sequence too long: change the pilot token budget or pre-audit the data.
-  Assistant targets are never silently truncated. The revised budget must be
-  shared across candidates and recorded in a new config version.
-- OOM: lower micro-batch size and increase accumulation consistently, enable
-  NF4/checkpointing, or request a larger allocation. Repilot/freeze again.
-- Partial state: completed branch checkpoints stay for diagnosis. Only a
-  complete matched K=3 state is published as labels. Restart from the last
-  accepted checkpoint into a new output directory; old partial files remain
-  available for audit.
-- Config/checkpoint mismatch: use the exact saved protocol and pinned base
-  revision. Weight checksums and adapter hashes reject incompatible/corrupt
-  checkpoints.
+```bash
+python experiments/plan_study.py \
+  --configs experiments/configs/qwen3_4b_frozen.json \
+            experiments/configs/llama3_2_3b_frozen.json \
+  --output experiments/plans/study_v1 --run-root runs/study_v1
 
-The ledger profiles state wall time, individual update time, probe time,
-optimizer steps, trainable parameters, and peak allocated GPU memory. CUDA
-synchronization surrounds measured update time. These measurements support
-pilot budgeting; end-to-end policy cost still includes generation/evaluation,
-and GPU-specific performance must be measured on the actual allocation.
+python experiments/submit_stage.py \
+  --plan experiments/plans/study_v1/plan.json --stage labels \
+  --gres=<allowed_larger_gpu_resource> \
+  --estimated-task-hours=<measured_estimate> --indices 0 1 2 3
+```
+
+Submission is a dry run until `--submit` is supplied. It reserves estimated
+GPU-hours for queued tasks, adds measured completed/failed wall time, rejects
+an over-budget proposal, and limits arrays to one simultaneous task. It cannot
+predict unknown runtimes; derive estimates from full pilot wall time including
+generation, evaluation and all branches. Reconcile stale running statuses or
+cancelled reservations against `sacct` before creating a versioned rerun plan.
+
+The default core plan spans both families, three seeds, and three independent
+exploration trajectories per seed. Start with a small task subset and compute
+Gate 1 on its complete states before adding the remaining collection budget:
+
+```bash
+python experiments/analyze.py --labels <completed_label_files> \
+  --output runs/gate1_initial
+```
+
+After Gate 1 supports continuation, finish `labels`, then `forecasters`, `forecast_reports`,
+`analysis`, `online_core`, `final_core`, and `reports`. Submit each stage after
+its predecessors complete; `--dependency <job_id>` adds `afterok`. The `stress`
+stage evaluates seeded shuffled prompt order using preselected forecasters;
+`reports_stress` exports its paired development comparisons.
+Each task writes running/complete/failed status with exact command argv,
+source-plan hash, host/job ID, elapsed time and storage preflight.
+
+Direct, H=1 MLP, matched H=1 GRU, Dynamics, five feature ablations and a scalar
+H=2 ablation share the same trajectory split. Online policies use the matching
+forecaster training seed. Analysis reports future ranking for each main method.
+
+## Transfer and final scores
+
+After core Gate 2 passes, pilot/freeze Gemma and both 8B backbones. Generate a
+new versioned plan with `--transfer-configs` pointing to those measured configs.
+`transfer_labels` and `transfer_forecasts` measure held-out-family/scale ranking;
+`online_transfer` and `final_transfer` compare no-update/greedy/Direct on the
+primary task. These stages require a passed Gate 2. Rotate models sequentially
+under the storage quota rather than caching all five backbones together.
+
+Final evaluation loads only the sealed final manifest and an accepted final
+adapter. It records item correctness, greedy pass@1, test-set counts and hashes.
+Reports separate development trajectories from final benchmark CSVs and pair
+final items by benchmark role. Core reports include both greedy and H=1
+reference comparisons. No empirical success is inferred from test fixtures.
+
+## Quota and recovery
+
+The configured account quota is 50GB. Study tasks check project footprint and
+filesystem headroom; `quota -s` remains authoritative for other account usage.
+Plans use `--prune-branches --keep-accepted 1`: complete-state labels, batches,
+logs, adapter hashes and the latest accepted checkpoint survive. Intermediate
+branch and older accepted adapters are removed only after commitment. Archive
+final adapters and logs before rotating models:
+
+```bash
+python experiments/manage_cache.py
+python experiments/manage_cache.py --evict-model Qwen/Qwen3-4B
+```
+
+Evict only after all jobs using that model have stopped. This utility operates
+on the dedicated HF cache and the exact named model; it does not touch adapters.
+Keep cache, environment and output sizes within the account's total quota.
+
+Resume from the latest accepted checkpoint with the same config, manifest,
+policy, pool-order seed and forecaster into a new output directory. The CLI
+bounds resumed invocations by the remaining generations under T=5; use
+`--generations` to request a smaller slice. Online resume validates forecaster
+weight identity and stitches the prior baseline/trajectory points so a resumed
+result still measures change from M_0. For example:
+
+```bash
+python experiments/run.py --mode online --policy direct \
+  --config <same_frozen_config> --manifest <same_selection_manifest> \
+  --forecaster <same_forecaster> --resume <run>/accepted/generation_2 \
+  --output runs/resumed_trial --prune-branches --keep-accepted 1
+```
+
+A partial invocation cannot enter full-depth policy reports. Insufficient
+corrections and overlong SFT targets require uniform repiloting, not fabricated
+continuations or truncation. Partial states remain diagnostic and never enter
+meta-training.

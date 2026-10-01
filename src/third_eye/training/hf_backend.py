@@ -18,7 +18,12 @@ from peft import (
     set_peft_model_state_dict,
 )
 from peft.utils.save_and_load import load_peft_weights
-from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
+from transformers import (
+    AutoConfig,
+    AutoModelForCausalLM,
+    AutoTokenizer,
+    BitsAndBytesConfig,
+)
 
 from third_eye.io import append_jsonl, file_digest, write_json
 from third_eye.training.tokenization import collate, encode_completion, format_prompt
@@ -77,7 +82,15 @@ class HFBackend:
                     bnb_4bit_compute_dtype=dtype,
                 )
                 kwargs["device_map"] = {"": torch.cuda.current_device()}
-            model = AutoModelForCausalLM.from_pretrained(m.name, **kwargs)
+            base_config = AutoConfig.from_pretrained(m.name, revision=m.revision)
+            if base_config.model_type == "gemma3":
+                # 4B Gemma has a multimodal outer config; load its language
+                # module with the proper composite class, without vision LoRA.
+                from transformers import Gemma3ForConditionalGeneration
+
+                model = Gemma3ForConditionalGeneration.from_pretrained(m.name, **kwargs)
+            else:
+                model = AutoModelForCausalLM.from_pretrained(m.name, **kwargs)
         if m.quantization == "nf4":
             model = prepare_model_for_kbit_training(
                 model,
@@ -92,7 +105,11 @@ class HFBackend:
                 r=t.rank,
                 lora_alpha=t.alpha,
                 lora_dropout=t.dropout,
-                target_modules=list(t.target_modules),
+                target_modules=(
+                    r".*language_model.*\.(?:" + "|".join(t.target_modules) + r")$"
+                    if getattr(model.config, "model_type", None) == "gemma3"
+                    else list(t.target_modules)
+                ),
                 bias="none",
                 task_type="CAUSAL_LM",
             ),
@@ -147,7 +164,12 @@ class HFBackend:
             add_special_tokens=False,
             return_token_type_ids=False,
         ).to(self.device)
-        capacity = getattr(self.model.config, "max_position_embeddings", None)
+        text_config = (
+            self.model.config.get_text_config()
+            if hasattr(self.model.config, "get_text_config")
+            else self.model.config
+        )
+        capacity = getattr(text_config, "max_position_embeddings", None)
         if capacity and inputs.input_ids.shape[1] + max_new_tokens > capacity:
             raise ValueError(
                 "Generation exceeds model context; shorten prompt or token budget"
@@ -291,6 +313,112 @@ class HFBackend:
                 total += loss.item() * count
                 tokens += count
         return total / tokens
+
+    def _gradient(self, examples):
+        """Adapter gradients at the current parent; no optimizer mutation."""
+        self.model.eval()
+        self.model.zero_grad(set_to_none=True)
+        try:
+            for example in examples:
+                row = self._encode(example.prompt, example.answer)
+                batch = {
+                    k: v.to(self.device)
+                    for k, v in collate([row], self.tokenizer.pad_token_id).items()
+                }
+                with self._autocast():
+                    loss = self.model(**batch).loss / len(examples)
+                loss.backward()
+            parts = [
+                p.grad.detach().float().cpu().flatten()
+                if p.grad is not None
+                else torch.zeros(p.numel())
+                for p in self.model.parameters()
+                if p.requires_grad
+            ]
+            return torch.cat(parts), [float(part.norm()) for part in parts]
+        finally:
+            self.model.zero_grad(set_to_none=True)
+
+    def candidate_diagnostics(self, examples, anchor):
+        lengths = [
+            len(self.tokenizer.encode(e.answer, add_special_tokens=False))
+            for e in examples
+        ]
+        losses = [self.measure_loss([e]) for e in examples]
+        candidate, norms = self._gradient(examples[:8])
+        retention, _ = self._gradient(anchor)
+        denom = candidate.norm() * retention.norm()
+        valid = (candidate != 0) & (retention != 0)
+        embeddings = []
+        with torch.inference_mode():
+            for ex in examples:
+                ids = torch.tensor(
+                    self.tokenizer.encode(ex.prompt, add_special_tokens=False),
+                    device=self.device,
+                )
+                vector = self.model.get_input_embeddings()(ids).float().mean(dim=0)
+                embeddings.append(torch.nn.functional.normalize(vector, dim=0).cpu())
+        matrix = torch.stack(embeddings)
+        similarity = matrix @ matrix.T
+        diversity = (
+            (
+                1
+                - float(
+                    (similarity.sum() - similarity.trace())
+                    / (len(examples) * (len(examples) - 1))
+                )
+            )
+            if len(examples) > 1
+            else 0.0
+        )
+        return {
+            "completion_tokens_mean": float(np.mean(lengths)),
+            "completion_tokens_std": float(np.std(lengths)),
+            "confidence_mean": float(np.mean(np.exp(-np.asarray(losses)))),
+            "gradient_norm": float(candidate.norm()),
+            "retention_gradient_cosine": float(torch.dot(candidate, retention) / denom)
+            if denom > 0
+            else 0.0,
+            "gradient_sign_agreement": float(
+                (candidate[valid].sign() == retention[valid].sign()).float().mean()
+            )
+            if valid.any()
+            else 0.0,
+            "layer_gradient_norm_mean": float(np.mean(norms)),
+            "layer_gradient_norm_std": float(np.std(norms)),
+            "embedding_diversity": diversity,
+        }
+
+    def anchor_distribution(self, anchor):
+        self.model.eval()
+        distributions = []
+        with torch.inference_mode():
+            for example in anchor:
+                text = format_prompt(
+                    self.tokenizer, example.prompt, self.config.model.chat_kwargs
+                )
+                inputs = self.tokenizer(
+                    text,
+                    return_tensors="pt",
+                    add_special_tokens=False,
+                    return_token_type_ids=False,
+                ).to(self.device)
+                with self._autocast():
+                    logits = self.model(**inputs).logits[0, -1].float()
+                distributions.append(logits.log_softmax(dim=-1).cpu())
+        return torch.stack(distributions)
+
+    def probe_diagnostics(self, parent, anchor, distribution):
+        after = self.anchor_distribution(anchor)
+        kl = (distribution.exp() * (distribution - after)).sum(dim=-1).mean()
+        squared = sum(
+            float((v.float() - parent[k].float()).square().sum())
+            for k, v in self.snapshot().items()
+        )
+        return {
+            "probe_anchor_kl": max(0.0, float(kl)),
+            "probe_adapter_delta_norm": squared**0.5,
+        }
 
     def save_checkpoint(self, path, metadata):
         path = Path(path)

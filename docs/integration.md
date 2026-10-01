@@ -1,114 +1,124 @@
-# Training component handover
+# Third Eye implementation contract
 
-This first-sprint implementation owns systems/training. It does not implement
-the H=1/H=2 forecasters, Direct/Dynamics architectures, statistical toolkit,
-official dataset splits, final benchmark scoring, or PD selector.
+## Inputs and labels
 
-## Public interfaces
+Candidate records contain `state_id`, `trajectory_id`, `candidate_id`, generation,
+model/seed identifiers, immutable protocol/data hashes, and cumulative adapter
+hashes. `precommit` contains current development scores, three past accepted
+state summaries, verified-pool statistics and reversible candidate diagnostics.
+`labels.h1` and `labels.h2` hold separate target/OOD/retention changes from the
+parent in accuracy fractions. Fixed utility weights derive scalar values.
 
-| Interface | Purpose |
-| --- | --- |
-| `third_eye.config.Config` | Immutable model/training/protocol configuration |
-| `third_eye.training.base.TrainingBackend` | Model-independent orchestrator contract |
-| `third_eye.training.hf_backend.HFBackend` | Single-device HF/PEFT LoRA and NF4 QLoRA |
-| `third_eye.updates.corrections.collect_corrections` | Current-model failures → verified training completions |
-| `third_eye.updates.candidates.sample_batches` | K=3 matched candidate composition |
-| `third_eye.experiments.labeling.LabelGenerator` | Parent → three t+1/t+2 labeled branches |
-| `third_eye.experiments.labeling.run_trajectory` | Commit selected t+1 adapter and repeat |
-| `third_eye.evaluation.verifiers.VerifierRegistry.from_spec` | Inject official verifier implementation |
+`forecasting.encoding` is a versioned allowlist. IDs, model identity, branch
+checkpoints, actual continuation data, final tests, full-update logs, and labels
+never enter inference. Missing optional diagnostics have explicit availability
+bits. Normalization is fitted only to meta-training data.
 
-## Candidate record schema v1
+Meta-splits keep entire recursive trajectories together, merge trajectories
+sharing a state, preserve all K=3 candidates, reserve 20% of independent core trajectories each
+for validation and test, and reserve specified held-out
+models for test. Resumed runs preserve trajectory IDs. Legacy records without
+IDs derive their trajectory from the run/resume provenance or source directory.
 
-Each record has identifiers (`state_id`, `candidate_id`, `generation`, `model`,
-`seed`), protocol/split/adapter/batch hashes, and these groups:
+## Features and architectures
 
-| Field | Contents | Allowed in forecaster input? |
-| --- | --- | --- |
-| `precommit.state` | Current target/OOD/retention development accuracy | Yes |
-| `precommit.history` | Last three accepted state summaries and H=1 changes | Yes |
-| `precommit.features` | Candidate word-length/duplicate/difficulty/NLL signals and reversible probe changes | Yes |
-| `precommit.pool_statistics` | Current training-pool failures and correction verification rates | Yes |
-| `labels.h1` | Immediate target/OOD/retention changes from the parent | Targets only |
-| `labels.h2` | Future target/OOD/retention changes from the parent | Targets only |
-| `labels.utility_h1`, `labels.utility_h2` | Fixed weighted aggregates of consequence heads | Targets only |
-| `evaluation`, `runtime`, `continuation`, `checkpoints` | Branch audits and post-update artifacts | No |
+The HF backend measures tokenizer lengths, mean completion likelihood,
+mean-input-embedding diversity, adapter gradient norms, cosine/sign agreement
+with eight retention examples, next-token KL on eight fixed anchor prompts,
+and adapter displacement. Gradient features use the first eight candidate
+examples and summarize layer norms without model-specific layer indices.
+Probes use the frozen short-step budget and always restore the parent adapter.
+Word and token counts remain distinct measurements.
 
-Metric values are fractions: `0.02` means two percentage points. Positive
-retention delta means improvement; forgetting is its negative. Baseline
-accuracies and batch-derived inputs are logged before full candidate training.
-The current length signals count words, not tokenizer tokens. Do not silently
-interpret them as token features. Token lengths, embedding diversity,
-confidence, retention-gradient cosine/sign agreement, KL drift, and richer
-validation-loss features belong to the modeling feature extractor.
+OneStep is a two-hidden-layer MLP. Direct uses a two-layer GRU over masked
+history and a multi-head feed-forward decoder. `matched_h1` uses the same Direct
+architecture and features, changing only the supervised horizon. Dynamics
+encodes current capability/history and candidate features, applies a shared
+residual transition twice, and predicts the second update embedding from the
+predicted first latent state. The actual continuation is unavailable online.
+H=1 decoding and detached capability-state encodings supply auxiliary training
+supervision; post-update scores are used only as targets. This is a latent
+model-evolution forecaster, not a general environment world model.
 
-The systems logger already emits total and layerwise adapter gradient norms
-at every optimizer step in `probe.jsonl` and `training_t1/t2.jsonl`. Probe logs
-are pre-commit; full-update logs are post-update. Keep this distinction when
-building additional features. The default probe records a per-step loss
-change and the retention-proxy NLL change; it is a starting logging adapter,
-not the final frozen modeling feature schema.
+Training combines consequence MSE and within-state pairwise ranking loss.
+Dynamics adds intermediate decoding and latent consistency losses. Dynamics reports H=1/H=2 latent rollout
+error against encoded future capabilities with fixed current-history context.
+Validation
+selects checkpoints and stopping; test data is evaluated after selection. All
+forecasters stay below one million trainable parameters. Scalar H=2 and
+history/gradient/probe/diversity/retention ablations reuse the same split.
 
-## Plug in modeling features
+## Execution and evaluation
 
-Inject a function with the default extractor signature:
+`run.py --mode labels` computes all K=3 H=1/H=2 branches and commits only the
+selected t+1 adapter. The continuation generation/sampling/training procedure
+and seed are fixed across branches; completions depend on each evolved model.
+Incomplete states are never published. Insufficient verified corrections fail
+rather than silently changing the batch or fabricating a label.
 
-```python
-def features(backend, batch, retention_dev, protocol, seed, log_path) -> dict:
-    ...
+`--mode online` computes matched candidate features, ranks before commitment,
+and trains one selected full update. Greedy evaluates three real H=1 branches;
+no-update leaves parameters fixed. Online runs log actual end-to-end wall time
+and probe time separately. Feature probes are paid by all update policies for
+matched comparisons. Failure restores the current parent. Final tests are
+loaded only by `evaluate_final.py`, which writes item correctness separately.
 
-labeler = LabelGenerator(
-    backend, config, splits, verifier, output, manifest_hash,
-    feature_extractor=features,
-)
+GSM8K numeric verification is strict. MATH uses the pinned Math-Verify parser
+and equivalence checker. MMLU prompts request one answer letter. MBPP prompts
+include required function signatures derived from the reference interface,
+without unit-test answers; this prompt protocol must be declared in reports.
+HumanEval accepts complete functions or reconstructed body continuations and
+reports greedy pass@1. The code development proxy is MBPP validation, not
+HumanEval and not a separate cross-benchmark OOD claim.
+
+## Isolated code verification
+
+Set `THIRD_EYE_SANDBOX_CONFIG` to an untracked JSON file:
+
+```json
+{
+  "engine": "docker",
+  "image": "python@sha256:<actual-approved-image-digest>",
+  "timeout_seconds": 8,
+  "memory_mb": 256
+}
 ```
 
-The extractor must restore the parent adapter even on exceptions. The labeler
-checks the parent hash afterward. `backend.snapshot()` returns a CPU copy of
-the cumulative adapter; `restore()` clears gradients. Use a `try/finally` guard
-around any probing. Do not merge adapters into the frozen base model.
+Pull/approve the image through the cluster's normal provisioning process.
+The verifier requires an operational Docker daemon in the allocated job.
+Containers have no network, read-only inputs/root filesystem, no Linux
+capabilities, a non-root UID, and PID/memory/CPU/file/output limits. Timeout and
+excess output terminate the container. Tests are held outside the generated
+prompt. A sandbox startup failure fails the run rather than scoring every
+example incorrect. The verdict nonce rejects ordinary output and early exit;
+the benchmark harness is not a defense against deliberate test introspection.
 
-## Plug in a learned selector
+If Docker is unavailable, use a trusted cluster-approved verifier with the
+`--verifier module:factory` interface. The callable receives `(example,
+completion)` and returns a boolean; its exceptions propagate. Never substitute
+host `exec`, a plain subprocess, or a network/home-mounted Enroot session as the
+isolation boundary for generated programs.
 
-```python
-def choose_candidate(views):
-    # Each view contains state_id, candidate_id, and precommit only.
-    predictions = forecaster.predict([v["precommit"] for v in views])
-    return int(predictions.argmax())
+## Evidence and gates
 
-run_trajectory(labeler, policy="external", selector=choose_candidate)
-```
+Ranking reports use tie-aware top-1, Spearman/Kendall and NDCG with within-state
+shifted nonnegative gains. Undefined correlations are null. Ranking utilities are rounded to 12 decimal
+places to prevent machine-rounding differences from creating false reversals. Confidence
+intervals resample states, with trajectory-cluster intervals additionally
+reported for the phenomenon. Policy comparisons pair model, split, seed,
+revision and budgets; final item tests pair IDs within each benchmark role.
+Holm correction is applied across reported comparisons. Per-head errors,
+calibration bins and zero/nonzero sign accuracy remain separately visible.
 
-The default meta-data exploration policy is seeded random. `greedy_h1` is an
-explicit experimental baseline that pays for candidate updates and uses the
-measured immediate development score. Never use measured H=2 labels to choose
-an online policy. Label generation is expensive research data collection;
-external-policy execution here still computes H=2 labels for auditing. A later
-deployment-only fast path should probe/rank candidates and train only the
-selected one, and must report its own runtime separately.
+Gate 1 requires at least 20 complete states and >=20% strict ranking reversals
+or >=15% updates harmful on a consequence. Gate 2 uses validation, requires
+at least 30 states with defined within-state correlations, mean Spearman >=.30,
+and informative-state top-1 >=.45 and above its tie-adjusted chance rate.
+The minimum sample counts are conservative implementation safeguards beyond
+the numerical signal thresholds. Eight-billion-parameter runs require the
+measured Gate 2 artifact. PD remains unimplemented until its additional
+retention/trade-off activation criteria are measured and passed.
 
-## Evaluation integration
-
-The external verifier factory returns `callable(example, completion) -> bool`.
-It is authoritative for all tasks in that run. Route math/code/retention tasks
-inside that callable, using `example.task` and metadata. Exceptions propagate
-to fail the state; the systems runner never treats a verifier crash as a valid
-correction. Generated code must run with the evaluation team's actual sandbox
-and resource limits. The bundled numeric verifier is for numeric GSM8K-style
-answers only; fractions, symbolic math, units, and rich MATH scoring require
-the official evaluator.
-
-The evaluation component supplies source-disjoint training/development data,
-fixed retention proxy/anchor, and independent final test data. The original
-proposal's final MATH-500/HumanEval scores remain evaluation-only; they must
-not be fed into the online feature pipeline. Audit overlap beyond exact text.
-
-## Pilot and freeze checklist
-
-The real GPU pilot still needs to establish throughput/memory, enough verified
-corrections, sensible LR/rank/steps/batch size, and reproducible K=3 H=2 labels.
-Only then freeze those settings. Gate 1 ranking mismatch and harmful-update
-rates must be measured from real states, not the test fixtures. Llama-small
-jobs are prepared; Qwen/Llama/Gemma need their usual model access (including
-gated-model approval where applicable). Pin HF revision to a commit before
-long research runs and archive dependency/runtime logs. No 8B scaling before
-Gate 2. No claim that the first sprint's empirical milestones are complete.
+All runs log source file hashes, dependency versions, model revision, split and
+adapter hashes, generation/seed and actual runtime. Result reports exclude
+pilot/incomplete trajectories and reject duplicated policy/seed units.

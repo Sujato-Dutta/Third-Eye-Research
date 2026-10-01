@@ -3,6 +3,7 @@
 import argparse
 from dataclasses import replace
 import json
+import re
 from pathlib import Path
 import sys
 
@@ -20,6 +21,12 @@ def main():
         help="Completed run directory using the chosen config",
     )
     parser.add_argument("--output", required=True, help="New frozen config filename")
+    parser.add_argument(
+        "--depth",
+        type=int,
+        choices=range(1, 6),
+        help="Frozen recursive depth; per-update budgets stay measured",
+    )
     args = parser.parse_args()
     if Path(args.output).exists():
         parser.error("Frozen configs are immutable; choose a new output path")
@@ -35,7 +42,16 @@ def main():
         parser.error("Chosen settings must correspond to a completed measured pilot")
     if not (run_dir / "meta_labels.jsonl").exists():
         parser.error("Pilot did not produce labels")
-    frozen = replace(cfg, protocol=replace(cfg.protocol, status="frozen"))
+    revision = run["resolved_revision"]
+    if not re.fullmatch(r"[0-9a-f]{40}", revision):
+        parser.error("Pilot must record the immutable Hugging Face model commit")
+    frozen = replace(
+        cfg,
+        model=replace(cfg.model, revision=revision),
+        protocol=replace(
+            cfg.protocol, status="frozen", depth=args.depth or cfg.protocol.depth
+        ),
+    )
     write_json(args.output, frozen.to_dict())
     write_json(
         str(args.output) + ".freeze.json",
@@ -44,6 +60,8 @@ def main():
             "pilot_config_hash": cfg.fingerprint,
             "frozen_config_hash": frozen.fingerprint,
             "pilot_labels_sha256": file_digest(run_dir / "meta_labels.jsonl"),
+            "resolved_revision": revision,
+            "frozen_depth": frozen.protocol.depth,
         },
     )
     print(f"Frozen config: {args.output}")

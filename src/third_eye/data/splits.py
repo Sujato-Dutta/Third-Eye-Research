@@ -2,6 +2,7 @@
 
 from dataclasses import asdict
 import json
+import os
 from pathlib import Path
 
 from third_eye.data.schema import Example, ROLES
@@ -11,7 +12,7 @@ from third_eye.io import digest, file_digest, write_json
 def read_examples(path, role):
     examples = [
         Example(**json.loads(line))
-        for line in Path(path).read_text().splitlines()
+        for line in Path(path).read_text(encoding="utf-8").splitlines()
         if line.strip()
     ]
     if not examples or any(ex.split != role for ex in examples):
@@ -45,7 +46,11 @@ def create_manifest(paths, output):
     validate_splits(splits)
     entries = {
         role: {
-            "path": str(Path(paths[role]).resolve()),
+            "path": Path(
+                os.path.relpath(
+                    Path(paths[role]).resolve(), Path(output).resolve().parent
+                )
+            ).as_posix(),
             "sha256": file_digest(paths[role]),
             "count": len(splits[role]),
             "examples_hash": digest([asdict(ex) for ex in splits[role]]),
@@ -58,16 +63,19 @@ def create_manifest(paths, output):
 
 
 def load_manifest(path):
-    manifest = json.loads(Path(path).read_text())
+    manifest = json.loads(Path(path).read_text(encoding="utf-8"))
     if manifest.get("schema_version") != 1 or set(manifest.get("splits", {})) != set(
         ROLES
     ):
         raise ValueError("Unsupported split manifest")
     splits = {}
     for role, entry in manifest["splits"].items():
-        if file_digest(entry["path"]) != entry["sha256"]:
+        split_path = Path(entry["path"])
+        if not split_path.is_absolute():
+            split_path = Path(path).resolve().parent / split_path
+        if file_digest(split_path) != entry["sha256"]:
             raise ValueError(f"Immutable split changed: {role}")
-        splits[role] = read_examples(entry["path"], role)
+        splits[role] = read_examples(split_path, role)
         if (
             len(splits[role]) != entry["count"]
             or digest([asdict(ex) for ex in splits[role]]) != entry["examples_hash"]

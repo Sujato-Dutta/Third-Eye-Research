@@ -1,7 +1,7 @@
 """Cheap pre-commit features and a reversible short training probe.
 
-This is a systems-level logging adapter. The modeling component can inject
-additional gradient alignment, diversity, confidence, and KL features later.
+Optional backend diagnostics measure token statistics, gradient interference,
+embedding diversity and anchor KL. Every probe restores the parent adapter.
 """
 
 from collections import Counter
@@ -22,10 +22,19 @@ def extract_features(backend, batch, anchor, protocol, seed, log_path):
     }
     examples = [replace(item.example, answer=item.completion) for item in batch]
     result["pre_update_nll"] = backend.measure_loss(examples)
+    result["revision_attempt_mean"] = statistics.mean(item.attempt for item in batch)
+    result["verifier_pass_rate"] = 1.0
+    if hasattr(backend, "candidate_diagnostics"):
+        result.update(backend.candidate_diagnostics(examples, anchor[:8]))
     if not protocol.probe_steps:
         return result
     parent, parent_hash = backend.snapshot(), backend.state_hash()
     anchor_before = backend.measure_loss(anchor)
+    distribution = (
+        backend.anchor_distribution(anchor[:8])
+        if hasattr(backend, "anchor_distribution")
+        else None
+    )
     try:
         probe = backend.train(
             batch, seed, max_steps=protocol.probe_steps, log_path=log_path
@@ -36,7 +45,11 @@ def extract_features(backend, batch, anchor, protocol, seed, log_path):
             / max(1, protocol.probe_steps - 1),
             probe_anchor_loss_change=backend.measure_loss(anchor) - anchor_before,
             probe_seconds=probe["seconds"],
+            probe_candidate_loss_change=backend.measure_loss(examples)
+            - result["pre_update_nll"],
         )
+        if hasattr(backend, "probe_diagnostics"):
+            result.update(backend.probe_diagnostics(parent, anchor[:8], distribution))
     finally:
         backend.restore(parent)
         if backend.state_hash() != parent_hash:

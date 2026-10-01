@@ -3,6 +3,7 @@ from dataclasses import asdict, dataclass, field
 from third_eye.io import digest
 
 ROLES = ("train", "target_dev", "ood_dev", "retention_dev")
+TEST_ROLES = ("target_test", "ood_test", "retention_test")
 
 
 @dataclass(frozen=True)
@@ -18,9 +19,9 @@ class Example:
     def __post_init__(self):
         if not self.id or not self.prompt.strip() or not self.answer.strip():
             raise ValueError("Examples require id, prompt, and answer")
-        if self.split not in ROLES:
+        if self.split not in ROLES + TEST_ROLES:
             raise ValueError(
-                "Final test sets cannot enter the training/selection runner"
+                "Final test data needs an explicit *_test role; unknown split"
             )
         if self.task not in {"math", "code", "exact"}:
             raise ValueError("Unknown task")
