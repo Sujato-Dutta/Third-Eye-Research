@@ -2,8 +2,8 @@
 #SBATCH --job-name=third-eye-study
 #SBATCH --partition=gpu_student
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=4
-#SBATCH --mem=32G
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=64G
 #SBATCH --time=12:00:00
 #SBATCH --output=third_eye_study_%A_%a.out
 # Specify an allowed GPU/MIG resource at submission; never assume 5GB fits 4B.
@@ -13,7 +13,8 @@ cd "${SLURM_SUBMIT_DIR:?Submit from the repository root}"
 [[ -n "${CUDA_VISIBLE_DEVICES:-}" ]] || { echo 'GPU allocation missing'; exit 1; }
 source "${THIRD_EYE_VENV:-.venv}/bin/activate"
 export HF_HOME="${THIRD_EYE_HF_HOME:-$PWD/models/hf_cache}"
-export OMP_NUM_THREADS="${SLURM_CPUS_PER_TASK:-4}"
+export OMP_NUM_THREADS="${THIRD_EYE_OMP_THREADS:-4}"
+export OPENBLAS_NUM_THREADS=1
 export TOKENIZERS_PARALLELISM=false
 export TMPDIR="${SLURM_TMPDIR:-$PWD/.tmp/${SLURM_JOB_ID}}"
 mkdir -p "$TMPDIR"

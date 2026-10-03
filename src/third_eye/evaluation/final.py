@@ -7,7 +7,7 @@ from third_eye.data.schema import TEST_ROLES
 from third_eye.data.splits import load_manifest, read_examples
 from third_eye.data.benchmarks import audit_overlap
 from third_eye.io import digest, file_digest, append_jsonl, write_json
-from third_eye.provenance import source_inventory, versions
+from third_eye.provenance import source_inventory, versions, execution_environment
 
 
 def load_final_manifest(path, selection_path):
@@ -42,11 +42,15 @@ def evaluate_final(backend, splits, verifier, output, max_new_tokens, seed, meta
     output.mkdir(parents=True)
     before = backend.state_hash()
     scores = {}
+    from third_eye.evaluation.runner import generate_greedy, verify_completions
+
     for role, examples in splits.items():
         count = 0
-        for example in examples:
-            completion = backend.generate(example.prompt, max_new_tokens, seed=seed)
-            passed = verifier.verify(example, completion)
+        completions = generate_greedy(
+            backend, examples, max_new_tokens, [seed] * len(examples)
+        )
+        verdicts = verify_completions(verifier, examples, completions)
+        for example, completion, passed in zip(examples, completions, verdicts):
             count += passed
             append_jsonl(
                 output / "items.jsonl",
@@ -67,8 +71,16 @@ def evaluate_final(backend, splits, verifier, output, max_new_tokens, seed, meta
         "counts": {k: len(v) for k, v in splits.items()},
         "adapter_hash": before,
         "seed": seed,
-        "evaluation": "greedy pass@1",
+        "evaluation": "greedy pass@1 with conditional multiple-choice scoring"
+        if getattr(
+            getattr(getattr(backend, "config", None), "protocol", None),
+            "multiple_choice_scoring",
+            "generation",
+        )
+        == "conditional_likelihood"
+        else "greedy pass@1",
         "software_versions": versions(),
+        "execution": execution_environment(),
         **source_inventory(),
         **metadata,
     }

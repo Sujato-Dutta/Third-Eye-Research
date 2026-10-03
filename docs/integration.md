@@ -56,6 +56,12 @@ and seed are fixed across branches; completions depend on each evolved model.
 Incomplete states are never published. Insufficient verified corrections fail
 rather than silently changing the batch or fabricating a label.
 
+Candidate sampling first draws a seeded difficulty quota. If that quota cannot
+support K distinct batches, a count-based search finds the quota with maximum
+combination capacity at the same batch size. Feasible original quotas retain
+their seeded behavior. All candidates share the selected quota; the search
+uses no consequences or held-out scores. Truly insufficient matched pools fail.
+
 `--mode online` computes matched candidate features, ranks before commitment,
 and trains one selected full update. Greedy evaluates three real H=1 branches;
 no-update leaves parameters fixed. Online runs log actual end-to-end wall time
@@ -93,7 +99,16 @@ prompt. A sandbox startup failure fails the run rather than scoring every
 example incorrect. The verdict nonce rejects ordinary output and early exit;
 the benchmark harness is not a defense against deliberate test introspection.
 
-If Docker is unavailable, use a trusted cluster-approved verifier with the
+Bubblewrap is also supported with `engine: bubblewrap`, an explicit executable
+path and SHA-256, and a Python virtual-environment runtime. It mounts only the
+read-only system runtime, virtual environment, and invocation files; clears
+inherited environment variables; and separates user, PID, network, IPC and
+mount namespaces. CPU, address-space, process, file and output limits apply.
+Timeout kills the process group, and namespace startup must succeed. The
+configured memory bound is virtual address space, not a cgroup RSS limit.
+The DGX preflight additionally checks reference programs before code pilots.
+
+If these backends are unavailable, use a trusted cluster-approved verifier with the
 `--verifier module:factory` interface. The callable receives `(example,
 completion)` and returns a boolean; its exceptions propagate. Never substitute
 host `exec`, a plain subprocess, or a network/home-mounted Enroot session as the
@@ -122,3 +137,40 @@ retention/trade-off activation criteria are measured and passed.
 All runs log source file hashes, dependency versions, model revision, split and
 adapter hashes, generation/seed and actual runtime. Result reports exclude
 pilot/incomplete trajectories and reject duplicated policy/seed units.
+
+`THIRD_EYE_MODEL_SOURCES` can point to a mapping of backbone IDs to immutable
+public-source proofs. `prefetch_mirror.py` requires every downloaded weight
+shard to match the original repository's SHA-256 and the tokenizer vocabulary
+to match its original content hash. Exact matching metadata can be recovered
+from another pinned public source. Configuration and chat/generation metadata
+differences remain explicit in the proof; the entire mirrored package is not
+claimed to be byte-identical to the original. Backend checkpoints enforce the
+same source proof on reload, and paired reports include its hash.
+
+`protocol.generation_batch_size` fixes left-padded greedy inference batches.
+Sampled correction attempts retain individual seeds. Batch size is part of
+the protocol fingerprint when greater than one, and the single-prompt default
+preserves earlier fingerprints. Pilots measure the chosen inference batch size
+before freezing; all policy comparisons for that backbone use it.
+
+`protocol.sampled_batch_size` fixes batched correction retries. Every training
+example/attempt retains its own seed and random stream, with the same
+temperature, model top-k and top-p=0.95 transformations. Successful examples
+leave later retry rounds; the saved correction pool retains training-example
+order. Fixed-batch repeatability is checked; floating-point batching effects
+can change tokens compared with serial sampling. A non-default sampled batch
+size enters the config hash, and its default preserves legacy fingerprints.
+CPU verifier work is separate from model generation. Set
+`THIRD_EYE_VERIFIER_WORKERS` within `SLURM_CPUS_PER_TASK` for independent code
+sandboxes; `THIRD_EYE_SYMBOLIC_WORKERS` defaults to one. Ordered verdicts and
+infrastructure exceptions are preserved. Jobs record CPU/GPU resources,
+verifier settings and sandbox-config hashes, plus pool stage timings.
+
+`protocol.multiple_choice_scoring: conditional_likelihood` ranks A/B/C/D by
+the sum of conditional answer-token log probabilities under the same chat
+prefix. It excludes end tokens and never conditions on the reference answer.
+Retention questions use this fixed accuracy protocol to avoid explanation
+generation and answer-formatting confounds. Math/code still use greedy
+generation. The setting is part of the protocol fingerprint, is fixed before
+research label collection, and must match across compared policies. The
+default `generation` setting preserves earlier protocol fingerprints.

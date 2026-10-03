@@ -1,7 +1,16 @@
 """Prevent research GPU execution outside a scheduler allocation."""
 
 import os
+import re
 import socket
+
+
+def scheduler_job_id(output):
+    """Parse --parsable output even when a site wrapper prints a preamble."""
+    matches = re.findall(r"^\s*(\d+)(?:;[A-Za-z0-9_.-]+)?\s*$", output, re.MULTILINE)
+    if len(matches) != 1:
+        raise RuntimeError("Scheduler output did not contain exactly one job ID")
+    return matches[0]
 
 
 def require_gpu_allocation(device="cuda"):

@@ -45,6 +45,12 @@ class ProtocolConfig:
     probe_steps: int = 10
     depth: int = 1
     status: str = "pilot"
+    generation_batch_size: int = 1
+    sampled_batch_size: int = 1
+    multiple_choice_scoring: str = "generation"
+    amendment: str = "original"
+    candidate_sampling: str = "matched_strata"
+    terminal_continuation: bool = False
     # Fractions, not percentage points; frozen before meta-label generation.
     utility_weights: tuple = (1 / 3, 1 / 3, 1 / 3)
 
@@ -67,6 +73,8 @@ class Config:
             p.correction_attempts,
             p.max_new_tokens,
             p.depth,
+            p.generation_batch_size,
+            p.sampled_batch_size,
         ):
             if type(value) is not int or value < 1:
                 raise ValueError("Budgets must be positive integers")
@@ -76,6 +84,24 @@ class Config:
             raise ValueError("Probe budget must be within the full update budget")
         if p.depth > 5 or p.status not in {"pilot", "frozen"}:
             raise ValueError("Require T<=5 and status pilot/frozen")
+        if (
+            p.amendment not in {"original", "A1"}
+            or p.candidate_sampling not in {"matched_strata", "stratified_distinct"}
+            or type(p.terminal_continuation) is not bool
+        ):
+            raise ValueError("Unsupported protocol amendment or sampling policy")
+        if p.amendment == "original" and (
+            p.terminal_continuation or p.candidate_sampling != "matched_strata"
+        ):
+            raise ValueError("Scarcity rules require an explicit A1 amendment")
+        if p.amendment == "A1" and (
+            not p.terminal_continuation or p.candidate_sampling != "stratified_distinct"
+        ):
+            raise ValueError(
+                "A1 requires distinct compositions and terminal continuations"
+            )
+        if p.multiple_choice_scoring not in {"generation", "conditional_likelihood"}:
+            raise ValueError("Unknown multiple-choice evaluation protocol")
         if m.quantization not in {"none", "nf4"} or m.dtype not in {
             "float32",
             "bfloat16",
@@ -101,7 +127,18 @@ class Config:
             raise ValueError("Three nonnegative utility weights must sum to one")
 
     def to_dict(self):
-        return asdict(self)
+        value = asdict(self)
+        if self.protocol.amendment == "original":
+            for name in ("amendment", "candidate_sampling", "terminal_continuation"):
+                value["protocol"].pop(name)
+        # Keep earlier single-prompt protocol fingerprints stable.
+        if self.protocol.generation_batch_size == 1:
+            value["protocol"].pop("generation_batch_size")
+        if self.protocol.sampled_batch_size == 1:
+            value["protocol"].pop("sampled_batch_size")
+        if self.protocol.multiple_choice_scoring == "generation":
+            value["protocol"].pop("multiple_choice_scoring")
+        return value
 
     @property
     def fingerprint(self):

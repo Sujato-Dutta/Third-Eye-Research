@@ -98,6 +98,47 @@ def test_insufficient_pool_does_not_silently_shrink_candidates():
         sample_batches(pool, 3, 3, 42)
 
 
+def test_infeasible_random_quota_does_not_reject_a_sufficient_pool():
+    pool = [
+        Correction(
+            Example(
+                str(i),
+                f"problem {i}",
+                "2",
+                "train",
+                difficulty="short" if i < 2 else "long",
+            ),
+            "2",
+            1,
+        )
+        for i in range(5)
+    ]
+    # Seed 1 picks both short items initially, producing only one combination.
+    batches = sample_batches(pool, 2, 3, 1)
+    assert len({batch_hash(batch) for batch in batches}) == 3
+    assert all(len(batch) == 2 for batch in batches)
+    assert Counter(x.example.difficulty for x in batches[0]) == {"short": 1, "long": 1}
+    assert all(
+        Counter(x.example.difficulty for x in batch)
+        == Counter(x.example.difficulty for x in batches[0])
+        for batch in batches
+    )
+    assert [batch_hash(batch) for batch in batches] == [
+        batch_hash(batch) for batch in sample_batches(pool, 2, 3, 1)
+    ]
+
+
+def test_stratum_singletons_cannot_be_fabricated_into_matched_candidates():
+    pool = [
+        Correction(
+            Example(str(i), f"problem {i}", "2", "train", difficulty=str(i)), "2", 1
+        )
+        for i in range(3)
+    ]
+    with pytest.raises(InsufficientCorrections, match="distinct"):
+        sample_batches(pool, 2, 3, 1)
+
+
 @pytest.mark.parametrize(
     "text,expected",
     [

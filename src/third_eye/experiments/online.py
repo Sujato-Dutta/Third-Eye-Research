@@ -101,7 +101,9 @@ def run_online(
                 pool, pool_stats = collect_corrections(
                     backend, splits["train"], verifier, p, seed
                 )
-                batches = sample_batches(pool, p.candidate_size, p.candidates, seed)
+                batches = sample_batches(
+                    pool, p.candidate_size, p.candidates, seed, p.candidate_sampling
+                )
                 for k, batch in enumerate(batches):
                     backend.restore(parent)
                     features = extract_features(

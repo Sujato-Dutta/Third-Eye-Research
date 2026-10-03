@@ -22,7 +22,7 @@ The research design is in [the project overview](docs/ACL27_Third_Eye_Research.d
 - Staged SLURM study plans, three seeds, shuffled-pool stress tests, gated
   family/scale transfer, runtime reservations, and checkpoint/cache management.
 
-**Research results are pending DGX execution.** Local synthetic fixtures and
+**Research results are pending completion of Vista experiments.** Local synthetic fixtures and
 random tiny-model checks establish software behavior, not benchmark gains.
 The primal-dual extension remains gated on measured forecasting and retention
 signal. GPU execution requires a compute-node SLURM allocation.
@@ -45,10 +45,22 @@ python experiments/verify_backend.py --device cpu
 On Windows, activate with `.venv\Scripts\Activate.ps1`. Entrypoints add `src/`
 to their import path; custom Python scripts can set `PYTHONPATH=src`.
 
-## DGX workflow
+## Cluster workflow
+
+The active campaign is consolidated on [TACC Vista](docs/vista_execution.md),
+with an October 10 completion target. The current
+[A1 correction-scarcity calibration](docs/a1_execution.md) uses a separate
+manifest, at most four concurrent GPUs, and stops for Gate 1 review. The
+20-GPU expansion remains held. The first four A1 pilots also require evidence
+inspection before the remaining calibration states can launch. Setup,
+validation, downloads and training use
+SLURM compute nodes. The DGX deployment below is retained as the original
+execution workflow.
 
 See [the execution runbook](docs/runbook.md) for exact commands. Run setup,
 benchmark preparation, verification, and training through the scheduler.
+The [DGX campaign record](docs/cluster_execution.md) preserves prior calibration
+and accounting. Its jobs have been retired from active execution.
 
 1. Submit `experiments/jobs/bootstrap.slurm` and `prepare_data.slurm`.
 2. Check allocated CUDA/NF4 behavior with `verify_gpu.slurm`.
@@ -70,9 +82,10 @@ python experiments/plan_study.py \
    evaluations, and paired result reports. Keep the same splits and budgets
    across policy comparisons.
 
-Code experiments require a working isolated verifier. The built-in Docker
-backend requires a pre-pulled image pinned by digest; it has no host execution
-fallback. A trusted verifier factory can integrate a cluster-approved sandbox.
+Code experiments require a working isolated verifier. Built-in options include
+Docker with an image pinned by digest and Bubblewrap with isolated Linux
+namespaces and a pinned runtime. A trusted verifier factory can integrate a
+cluster-approved sandbox.
 See [the code verifier contract](docs/integration.md).
 
 ## Repository

@@ -62,6 +62,7 @@ def main():
             "model": cfg.model.name,
             "policy": metadata.get("policy", "no_update"),
             "resolved_revision": backend.resolved_revision,
+            "model_source": backend.source_proof,
             "utility_weights": list(cfg.protocol.utility_weights),
         },
     )

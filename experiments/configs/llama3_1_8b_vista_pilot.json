@@ -1,0 +1,48 @@
+{
+  "model": {
+    "name": "meta-llama/Llama-3.1-8B-Instruct",
+    "revision": "main",
+    "quantization": "none",
+    "dtype": "bfloat16",
+    "device": "cuda",
+    "gradient_checkpointing": true,
+    "chat_kwargs": {}
+  },
+  "training": {
+    "rank": 16,
+    "alpha": 32,
+    "dropout": 0.0,
+    "target_modules": [
+      "q_proj",
+      "k_proj",
+      "v_proj",
+      "o_proj"
+    ],
+    "learning_rate": 0.0001,
+    "weight_decay": 0.0,
+    "max_steps": 50,
+    "micro_batch_size": 1,
+    "gradient_accumulation_steps": 8,
+    "max_sequence_length": 1024,
+    "max_grad_norm": 1.0
+  },
+  "protocol": {
+    "seed": 42,
+    "candidates": 3,
+    "candidate_size": 2,
+    "correction_attempts": 4,
+    "max_new_tokens": 512,
+    "correction_temperature": 0.7,
+    "probe_steps": 10,
+    "depth": 1,
+    "status": "pilot",
+    "utility_weights": [
+      0.3333333333333333,
+      0.3333333333333333,
+      0.3333333333333333
+    ],
+    "generation_batch_size": 16,
+    "multiple_choice_scoring": "conditional_likelihood",
+    "sampled_batch_size": 8
+  }
+}

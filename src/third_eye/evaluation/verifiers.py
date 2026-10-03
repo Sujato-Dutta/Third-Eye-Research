@@ -62,3 +62,10 @@ class VerifierRegistry:
         raise RuntimeError(
             "Code verification requires the evaluation team's sandboxed verifier plugin"
         )
+
+    def verify_many(self, examples, completions):
+        if len(examples) != len(completions):
+            raise ValueError("Verifier inputs must match")
+        if self.external is not None and hasattr(self.external, "verify_many"):
+            return self.external.verify_many(examples, completions)
+        return [self.verify(ex, text) for ex, text in zip(examples, completions)]

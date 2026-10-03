@@ -17,7 +17,7 @@ from third_eye.evaluation.verifiers import VerifierRegistry
 from third_eye.experiments.labeling import LabelGenerator, run_trajectory
 from third_eye.experiments.online import POLICIES, run_online
 from third_eye.io import digest, write_json
-from third_eye.provenance import source_inventory, versions
+from third_eye.provenance import source_inventory, versions, execution_environment
 
 
 def main():
@@ -180,6 +180,7 @@ def main():
             "config_hash": config.fingerprint,
             "manifest_hash": manifest_hash,
             "resolved_revision": backend.resolved_revision,
+            "model_source": backend.source_proof,
             "policy": args.policy,
             "git_commit": git_commit,
             "pilot": args.pilot,
@@ -187,6 +188,7 @@ def main():
             "invocation_generations": generations,
             "label_units": "accuracy fractions",
             "software_versions": versions(),
+            "execution": execution_environment(),
             **source_inventory(),
         },
     )
@@ -238,7 +240,17 @@ def main():
         keep_accepted=args.keep_accepted,
         generations=generations,
     )
-    write_json(output / "completed.json", {"accepted": accepted, "status": "complete"})
+    write_json(
+        output / "completed.json",
+        {
+            "accepted": accepted,
+            "status": "correction_scarcity"
+            if len(accepted) < generations
+            else "complete",
+            "completed_states": len(accepted),
+            "requested_generations": generations,
+        },
+    )
     print(
         f"Completed {len(accepted)} accepted update(s); labels: {output / 'meta_labels.jsonl'}"
     )

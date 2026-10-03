@@ -47,6 +47,8 @@ def read_records(paths):
             )
             records.append(record)
     states = defaultdict(list)
+    if len({r.get("protocol_amendment", "original") for r in records}) > 1:
+        raise ValueError("Different protocol amendments cannot enter a pooled dataset")
     for record in records:
         states[record["state_id"]].append(record)
     for state, rows in states.items():

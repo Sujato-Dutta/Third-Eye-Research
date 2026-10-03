@@ -27,6 +27,7 @@ from transformers import (
 
 from third_eye.io import append_jsonl, file_digest, write_json
 from third_eye.training.tokenization import collate, encode_completion, format_prompt
+from third_eye.training.sources import resolve_source
 
 
 def seed_everything(seed):
@@ -41,6 +42,7 @@ class HFBackend:
     def __init__(self, config, model=None, tokenizer=None):
         self.config = config
         m, t = config.model, config.training
+        source_name, source_revision, self.source_proof = resolve_source(m)
         self.device = torch.device(m.device)
         if self.device.type == "cuda" and not torch.cuda.is_available():
             raise RuntimeError(
@@ -54,7 +56,7 @@ class HFBackend:
             raise RuntimeError("Configured GPU does not support bf16")
         seed_everything(config.protocol.seed)
         tokenizer = tokenizer or AutoTokenizer.from_pretrained(
-            m.name, revision=m.revision, use_fast=True
+            source_name, revision=source_revision, use_fast=True
         )
         if not tokenizer.is_fast:
             raise ValueError(
@@ -70,7 +72,7 @@ class HFBackend:
         dtype = getattr(torch, m.dtype)
         if model is None:
             kwargs = {
-                "revision": m.revision,
+                "revision": source_revision,
                 "torch_dtype": dtype,
                 "trust_remote_code": False,
             }
@@ -82,15 +84,19 @@ class HFBackend:
                     bnb_4bit_compute_dtype=dtype,
                 )
                 kwargs["device_map"] = {"": torch.cuda.current_device()}
-            base_config = AutoConfig.from_pretrained(m.name, revision=m.revision)
+            base_config = AutoConfig.from_pretrained(
+                source_name, revision=source_revision
+            )
             if base_config.model_type == "gemma3":
                 # 4B Gemma has a multimodal outer config; load its language
                 # module with the proper composite class, without vision LoRA.
                 from transformers import Gemma3ForConditionalGeneration
 
-                model = Gemma3ForConditionalGeneration.from_pretrained(m.name, **kwargs)
+                model = Gemma3ForConditionalGeneration.from_pretrained(
+                    source_name, **kwargs
+                )
             else:
-                model = AutoModelForCausalLM.from_pretrained(m.name, **kwargs)
+                model = AutoModelForCausalLM.from_pretrained(source_name, **kwargs)
         if m.quantization == "nf4":
             model = prepare_model_for_kbit_training(
                 model,
@@ -124,7 +130,9 @@ class HFBackend:
             self.model.config.get_text_config().use_cache = False
         self.model.eval()
         self.resolved_revision = (
-            getattr(model.config, "_commit_hash", None) or m.revision
+            self.source_proof["original_revision"]
+            if self.source_proof
+            else getattr(model.config, "_commit_hash", None) or m.revision
         )
 
     def snapshot(self):
@@ -187,6 +195,185 @@ class HFBackend:
         return self.tokenizer.decode(
             output[0, inputs.input_ids.shape[1] :], skip_special_tokens=True
         )
+
+    def generate_many(self, prompts, max_new_tokens, seeds=None):
+        """Greedy decoding in fixed left-padded batches; sampled retries stay seeded."""
+        prompts = list(prompts)
+        seeds = list(seeds) if seeds is not None else [0] * len(prompts)
+        if len(seeds) != len(prompts):
+            raise ValueError("Generation seeds must match prompts")
+        batch_size = self.config.protocol.generation_batch_size
+        if batch_size == 1:
+            return [
+                self.generate(p, max_new_tokens, seed=s) for p, s in zip(prompts, seeds)
+            ]
+        self.model.eval()
+        results = []
+        for start in range(0, len(prompts), batch_size):
+            seed_everything(seeds[start])
+            texts = [
+                format_prompt(self.tokenizer, p, self.config.model.chat_kwargs)
+                for p in prompts[start : start + batch_size]
+            ]
+            padding = self.tokenizer.padding_side
+            try:
+                self.tokenizer.padding_side = "left"
+                inputs = self.tokenizer(
+                    texts,
+                    padding=True,
+                    return_tensors="pt",
+                    add_special_tokens=False,
+                    return_token_type_ids=False,
+                ).to(self.device)
+            finally:
+                self.tokenizer.padding_side = padding
+            text_config = (
+                self.model.config.get_text_config()
+                if hasattr(self.model.config, "get_text_config")
+                else self.model.config
+            )
+            capacity = getattr(text_config, "max_position_embeddings", None)
+            length = inputs.input_ids.shape[1]
+            if capacity and length + max_new_tokens > capacity:
+                raise ValueError("Generation exceeds model context")
+            with torch.inference_mode():
+                output = self.model.generate(
+                    **inputs,
+                    max_new_tokens=max_new_tokens,
+                    do_sample=False,
+                    use_cache=True,
+                    pad_token_id=self.tokenizer.pad_token_id,
+                )
+            results.extend(
+                self.tokenizer.batch_decode(
+                    output[:, length:], skip_special_tokens=True
+                )
+            )
+        return results
+
+    def predict_choices(self, prompts):
+        """Rank A/B/C/D by conditional log likelihood, excluding end tokens.
+
+        Teacher forcing scores the answer suffix only, including a tokenizer
+        boundary token when it crosses into that suffix. It never generates
+        explanations or conditions on the reference answer.
+        """
+        self.model.eval()
+        result = []
+        batch_size = self.config.protocol.generation_batch_size
+        for start in range(0, len(prompts), batch_size):
+            prefixes = [
+                format_prompt(self.tokenizer, p, self.config.model.chat_kwargs)
+                for p in prompts[start : start + batch_size]
+            ]
+            texts = [prefix + choice for prefix in prefixes for choice in "ABCD"]
+            padding = self.tokenizer.padding_side
+            try:
+                self.tokenizer.padding_side = "left"
+                inputs = self.tokenizer(
+                    texts,
+                    padding=True,
+                    return_tensors="pt",
+                    return_offsets_mapping=True,
+                    add_special_tokens=False,
+                    return_token_type_ids=False,
+                )
+            finally:
+                self.tokenizer.padding_side = padding
+            offsets = inputs.pop("offset_mapping")
+            lengths = torch.tensor([len(prefix) for prefix in prefixes for _ in "ABCD"])
+            answer_mask = offsets[:, :, 1] > lengths[:, None]
+            counts = answer_mask.sum(1).tolist()
+            if not counts or min(counts) < 1:
+                raise ValueError("Multiple-choice hypotheses have no answer tokens")
+            text_config = (
+                self.model.config.get_text_config()
+                if hasattr(self.model.config, "get_text_config")
+                else self.model.config
+            )
+            capacity = getattr(text_config, "max_position_embeddings", None)
+            if capacity and inputs.input_ids.shape[1] > capacity:
+                raise ValueError("Choice scoring exceeds model context")
+            inputs = inputs.to(self.device)
+            with torch.inference_mode():
+                logits = self.model(
+                    **inputs, use_cache=False, logits_to_keep=max(counts) + 1
+                ).logits.float()
+                logp = torch.log_softmax(logits, dim=-1)
+                scores = []
+                for index, count in enumerate(counts):
+                    chosen = inputs.input_ids[index, -count:]
+                    scores.append(
+                        logp[index, -count - 1 : -1].gather(-1, chosen[:, None]).sum()
+                    )
+                winners = torch.stack(scores).reshape(-1, 4).argmax(1).tolist()
+            result.extend("ABCD"[winner] for winner in winners)
+        return result
+
+    def generate_sampled_many(self, prompts, max_new_tokens, seeds, temperature):
+        from third_eye.training.sampling import SeededSampling
+
+        prompts, seeds = list(prompts), list(seeds)
+        if len(prompts) != len(seeds):
+            raise ValueError("Sampling seeds must match prompts")
+        size = self.config.protocol.sampled_batch_size
+        if size == 1:
+            return [
+                self.generate(p, max_new_tokens, seed=s, temperature=temperature)
+                for p, s in zip(prompts, seeds)
+            ]
+        self.model.eval()
+        results = []
+        for start in range(0, len(prompts), size):
+            texts = [
+                format_prompt(self.tokenizer, p, self.config.model.chat_kwargs)
+                for p in prompts[start : start + size]
+            ]
+            padding = self.tokenizer.padding_side
+            try:
+                self.tokenizer.padding_side = "left"
+                inputs = self.tokenizer(
+                    texts,
+                    padding=True,
+                    return_tensors="pt",
+                    add_special_tokens=False,
+                    return_token_type_ids=False,
+                ).to(self.device)
+            finally:
+                self.tokenizer.padding_side = padding
+            text_config = (
+                self.model.config.get_text_config()
+                if hasattr(self.model.config, "get_text_config")
+                else self.model.config
+            )
+            capacity = getattr(text_config, "max_position_embeddings", None)
+            length = inputs.input_ids.shape[1]
+            if capacity and length + max_new_tokens > capacity:
+                raise ValueError("Sampling exceeds model context")
+            sampler = SeededSampling(
+                seeds[start : start + size],
+                self.device,
+                temperature,
+                self.model.generation_config,
+            )
+            with torch.inference_mode():
+                output = self.model.generate(
+                    **inputs,
+                    max_new_tokens=max_new_tokens,
+                    do_sample=False,
+                    temperature=1.0,
+                    top_p=1.0,
+                    top_k=50,
+                    use_cache=True,
+                    pad_token_id=self.tokenizer.pad_token_id,
+                    logits_processor=[sampler],
+                )
+            results.extend(
+                self.tokenizer.batch_decode(
+                    output[:, length:], skip_special_tokens=True
+                )
+            )
+        return results
 
     def _encode(self, prompt, completion):
         return encode_completion(
@@ -436,6 +623,7 @@ class HFBackend:
                 "config_hash": self.config.fingerprint,
                 "adapter_hash": self.state_hash(),
                 "resolved_revision": self.resolved_revision,
+                "model_source": self.source_proof,
                 "weights": weights,
                 "versions": {
                     pkg: importlib.metadata.version(pkg)
@@ -451,6 +639,7 @@ class HFBackend:
         if (
             saved["config_hash"] != self.config.fingerprint
             or saved["resolved_revision"] != self.resolved_revision
+            or saved.get("model_source") != self.source_proof
         ):
             raise ValueError(
                 "Checkpoint protocol/backbone differs; use its exact config and model revision"

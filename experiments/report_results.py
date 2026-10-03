@@ -51,6 +51,7 @@ def main():
             run["manifest_hash"],
             run["seed"],
             metadata["resolved_revision"],
+            (metadata.get("model_source") or {}).get("proof_sha256"),
             json.dumps(metadata["config"]["training"], sort_keys=True),
             json.dumps(metadata["config"]["protocol"], sort_keys=True),
         )
@@ -153,6 +154,7 @@ def main():
             score["final_manifest_hash"],
             score["config_hash"],
             score["resolved_revision"],
+            (score.get("model_source") or {}).get("proof_sha256"),
         )
         if (group, score["policy"]) in final_scores:
             p.error("Duplicate final evaluation policy/seed")

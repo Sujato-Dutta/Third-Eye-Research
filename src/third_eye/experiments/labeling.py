@@ -64,7 +64,9 @@ class LabelGenerator:
                     "items": [item.to_dict() for item in pool],
                 },
             )
-            batches = sample_batches(pool, p.candidate_size, p.candidates, seed)
+            batches = sample_batches(
+                pool, p.candidate_size, p.candidates, seed, p.candidate_sampling
+            )
             # Same seed, steps, LR, rank, and optimizer reset for all branches.
             update_seed, continuation_seed = seed + 300_000, seed + 600_000
             for index, batch in enumerate(batches):
@@ -100,26 +102,67 @@ class LabelGenerator:
                 continuation_pool, continuation_stats = collect_corrections(
                     b, self.splits["train"], self.verifier, p, continuation_seed
                 )
-                continuation = sample_batches(
-                    continuation_pool, p.candidate_size, 1, continuation_seed
-                )[0]
+                continuation_available = len(continuation_pool) >= p.candidate_size
+                if p.amendment == "A1":
+                    write_json(
+                        directory / "continuation_pool.json",
+                        {
+                            "stats": continuation_stats,
+                            "items": [item.to_dict() for item in continuation_pool],
+                        },
+                    )
+                if not continuation_available and not p.terminal_continuation:
+                    raise InsufficientCorrections(
+                        f"Need {p.candidate_size} unique verified examples; have {len(continuation_pool)}"
+                    )
+                continuation = (
+                    sample_batches(
+                        continuation_pool,
+                        p.candidate_size,
+                        1,
+                        continuation_seed,
+                        p.candidate_sampling,
+                    )[0]
+                    if continuation_available
+                    else ()
+                )
                 write_json(
                     directory / "continuation_batch.json",
                     [item.to_dict() for item in continuation],
                 )
-                continuation_log = b.train(
-                    continuation,
-                    continuation_seed,
-                    log_path=directory / "training_t2.jsonl",
-                )
-                t2 = evaluate(b, self.splits, self.verifier, p.max_new_tokens, seed)
+                if continuation_available:
+                    continuation_log = b.train(
+                        continuation,
+                        continuation_seed,
+                        log_path=directory / "training_t2.jsonl",
+                    )
+                    t2 = evaluate(b, self.splits, self.verifier, p.max_new_tokens, seed)
+                else:
+                    if b.state_hash() != t1_hash:
+                        raise RuntimeError(
+                            "Terminal continuation changed the t+1 adapter"
+                        )
+                    continuation_log = {
+                        "optimizer_steps": 0,
+                        "seconds": 0.0,
+                        "reserved_optimizer_steps": cfg.training.max_steps,
+                        "terminal_reason": "correction_scarcity",
+                    }
+                    t2 = t1
                 b.save_checkpoint(
                     directory / "t2",
-                    {"state_id": state_id, "candidate_id": candidate_id, "horizon": 2},
+                    {
+                        "state_id": state_id,
+                        "candidate_id": candidate_id,
+                        "horizon": 2,
+                        "continuation_available": int(continuation_available),
+                    },
                 )
                 delta1, delta2 = t1.delta(baseline), t2.delta(baseline)
                 record = {
                     "schema_version": 1,
+                    "protocol_amendment": p.amendment,
+                    "continuation_available": int(continuation_available),
                     "protocol_status": p.status,
                     "trajectory_id": self.trajectory_id,
                     "state_id": state_id,
@@ -161,8 +204,14 @@ class LabelGenerator:
                         "continuation": continuation_log,
                     },
                     "continuation": {
+                        "available": int(continuation_available),
+                        "terminal_reason": None
+                        if continuation_available
+                        else "correction_scarcity",
                         "seed": continuation_seed,
-                        "batch_hash": batch_hash(continuation),
+                        "batch_hash": batch_hash(continuation)
+                        if continuation_available
+                        else None,
                         "pool_statistics": continuation_stats,
                     },
                 }
@@ -187,7 +236,9 @@ class LabelGenerator:
                 state_dir / "failure.json",
                 {
                     "state_id": state_id,
-                    "status": "failed",
+                    "status": "correction_scarcity"
+                    if p.amendment == "A1" and isinstance(exc, InsufficientCorrections)
+                    else "failed",
                     "error_type": type(exc).__name__,
                     "error": str(exc),
                     "completed_candidates": len(records),
@@ -236,6 +287,8 @@ def run_trajectory(
                     "error": str(exc),
                 },
             )
+            if cfg.protocol.amendment == "A1":
+                break
             raise
         if policy == "greedy_h1":
             selected = max(

@@ -37,7 +37,7 @@ implementation in both trajectory jobs and final evaluation.
 ## Pilot and freeze
 
 ```bash
-export THIRD_EYE_CONFIG=experiments/configs/qwen3_4b_pilot.json
+export THIRD_EYE_CONFIG=experiments/configs/qwen3_4b_full_gpu_pilot.json
 export THIRD_EYE_MANIFEST="$PWD/data/processed/v1/math/selection.json"
 sbatch --partition=gpu_student --gres=<allowed_larger_gpu_resource> \
   experiments/jobs/pilot.slurm
@@ -49,7 +49,7 @@ Freeze the settings that actually produced a completed pilot:
 
 ```bash
 python experiments/freeze_protocol.py \
-  --config experiments/configs/qwen3_4b_pilot.json \
+  --config experiments/configs/qwen3_4b_full_gpu_pilot.json \
   --pilot-run runs/pilot/<job_id> --depth 5 \
   --output experiments/configs/qwen3_4b_frozen.json
 ```
@@ -116,6 +116,31 @@ adapter. It records item correctness, greedy pass@1, test-set counts and hashes.
 Reports separate development trajectories from final benchmark CSVs and pair
 final items by benchmark role. Core reports include both greedy and H=1
 reference comparisons. No empirical success is inferred from test fixtures.
+
+## Automatic continuation
+
+`experiments/jobs/continue_study.slurm` runs a CPU controller, which submits
+GPU work through SLURM. Set `THIRD_EYE_CAMPAIGN` to a JSON manifest containing
+the four model/task pilot config paths, job IDs and run directories, plus
+`data_root`, `prior_gpu_hours`, optional transfer pilot templates/public source
+specifications, and `stress`. Set `THIRD_EYE_CAMPAIGN_OUTPUT` to a new output
+directory. Export `THIRD_EYE_MODEL_SOURCES` and `THIRD_EYE_SANDBOX_CONFIG` as
+needed. Submit after the validation job succeeds and all four pilots terminate.
+
+The controller checks each pilot's completed artifact and equal math/code
+protocols, freezes measured settings, and collects four predetermined T=5
+trajectories for the first 20-state Gate 1 report. A failed or insufficient
+gate stops advancement. After Gate 1 passes it completes collection, fits the
+forecasters and ablations, and computes Gate 2. Online/final comparisons and
+then family/scale transfer require Gate 2. Transfer models receive their own
+measured pilots; the controller rotates only completed model caches to retain
+storage headroom. Stress runs require sufficient remaining budget.
+
+GPU spending includes pilot time, failed/completed task time and queued
+reservations. Label estimates use measured state runtime with headroom;
+matched online/final groups refine estimates after their first task. Controller
+events and `status.json` expose failures, gate decisions, budget stops, cache
+rotation and job IDs. Inspect those records before any versioned rerun.
 
 ## Quota and recovery
 

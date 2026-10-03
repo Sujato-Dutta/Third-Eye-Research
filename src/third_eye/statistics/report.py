@@ -47,6 +47,13 @@ def phenomenon(records):
     for row in rows:
         trajectories[row["trajectory_id"]].append(row)
     result = {"states": len(rows), "trajectories": len(trajectories), "per_state": rows}
+    terminal = sum(r.get("continuation_available", 1) == 0 for r in records)
+    result["correction_scarcity"] = {
+        "terminal_continuations": terminal,
+        "candidate_branches": len(records),
+        "terminal_fraction": terminal / len(records) if records else 0.0,
+        "interpretation": "Descriptive availability; not a saturation claim",
+    }
     for key in (
         "strict_ranking_reversal",
         "harmful_component_fraction",
@@ -70,6 +77,11 @@ def gate1(report, min_states=20):
         "gate": 1,
         "passed": report["states"] >= min_states and (mismatch >= 0.20 or harm >= 0.15),
         "sample_sufficient": report["states"] >= min_states,
+        "status": "insufficient_evidence"
+        if report["states"] < min_states
+        else (
+            "passed" if mismatch >= 0.20 or harm >= 0.15 else "phenomenon_not_observed"
+        ),
         "minimum_states": min_states,
         "states": report["states"],
         "mismatch_fraction": mismatch,
