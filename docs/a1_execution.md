@@ -85,7 +85,7 @@ At October 3, 2026, 06:17 UTC (11:47 IST), both validation jobs have passed:
 | --- | --- | --- | --- |
 | 1044310 | CPU setup and full test suite | afterany:1042902, satisfied | Completed, 00:00:57 on i617-141 |
 | 1044311 | Scheduled CUDA terminal-state verification | afterok:1044310, satisfied | Completed, 00:00:36 on c642-071 |
-| 1044312 | Four-stream A1 pilot controller | afterok:1044311 | Pending |
+| 1044312 | Four-stream A1 pilot controller | afterok:1044311, satisfied | Running on i614-021; submitted only the first four pilots |
 
 The original Llama math task `1042902_18` completed successfully in 05:08:36;
 Llama code `1042902_27` completed successfully in 06:14:44. The original Qwen
@@ -116,3 +116,47 @@ controller remains `PENDING (Dependency)` until that cleanup finishes; no A1
 pilot array has been submitted yet. This preserves the success dependency and
 does not bypass validation. The remaining sixteen calibrations cannot be
 submitted by this first controller invocation because it stops for inspection.
+
+At 07:36 UTC (13:06 IST), CUDA verification has fully left `COMPLETING`.
+Controller `1044312` is running and has submitted exactly one pilot array,
+`1044550`, with indices `0,5,10,15` and a four-task concurrency cap. Its source
+and amendment hashes still match the validation proofs. Prior GPU usage is
+20.1914 H200 node-hours, including original runs and both GPU verification
+stages; the four new tasks reserve 32 node-hours at eight hours per task.
+
+| Array task | Stream | Seed | Observed state |
+| --- | --- | --- | --- |
+| 1044550_0 | Qwen math | 1042 | Pending, Priority |
+| 1044550_5 | Qwen code | 1042 | Pending, Priority |
+| 1044550_10 | Llama math | 1042 | Pending, Priority |
+| 1044550_15 | Llama code | 1042 | Pending, Priority |
+
+No A1 pilot labels or `pilot_inspection.json` are available yet. Starvation
+frequency and Qwen-versus-Llama asymmetry therefore remain unmeasured under A1.
+The four-pilot inspection must finish before releasing the remaining sixteen;
+high terminal frequency is reviewed for meaningful H=2 comparisons without a
+new numerical cutoff. The Gate 1 review stop, Gate 2 priority, and scaling/8B
+holds remain in force. The controller has not submitted another array.
+
+At 14:22 UTC (19:52 IST), three seed-1042 pilots have completed successfully:
+
+| Array task | Stream | Runtime at inspection | State |
+| --- | --- | --- | --- |
+| 1044550_0 | Qwen math | 03:45:52 | Running |
+| 1044550_5 | Qwen code | 03:01:40 | Completed, exit 0 |
+| 1044550_10 | Llama math | 03:14:14 | Completed, exit 0 |
+| 1044550_15 | Llama code | 03:13:51 | Completed, exit 0 |
+
+Locally inspected published labels from the three completed streams each contain
+one complete K=3 state. All nine continuations are available, with 50 candidate
+optimizer steps and 50 continuation steps each; none is terminal. Verified
+continuation-pool sizes are Qwen code 11/18/15, Llama math 149/53/74, and Llama
+code 26/26/35. These are preliminary availability observations, not Gate 1 or
+a full four-stream inspection result.
+
+At 14:24 UTC, Qwen math has saved two of its three branch records and is still
+working through the final branch. Its partial records remain diagnostic until
+the complete matched state is published. `pilot_inspection.json` is not yet
+available. Controller `1044312` continues to wait for this original four-task
+array; no remaining calibration or scaling jobs have been submitted. No
+scientific code, A1 rule, or terminal-frequency threshold was changed.
