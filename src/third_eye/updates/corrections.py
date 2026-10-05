@@ -11,6 +11,7 @@ def collect_corrections(backend, train_examples, verifier, protocol, seed):
     if any(ex.split != "train" for ex in train_examples):
         raise ValueError("Correction generation accepts training prompts only")
     started = time.perf_counter()
+    seed_stride = protocol.correction_seed_stride or protocol.correction_attempts
     pool, failures, attempted = [], 0, 0
     generated_words, generated_tokens = 0, 0
     tokenizer = getattr(backend, "tokenizer", None)
@@ -67,10 +68,7 @@ def collect_corrections(backend, train_examples, verifier, protocol, seed):
             if not pending:
                 break
             attempted += len(pending)
-            seeds = [
-                seed + 100_000 + i * protocol.correction_attempts + attempt
-                for i in pending
-            ]
+            seeds = [seed + 100_000 + i * seed_stride + attempt for i in pending]
             stamp = time.perf_counter()
             completions = backend.generate_sampled_many(
                 [retry_prompts[i] for i in pending],
@@ -110,7 +108,7 @@ def collect_corrections(backend, train_examples, verifier, protocol, seed):
                 completion = backend.generate(
                     retry_prompts[i],
                     protocol.max_new_tokens,
-                    seed=seed + 100_000 + i * protocol.correction_attempts + attempt,
+                    seed=seed + 100_000 + i * seed_stride + attempt,
                     temperature=protocol.correction_temperature,
                 )
                 timings["revision_generation_seconds"] += time.perf_counter() - stamp
@@ -131,6 +129,11 @@ def collect_corrections(backend, train_examples, verifier, protocol, seed):
         "revision_attempts": attempted,
         "verified_corrections": len(pool),
         "correction_attempt_limit": protocol.correction_attempts,
+        **(
+            {"correction_seed_stride": seed_stride}
+            if protocol.correction_seed_stride
+            else {}
+        ),
         "unresolved_failures": failures - len(pool),
         "harvest_complete": True,
         "verifier_pass_rate": len(pool) / attempted if attempted else 0.0,

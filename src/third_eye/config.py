@@ -51,6 +51,8 @@ class ProtocolConfig:
     amendment: str = "original"
     candidate_sampling: str = "matched_strata"
     terminal_continuation: bool = False
+    correction_seed_stride: int = 0
+    deterministic_execution: bool = False
     # Fractions, not percentage points; frozen before meta-label generation.
     utility_weights: tuple = (1 / 3, 1 / 3, 1 / 3)
 
@@ -85,7 +87,7 @@ class Config:
         if p.depth > 5 or p.status not in {"pilot", "frozen"}:
             raise ValueError("Require T<=5 and status pilot/frozen")
         if (
-            p.amendment not in {"original", "A1"}
+            p.amendment not in {"original", "A1", "A2"}
             or p.candidate_sampling not in {"matched_strata", "stratified_distinct"}
             or type(p.terminal_continuation) is not bool
         ):
@@ -94,11 +96,28 @@ class Config:
             p.terminal_continuation or p.candidate_sampling != "matched_strata"
         ):
             raise ValueError("Scarcity rules require an explicit A1 amendment")
-        if p.amendment == "A1" and (
+        if p.amendment in {"A1", "A2"} and (
             not p.terminal_continuation or p.candidate_sampling != "stratified_distinct"
         ):
             raise ValueError(
-                "A1 requires distinct compositions and terminal continuations"
+                "Scarcity amendments require distinct compositions and terminal continuations"
+            )
+        if type(p.correction_seed_stride) is not int or p.correction_seed_stride < 0:
+            raise ValueError("Correction seed stride must be a nonnegative integer")
+        if (
+            p.correction_seed_stride
+            and p.correction_seed_stride < p.correction_attempts
+        ):
+            raise ValueError("Correction seed stride must cover the retry budget")
+        if type(p.deterministic_execution) is not bool:
+            raise ValueError("Deterministic execution must be boolean")
+        if p.amendment == "A2" and (
+            p.correction_attempts != 8
+            or p.correction_seed_stride != 16
+            or not p.deterministic_execution
+        ):
+            raise ValueError(
+                "A2 requires eight attempts, seed stride sixteen and deterministic execution"
             )
         if p.multiple_choice_scoring not in {"generation", "conditional_likelihood"}:
             raise ValueError("Unknown multiple-choice evaluation protocol")
@@ -128,6 +147,10 @@ class Config:
 
     def to_dict(self):
         value = asdict(self)
+        if not self.protocol.correction_seed_stride:
+            value["protocol"].pop("correction_seed_stride")
+        if not self.protocol.deterministic_execution:
+            value["protocol"].pop("deterministic_execution")
         if self.protocol.amendment == "original":
             for name in ("amendment", "candidate_sampling", "terminal_continuation"):
                 value["protocol"].pop(name)

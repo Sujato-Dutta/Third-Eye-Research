@@ -103,7 +103,7 @@ class LabelGenerator:
                     b, self.splits["train"], self.verifier, p, continuation_seed
                 )
                 continuation_available = len(continuation_pool) >= p.candidate_size
-                if p.amendment == "A1":
+                if p.amendment in {"A1", "A2"}:
                     write_json(
                         directory / "continuation_pool.json",
                         {
@@ -174,6 +174,7 @@ class LabelGenerator:
                     "manifest_hash": self.manifest_hash,
                     "parent_adapter_hash": parent_hash,
                     "candidate_adapter_hash": t1_hash,
+                    "continuation_adapter_hash": b.state_hash(),
                     "batch_hash": batch_hash(batch),
                     "candidate_size": len(batch),
                     "utility_weights": list(p.utility_weights),
@@ -237,7 +238,8 @@ class LabelGenerator:
                 {
                     "state_id": state_id,
                     "status": "correction_scarcity"
-                    if p.amendment == "A1" and isinstance(exc, InsufficientCorrections)
+                    if p.amendment in {"A1", "A2"}
+                    and isinstance(exc, InsufficientCorrections)
                     else "failed",
                     "error_type": type(exc).__name__,
                     "error": str(exc),
@@ -287,7 +289,7 @@ def run_trajectory(
                     "error": str(exc),
                 },
             )
-            if cfg.protocol.amendment == "A1":
+            if cfg.protocol.amendment in {"A1", "A2"}:
                 break
             raise
         if policy == "greedy_h1":

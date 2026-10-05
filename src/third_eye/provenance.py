@@ -54,12 +54,21 @@ def execution_environment():
             "SLURM_JOB_PARTITION",
             "THIRD_EYE_VERIFIER_WORKERS",
             "THIRD_EYE_SYMBOLIC_WORKERS",
+            "CUBLAS_WORKSPACE_CONFIG",
         )
     }
     sandbox = os.environ.get("THIRD_EYE_SANDBOX_CONFIG")
     if sandbox:
         result["sandbox_config_sha256"] = file_digest(sandbox)
     import torch
+
+    result["deterministic_runtime"] = {
+        "algorithms": torch.are_deterministic_algorithms_enabled(),
+        "matmul_tf32": torch.backends.cuda.matmul.allow_tf32,
+        "cudnn_tf32": torch.backends.cudnn.allow_tf32,
+        "cudnn_benchmark": torch.backends.cudnn.benchmark,
+        "cudnn_deterministic": torch.backends.cudnn.deterministic,
+    }
 
     if torch.cuda.is_available():
         device = torch.cuda.get_device_properties(torch.cuda.current_device())

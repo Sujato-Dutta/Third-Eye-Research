@@ -22,8 +22,9 @@ and training run in SLURM compute-node allocations.
 | Operational workflow audit | Passed as a compute step in allocation `1041757` |
 | Core pilots | All four completed successfully: `1041762`, `1041764`, `1041766`, `1041768` |
 | Initial Gate 1 trajectories | Array `1042902`: Qwen tasks stopped for correction scarcity; both Llama tasks completed successfully by October 3 06:15 UTC |
-| A1 verification chain | Jobs `1044310` CPU setup and `1044311` CUDA verification passed; `1044312` pilot controller running |
-| A1 first pilots | Array `1044550`, indices `0,5,10,15`, seed 1042; four tasks pending for Priority at October 3 07:36 UTC |
+| A1 verification chain | Jobs `1044310` CPU setup and `1044311` CUDA verification passed; first controller `1044312` completed at its inspection hold |
+| A1 first pilots | Array `1044550`: all four seed-1042 streams completed; inspection valid, twelve nonterminal branches |
+| A1 calibration continuation | Reviewed controller `1045577` running; first wave `1045578` (seed 2042) pending for Priority at October 3 17:25 UTC |
 | Current A1 parallelism | At most four one-node GPU tasks; broad 20-GPU expansion held |
 | GPU spending ceiling | 500 H200 node-hours, including GPU preflight/pilots |
 | Project storage ceiling | 50 GB, independently enforced |

@@ -4,6 +4,7 @@ from contextlib import nullcontext
 import hashlib
 import importlib.metadata
 import json
+import os
 from pathlib import Path
 import random
 import time
@@ -41,6 +42,15 @@ def seed_everything(seed):
 class HFBackend:
     def __init__(self, config, model=None, tokenizer=None):
         self.config = config
+        if config.protocol.deterministic_execution:
+            if os.environ.get("CUBLAS_WORKSPACE_CONFIG") not in {None, ":4096:8"}:
+                raise RuntimeError("A2 requires CUBLAS_WORKSPACE_CONFIG=:4096:8")
+            os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"
+            torch.use_deterministic_algorithms(True)
+            torch.backends.cuda.matmul.allow_tf32 = False
+            torch.backends.cudnn.allow_tf32 = False
+            torch.backends.cudnn.benchmark = False
+            torch.backends.cudnn.deterministic = True
         m, t = config.model, config.training
         source_name, source_revision, self.source_proof = resolve_source(m)
         self.device = torch.device(m.device)

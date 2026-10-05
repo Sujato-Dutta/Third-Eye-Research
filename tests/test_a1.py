@@ -16,12 +16,21 @@ from third_eye.updates.candidates import batch_hash, sample_batches
 from third_eye.updates.corrections import InsufficientCorrections
 
 
-def amended(config):
+def amended(config, amendment="A1"):
     return replace(
         config,
         protocol=replace(
             config.protocol,
-            amendment="A1",
+            amendment=amendment,
+            **(
+                {
+                    "correction_attempts": 8,
+                    "correction_seed_stride": 16,
+                    "deterministic_execution": True,
+                }
+                if amendment == "A2"
+                else {}
+            ),
             candidate_sampling="stratified_distinct",
             terminal_continuation=True,
         ),
@@ -50,13 +59,14 @@ def test_three_compositions_can_overlap_and_vary_difficulty():
         sample_batches(pool[:2], 2, 3, 1042, "stratified_distinct")
 
 
-def test_terminal_continuation_preserves_real_adapter(tmp_path):
+@pytest.mark.parametrize("amendment", ["A1", "A2"])
+def test_terminal_continuation_preserves_real_adapter(tmp_path, amendment):
     from verify_backend import make_tiny_backend
 
     backend = make_tiny_backend(
         device=os.environ.get("THIRD_EYE_A1_VERIFY_DEVICE", "cpu")
     )
-    backend.config = amended(backend.config)
+    backend.config = amended(backend.config, amendment)
     cfg = backend.config
     splits = {
         role: [
@@ -96,11 +106,14 @@ def test_terminal_continuation_preserves_real_adapter(tmp_path):
     assert len(records) == 3
 
 
-def test_a1_root_scarcity_stops_without_fabricated_labels(tmp_path, monkeypatch):
+@pytest.mark.parametrize("amendment", ["A1", "A2"])
+def test_a1_root_scarcity_stops_without_fabricated_labels(
+    tmp_path, monkeypatch, amendment
+):
     from test_labeling import setup_labeler
 
     labeler = setup_labeler(tmp_path, monkeypatch)
-    labeler.config = amended(labeler.config)
+    labeler.config = amended(labeler.config, amendment)
     monkeypatch.setattr(
         "third_eye.experiments.labeling.collect_corrections",
         lambda *args: ([], {"verified_corrections": 0}),
