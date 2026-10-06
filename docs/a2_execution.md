@@ -108,3 +108,81 @@ Evidence:
 `runs/a2/validation/development_reroute.json` and `step_host_{0,1}.json`
 remotely. Frozen A2 source SHA remains
 `917c86b78482c73797619d17feab423f91d3775026db086e15f7f529e4fcf988`.
+
+## October 5 evening: validation metadata defect repaired
+
+At 13:40 UTC / 19:10 IST, development validation 1049914 was FAILED after
+36m 02s (Slurm exit 15:0 after srun terminated its second rank). The actual
+Python exception was a metadata assumption at the end of Qwen's model checks:
+`b.source_proof["proof_sha256"]` attempted to index None. Directly loaded Qwen
+uses a pinned Hugging Face source and legitimately has no mirror-proof record.
+Both Llama instances had logged their within-node checks as passed. No complete
+cross-node proof was published, so no reproducibility pass is claimed.
+
+This was a validation-script implementation defect. It did not alter A2
+candidate construction, training, harvest attempts or scientific results. The
+failed log and existing implementation-test checkpoints are preserved. Label
+array 1049534 and CPU forecasting 1049535 remained blocked and never started.
+The failed two-node allocation consumed 1.2011 GPU-hours, bringing reconciled
+GPU expenditure to about 100.3978 hours, excluding CPU SUs.
+
+Validation revision V2 records direct pinned-source identity separately from
+verified mirror-proof identity. Six regression tests cover direct-source None,
+verified mirrors, unpinned/mismatching revisions, and invalid mirror proofs.
+Completed model controls are now persisted independently before the next
+model begins, avoiding loss of earlier diagnostics if another check fails.
+New verification artifacts use `runs/a2/validation/v2/`; failed artifacts are
+not overwritten. Frozen A2 scientific source, configuration, plan and original
+operational files remain unchanged; V2 tools have separate recorded hashes.
+
+The repaired success chain is CPU validation 1049976 -> two-node development
+CUDA validation 1049977 -> CPU comparison 1049978 -> the same 36-task label
+array 1049534, capped at twenty concurrent GPUs -> existing CPU forecasting
+1049535. Unstartable review 1049915 was canceled only after the replacement
+label dependency was successfully updated. No scientific trajectory was rerun.
+
+At 13:47 UTC / 19:17 IST, CPU validation 1049976 completed in 53 seconds,
+exit zero: 132 tests passed in 39.00 seconds, and V2 was bound to the unchanged
+frozen A2 source and plan. The scheduler still showed the CPU job completing
+while the GPU success dependency cleared. CUDA verification remains required;
+no cross-node reproducibility pass or Gate 2 result is asserted yet.
+
+Evidence: `runs/deployment/evidence/a2_validation_v2_submission_20261005.json`,
+`a2_validation_v2_files_20261005.json`, and
+`a2_cuda_dev_1049914_failed.log` locally; `runs/a2/validation/v2/cpu_v2.json`
+and `submission.json` remotely. Scientific source SHA remains
+`917c86b78482c73797619d17feab423f91d3775026db086e15f7f529e4fcf988`.
+
+## October 5 night: A2 validation passed; labels eligible
+
+At 16:00 UTC / 21:30 IST, metadata-repaired CUDA validation 1049977 was
+COMPLETED, exit zero, in 36m 15s on two development nodes. Both Qwen and Llama
+passed the tested decoding, verifier, repeated fifty-step training and checkpoint
+controls. Both nodes passed their two terminal-continuation tests. CPU review
+1049978 completed with exit zero in nine seconds and published
+`runs/a2/validation/gpu_review.json` with `passed=true`.
+
+The two CUDA reports have identical byte hashes and matching tested model
+control digests, while independent step-host metadata confirms different
+allocated nodes. Downloaded reports and their hashes were independently
+checked against the review evidence. This establishes parity of tested A2
+computations in the pinned GH200 environment. It does not assign a root cause
+to historical A1 output differences or claim determinism across untested
+software/hardware conditions.
+
+At 16:02 UTC / 21:32 IST, all 36 label tasks in array 1049534 were PENDING for
+Priority, with their success dependency cleared and array throttle twenty.
+No label task was running or completed. The scheduler reported StartTime Unknown
+and all non-drained/reserved production GPU nodes allocated. CPU forecasting
+1049535 remains queued after the label array. Current limitation is production
+GPU availability/priority, rather than a validation error. No reliable allocation
+start estimate is available; the projected 30-48 hours to Gate 2 assumes sustained
+near-twenty-node concurrency after allocation, plus inter-stage queue waits.
+
+Reconciled GPU expenditure is about 101.6061 hours, excluding CPU charges and
+unspent reservations. Gate 1 remains reviewed and passed; A2 Gate 2 remains
+untested. Evidence: `runs/deployment/evidence/a2_gpu_review_1049978.json`,
+`a2_cuda_v2_1049977_rank{0,1}.json`, and
+`a2_validation_passed_progress_20261005.json` locally. The existing successful
+validation -> 36 labels -> CPU forecasting chain proceeds without a new protocol
+change, without login-node execution, and stops again for Gate 2 review.
