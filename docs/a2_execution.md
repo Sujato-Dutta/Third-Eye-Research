@@ -186,3 +186,75 @@ untested. Evidence: `runs/deployment/evidence/a2_gpu_review_1049978.json`,
 `a2_validation_passed_progress_20261005.json` locally. The existing successful
 validation -> 36 labels -> CPU forecasting chain proceeds without a new protocol
 change, without login-node execution, and stops again for Gate 2 review.
+
+## October 6 morning: label generation started
+
+At 04:29 UTC / 09:59 IST, label tasks 1049534_0 and 1049534_1 were RUNNING
+on production compute nodes, with 34 tasks pending for Priority. By 04:30 UTC /
+10:00 IST, tasks 0 through 6 were RUNNING: seven allocated GPUs, 29 pending,
+and no completed trajectories or reported failures. Array throttle remains
+20. Allocations are increasing, but twenty simultaneous GPUs are not guaranteed.
+
+The first two Qwen-math trajectories (seeds 1042 and 2042) loaded their pinned
+models and completed initial development evaluations. Both reported 57/64
+target, 28/64 OOD, and 165/256 retention. These are starting-model checks, not
+update gains or Gate 2 results. Their first recursive states are underway;
+no complete-state ledger records were present in the downloaded metadata
+snapshot. CPU forecaster job 1049535 remains pending on the full label array.
+No new source, protocol, budget, or data change was made for this progress check.
+
+Evidence: `runs/deployment/evidence/a2_progress_20261006_morning.json` and
+`a2_progress_metadata_20261006.tar.gz`. The 30-48-hour Gate 2 planning estimate
+still assumes near-twenty-node concurrency after allocation; actual timings
+will be revised after complete A2 state/trajectory measurements are available.
+
+## October 6 late morning: twenty GPUs allocated
+
+At 06:11 UTC / 11:41 IST, twenty label trajectories were RUNNING in array
+1049534; the remaining sixteen were pending for JobArrayTaskLimit. This is
+full use of the authorized twenty-node concurrency cap. Pending trajectories
+become eligible as slots open, subject to the scheduler allocating nodes.
+CPU forecasting 1049535 remains pending on the full label array.
+
+No job failures, completed trajectories, or complete-state ledger records were
+present in this snapshot. Jobs were approximately 1h 37m to 1h 55m into their
+first states. Representative Qwen-math/code and Llama-math logs show actual
+candidate updates, development evaluations and standardized continuation
+harvesting underway at eight attempts. Initial Qwen-code and Llama-math
+metrics match their saved CUDA control baselines. Subsequent branch metrics
+are not aggregated as science results before complete K=3 labels exist.
+
+The October 7-8 Gate 2 planning window remains conditional on maintained
+parallel allocations and successful runs; first complete-state timings are
+still needed to refine it. Evidence:
+`runs/deployment/evidence/a2_full_parallel_progress_20261006.json` and
+`a2_progress_metadata_20261006_259.tar.gz`. Live cumulative GPU-hours are
+recorded from Slurm elapsed time in the progress evidence, separately from
+CPU SUs and unspent reservations. No scientific or execution-code change was
+made in this progress check.
+
+## October 6 early afternoon: first complete states audited
+
+At 07:27 UTC / 12:57 IST, twenty trajectories remained RUNNING and sixteen
+were pending for the twenty-task array cap. No full T=5 trajectory had completed
+and no job failure was reported. CPU forecaster job 1049535 remained dependent
+on the label array. The downloaded metadata then contained five complete Qwen-
+code states and their accepted t+1 checkpoints; these runs had entered the next
+generation. Accepted ledger entries are commitments, not scarcity events.
+
+A subsequent immutable-label snapshot contained nine complete Qwen-code states,
+with twenty-seven candidate records. An independent local CPU audit passed
+all twenty-seven: K=3, distinct unique-example batches, verified-pool membership,
+eight-attempt limits/seed stride, matched fifty-step budgets, valid development
+metrics, and exact H=1/H=2 deltas. All twenty-seven continuations were available;
+zero terminal candidates were present in this snapshot. These are data-quality
+checks on published states, not a Gate 1/2 decision or a full-study conclusion.
+No scientific source or queued command changed.
+
+The first five measured Qwen-code states took 2.628-2.885 hours, median 2.771.
+Other streams and later generations still need complete-state measurements;
+extrapolating one stream's first generation to the whole campaign is not an
+established runtime forecast. The October 7-8 Gate 2 window remains conditional
+on sustained allocations and successful runs. Evidence:
+`runs/deployment/evidence/a2_progress_270.json`,
+`a2_published_label_health_269.json`, and `a2_progress_metadata_267.tar.gz`.
