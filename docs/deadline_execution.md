@@ -462,3 +462,28 @@ established runtime forecast. The October 7-8 Gate 2 window remains conditional
 on sustained allocations and successful runs. Evidence:
 `runs/deployment/evidence/a2_progress_270.json`,
 `a2_published_label_health_269.json`, and `a2_progress_metadata_267.tar.gz`.
+
+## October 6 afternoon: twenty complete states audited
+
+At 15:24 IST, all twenty GPU slots were running label trajectories; sixteen
+additional trajectories were queued. No full T=5 trajectory had completed
+and no job failure was reported. CPU forecasting 1049535 remains queued on
+the complete label array and will stop for Gate 2 review after its checks.
+
+Twenty complete states / sixty candidate labels passed the published-artifact
+health audit: seven Qwen math, eleven Qwen code, and two Llama math states.
+All had distinct K=3 candidate compositions, unique examples within batches,
+matched training budgets, and valid target/OOD/retention and H=2 labels. No
+terminal candidate or parent scarcity event was recorded in this snapshot.
+Llama code remains queued; two Qwen-code states have reached generation one.
+
+Whole-state medians are 2.813 hours for Qwen code, 4.848 for Qwen math, and
+4.155 for Llama math. These measurements do not yet establish later-generation
+or Llama-code runtimes. Gate 2 is estimated for late October 7 to October 8,
+conditional on successful runs, sustained allocations, and sufficient usable
+held-out states. The scheduler snapshot gives 209.18 cumulative GPU-hours,
+excluding separate CPU SUs and unspent reservations. Source, protocol, seeds,
+data, and queued commands are unchanged.
+
+Evidence: `runs/deployment/evidence/a2_progress_278.json` and
+`a2_published_label_health_277.json`.

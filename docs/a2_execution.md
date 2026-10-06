@@ -258,3 +258,32 @@ established runtime forecast. The October 7-8 Gate 2 window remains conditional
 on sustained allocations and successful runs. Evidence:
 `runs/deployment/evidence/a2_progress_270.json`,
 `a2_published_label_health_269.json`, and `a2_progress_metadata_267.tar.gz`.
+
+## October 6 afternoon: twenty complete states audited
+
+At 09:54 UTC / 15:24 IST, array 1049534 had twenty RUNNING trajectories and
+sixteen pending for JobArrayTaskLimit. No full T=5 trajectory had completed,
+and no job failure was reported. CPU forecaster 1049535 remained PENDING on
+the label-array dependency. All twenty authorized GPU slots were allocated.
+
+The metadata and subsequent published-label snapshot both contained twenty
+complete states / sixty candidate labels: Qwen math seven, Qwen code eleven,
+and Llama math two. Two Qwen-code states were from generation one; the other
+published states were generation zero. Llama-code trajectories remained queued.
+The independent CPU artifact audit passed all sixty records: complete K=3,
+distinct compositions and unique examples within each batch, verified-pool
+membership, eight-attempt budgets with seed stride sixteen, matched optimizer
+steps, finite target/OOD/retention metrics, and correct H=1/H=2 deltas. There
+were zero terminal candidates and no parent scarcity events in this snapshot.
+This is a partial-trajectory health check, not a new Gate 1/2 decision.
+
+Measured complete-state medians were 2.813 hours for Qwen code (n=11), 4.848
+hours for Qwen math (n=7), and 4.155 hours for Llama math (n=2). Later
+generations and Llama code remain unmeasured. The Gate 2 planning window is
+late October 7 to October 8, conditional on sustained allocations, successful
+trajectories, and enough usable held-out states. No scientific or queued
+execution command changed. Cumulative GPU elapsed time at the scheduler
+snapshot was 209.18 hours; CPU SUs and unspent reservations are separate.
+
+Evidence: `runs/deployment/evidence/a2_progress_278.json`,
+`a2_progress_analysis_275.json`, and `a2_published_label_health_277.json`.
