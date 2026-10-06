@@ -287,3 +287,32 @@ snapshot was 209.18 hours; CPU SUs and unspent reservations are separate.
 
 Evidence: `runs/deployment/evidence/a2_progress_278.json`,
 `a2_progress_analysis_275.json`, and `a2_published_label_health_277.json`.
+
+## October 6 evening: forty-nine complete states audited
+
+At 15:28:58 UTC / 20:58:58 IST, all twenty GPU trajectories remained RUNNING;
+sixteen more were pending for JobArrayTaskLimit. No full trajectory had
+completed and no scheduler failure was reported. CPU forecaster 1049535
+remained PENDING Dependency. The renewed SSH connection changed no Slurm job.
+
+Both downloaded snapshots contained forty-nine complete states: Qwen math
+sixteen, Qwen code twenty-nine, and Llama math four. All 147 candidate records
+passed the published-artifact audit, including exactly three distinct candidate
+IDs/compositions per state, within-batch uniqueness, verified-pool membership,
+the frozen eight-attempt budgets, matched optimizer steps, valid development
+metrics, and correct H=1/H=2 deltas. No terminal continuation or parent scarcity
+event was present. Qwen code had nine states in each of generations zero, one,
+and two, plus two in generation three: two trajectories had therefore completed
+four of five generations. Qwen math had nine initial and seven second-generation
+states; Llama math had two initial and two second-generation states. Llama code
+remains queued. These partial labels do not establish a Gate 2 result.
+
+Whole-state median durations were 2.874 hours for Qwen code (n=29), 4.845 hours
+for Qwen math (n=16), and 4.264 hours for Llama math (n=4). The Gate 2 planning
+window remains late October 7 to October 8, conditional on successful runs,
+sustained allocations, and sufficient usable held-out states. Cumulative GPU
+elapsed time was 320.719 hours at the scheduler snapshot; CPU SUs and unspent
+reservations remain separate. No scientific or execution command changed.
+
+Evidence: `runs/deployment/evidence/a2_progress_285.json`,
+`a2_progress_analysis_282.json`, and `a2_published_label_health_284.json`.

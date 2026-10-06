@@ -487,3 +487,26 @@ data, and queued commands are unchanged.
 
 Evidence: `runs/deployment/evidence/a2_progress_278.json` and
 `a2_published_label_health_277.json`.
+
+## October 6 evening: forty-nine complete states audited
+
+At 20:58:58 IST, twenty GPU trajectories were RUNNING and sixteen remained
+queued. No full trajectory or scheduler failure was recorded. CPU forecasting
+1049535 remains pending on the full label-array dependency.
+
+Forty-nine complete states / 147 candidate labels passed the independent
+published-artifact audit: Qwen math sixteen, Qwen code twenty-nine, and Llama
+math four. No terminal continuation or parent scarcity event was recorded.
+Two Qwen-code trajectories have completed four of five generations. Llama
+code remains queued; all four streams must finish or record their predeclared
+scarcity outcomes before the queued CPU stage can evaluate the gates.
+
+Whole-state medians are 2.874 hours for Qwen code, 4.845 for Qwen math, and
+4.264 for Llama math. The Gate 2 planning window remains late October 7 to
+October 8, conditional on successful runs, sustained allocations, and enough
+usable held-out states. Cumulative GPU elapsed time is 320.719 hours, with CPU
+SUs and unspent reservations excluded. No source, protocol, data, seed, or
+queued execution command changed.
+
+Evidence: `runs/deployment/evidence/a2_progress_285.json` and
+`a2_published_label_health_284.json`.
