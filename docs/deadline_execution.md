@@ -532,3 +532,49 @@ No scientific or Slurm execution command changed.
 
 Evidence: `runs/deployment/evidence/a2_progress_292.json` and
 `a2_progress_metadata_289.tar.gz`.
+
+## October 7 morning: pending snapshot audit resolved
+
+The preserved archive was downloaded successfully and its SHA-256 matched the
+remote file. All 112 complete states / 336 candidate labels passed the full
+published-artifact audit; zero terminal continuations were present. Candidate
+counts/compositions, unique within-batch examples, verified-pool membership,
+eight-attempt limits, matched training budgets, and all development consequence
+metrics passed. The preceding transfer failure remains recorded.
+
+At 11:21:43 IST, the refreshed scheduler confirmed fourteen trajectories
+completed, twenty running, two queued, no failures, and CPU forecasting 1049535
+pending on the label array. Cumulative GPU elapsed time was 608.111 hours,
+excluding CPU SUs and unspent reservations. Gate 2 review remains estimated
+around October 8, conditional on successful remaining runs, sustained
+allocations, and sufficient usable held-out states. Scientific and Slurm
+execution commands are unchanged. The local reconnect helper now waits for a
+complete saved MFA entry and bounds SFTP prefetch requests.
+
+Evidence: `runs/deployment/evidence/a2_progress_296.json` and
+`a2_published_label_health_291.json`.
+
+## October 7 afternoon: twenty trajectories complete, none pending
+
+At 15:29:51 IST, twenty of thirty-six label trajectories had completed all
+five generations successfully. All Qwen math/code trajectories are complete;
+sixteen Llama math/code trajectories are running and none remain pending.
+CPU forecasting 1049535 remains dependent on the complete label array.
+
+The snapshot contains 132 complete states / 396 candidate labels, or 73.3%
+of the planned 180-state label-generation phase. This is not the completion
+percentage of the full experimental program. No job failure or parent
+scarcity event was recorded. Frozen configs, K=3 ledger counts, matched
+budgets, completion artifacts, and successful scheduler exits passed metadata
+checks. The previous full artifact audit passed for 112 states / 336 labels;
+the queued CPU stage will audit all final labels before fitting forecasters.
+
+Gate 2 review remains estimated around October 8, conditional on successful
+remaining runs, CPU allocation, and sufficient usable held-out states.
+Cumulative GPU elapsed time was 684.927 hours, excluding CPU SUs and unspent
+reservations. No new jobs, scientific changes, or Slurm execution changes
+were introduced by this check. Subsequent online/scaling launches still wait
+for Gate 2 review.
+
+Evidence: `runs/deployment/evidence/a2_progress_300.json` and
+`a2_progress_metadata_299.tar.gz`.
