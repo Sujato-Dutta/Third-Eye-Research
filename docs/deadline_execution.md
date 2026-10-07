@@ -510,3 +510,25 @@ queued execution command changed.
 
 Evidence: `runs/deployment/evidence/a2_progress_285.json` and
 `a2_published_label_health_284.json`.
+
+## October 7 morning: fourteen full trajectories completed
+
+At 11:10:58 IST, fourteen of thirty-six label trajectories had completed all
+five generations successfully. Twenty GPU trajectories remained running and
+only two were queued. All nine Qwen-code trajectories are complete. CPU
+forecasting 1049535 remains pending on the complete label-array dependency.
+
+The metadata snapshot contains 112 complete states / 336 candidate labels
+across all four streams. No scheduler failure or parent scarcity event was
+recorded. The full new-label artifact audit is pending because SSH disconnected
+during its archive transfer; the earlier 147-label audit passed. No new
+336-label health-pass claim is made before the transfer and audit finish.
+
+Gate 2 review is estimated around October 8, conditional on successful
+remaining trajectories, sustained allocations, and sufficient usable held-out
+states. Cumulative GPU elapsed time was 604.527 hours, excluding CPU SUs and
+unspent reservations. Monitoring disconnection does not interrupt Slurm jobs.
+No scientific or Slurm execution command changed.
+
+Evidence: `runs/deployment/evidence/a2_progress_292.json` and
+`a2_progress_metadata_289.tar.gz`.

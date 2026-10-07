@@ -316,3 +316,32 @@ reservations remain separate. No scientific or execution command changed.
 
 Evidence: `runs/deployment/evidence/a2_progress_285.json`,
 `a2_progress_analysis_282.json`, and `a2_published_label_health_284.json`.
+
+## October 7 morning: fourteen full trajectories completed
+
+At 05:40:58 UTC / 11:10:58 IST, fourteen of thirty-six label trajectories had
+COMPLETED with exit 0:0; twenty were RUNNING and two remained pending for the
+array concurrency cap. All fourteen completed artifacts also reported five
+completed states and status complete. These included all nine Qwen-code
+trajectories, four Qwen-math trajectories, and one Llama-math trajectory.
+CPU forecaster 1049535 remained PENDING Dependency on the complete array.
+
+The downloaded metadata contained 112 complete states: Qwen math forty,
+Qwen code forty-five, Llama math twenty-three, and Llama code four. This
+corresponds to 336 candidate labels, with no recorded parent scarcity events.
+The new full artifact audit is pending: SSH disconnected during its archive
+download. The prior 147-label snapshot passed its audit; no full audit of the
+new 336-label snapshot is claimed yet. The remote packed archive is preserved
+and the local transport will retry with bounded SFTP prefetch. Slurm jobs
+continue independently of this monitoring connection.
+
+Whole-state medians are 3.044 hours for Qwen code (n=45), 5.085 for Qwen math
+(n=40), 3.779 for Llama math (n=23), and 2.863 for Llama code (n=4). Gate 2
+review is estimated around October 8, conditional on successful remaining
+trajectories, sustained allocations, and sufficient usable held-out states.
+Cumulative GPU elapsed time was 604.527 hours at the scheduler snapshot;
+CPU SUs and unspent reservations remain separate. No scientific or Slurm
+execution command changed.
+
+Evidence: `runs/deployment/evidence/a2_progress_292.json`,
+`a2_progress_analysis_289.json`, and `a2_progress_metadata_289.tar.gz`.
