@@ -104,3 +104,8 @@ See [the code verifier contract](docs/integration.md).
 
 [Implementation details](docs/integration.md), [validation record](docs/validation.md),
 and [data protocol](data/README.md) describe the assumptions and evidence limits.
+
+The versioned [F2 forecasting extension](docs/protocol_forecaster_f2.md) adds
+shared-parent candidate comparisons and supervised continuation residuals.
+Its [execution record](docs/f2_execution.md) tracks matched controls,
+ablations and validation.
