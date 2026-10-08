@@ -578,3 +578,28 @@ for Gate 2 review.
 
 Evidence: `runs/deployment/evidence/a2_progress_300.json` and
 `a2_progress_metadata_299.tar.gz`.
+
+## October 7 night: 86% of label states published
+
+At 22:16:35 IST, twenty-two trajectories were complete, fourteen running, and
+none pending. No job failure or parent scarcity event was recorded. The
+snapshot contains 155 of 180 planned label states / 465 candidate records,
+or 86.1% of label generation. This is not overall experimental completion.
+All configs, K=3 ledger counts, and successful T=5 completion artifacts passed
+metadata checks. The previous 112-state / 336-label full artifact audit passed;
+the queued CPU stage audits the final complete dataset before fits.
+
+Later Llama-math states have taken up to 9.657 hours, and some trajectories
+may approach their submitted 36-hour limit. The live gh queue allows 48 hours,
+but Slurm denied an attempted running-job extension with Access/permission
+denied. No job, source, training budget, harvesting rule, or dependency changed;
+no timeout or restart occurred. This operational risk remains recorded.
+
+CPU forecasting 1049535 remains dependent on the label array. Gate 2 review
+is estimated for October 8, potentially afternoon/evening, conditional on
+successful completion within wall limits, CPU allocation, and sufficient usable
+held-out states. Cumulative GPU elapsed time was 789.094 hours, excluding CPU
+SUs and unspent reservations.
+
+Evidence: `runs/deployment/evidence/a2_progress_307.json` and
+`a2_progress_metadata_304.tar.gz`.

@@ -404,3 +404,39 @@ No scientific or Slurm execution command changed.
 
 Evidence: `runs/deployment/evidence/a2_progress_300.json`,
 `a2_progress_analysis_299.json`, and `a2_progress_metadata_299.tar.gz`.
+
+## October 7 night: 155 complete states, later math states slower
+
+At 16:46:35 UTC / 22:16:35 IST, twenty-two of thirty-six label trajectories
+had COMPLETED with exit 0:0; fourteen were RUNNING and none were pending.
+CPU forecaster 1049535 remained PENDING Dependency. All completed artifacts
+reported five completed states. No job failure or parent scarcity event was
+recorded. The longest initial Llama-math run completed successfully in 32h
+30m 55s; no timeout or restart occurred.
+
+The metadata snapshot contains 155 complete states / 465 candidate labels:
+Qwen math forty-five, Qwen code forty-five, Llama math thirty-three, and Llama
+code thirty-two. This is 86.1% of the planned label-generation phase, not the
+full research program. All thirty-six configs and all published K=3 ledger
+counts passed the frozen-budget metadata checks. The last full artifact audit
+passed for 112 states / 336 labels. The queued CPU stage audits all final
+labels before fitting; this progress check makes no full-audit claim for the
+additional labels.
+
+Later Llama-math states have taken up to 9.657 hours. Representative running
+logs show correction harvesting continuing, with larger observed failure
+pools. Runtime growth is recorded without changing the predeclared harvest,
+training, or terminal rules. The live gh queue permits 48 hours, while these
+submitted jobs retain their original 36-hour limits. A request to increase
+running task 1049534_21 to 48 hours was rejected by Slurm with Access/permission
+denied. No job or frozen file was changed. Some slow trajectories may approach
+their original wall limit; no automatic restart or gate bypass was introduced.
+
+Gate 2 review remains estimated for October 8, potentially afternoon/evening,
+conditional on remaining runs finishing within their limits, CPU allocation,
+and sufficient usable held-out states. Cumulative GPU elapsed time was
+789.094 hours; CPU SUs and unspent reservations are separate.
+
+Evidence: `runs/deployment/evidence/a2_progress_307.json`,
+`a2_progress_analysis_304.json`, and the time-limit check/extension request
+responses 305 and 306 in `runs/deployment/vista_monitor_requests/`.
