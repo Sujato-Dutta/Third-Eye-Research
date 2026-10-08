@@ -1,5 +1,34 @@
 # October 4 deadline execution override
 
+Latest status, October 8 at 12:17 IST: 177/180 published label states;
+33 original trajectories completed, one timed out, two running. Recovery
+validation and its controller are queued. Gate 2 is still pending; earlier
+October 8 completion estimates are conditional and now require recovery.
+
+Latest forecasting outcome: replacement 1057179 completed all eighteen fits
+in 91 seconds after 124 tests and the published-label audit passed. The
+177-state snapshot misses Gate 2's correlation threshold (0.215849 versus
+0.30), although top-1 is 50% and all forty validation states are informative.
+The original result is preserved; diagnostic 1057195 checks only forecaster
+stopping under the existing 200-epoch cap with matched H=1/H=2 controls.
+No gate threshold changes or scaling occurred. Full-study completion by
+October 10 remains at risk: the next core phase was projected at 36-60 hours,
+before broader confirmation experiments and additional queue delays.
+
+The stopping diagnostic completed all six fits in 48 seconds. Increasing
+patience retained the same Direct validation results; the frozen correlation
+criterion is still unmet. No diagnostic was adopted or threshold weakened.
+Recovery validation passed 129 tests and submitted checkpoint recovery
+1057197. Full-data confirmation remains separate from this completed early
+review. Next-stage compute cannot substitute for an adequate forecasting result.
+
+Independent CPU forecasting job **1057170** was queued at 12:35 IST to audit
+and fit published labels immediately on allocation. The available data include
+97 training states and all forty validation / forty test states; only training
+states are missing. An early forecasting review can precede GPU recovery.
+The full-data CPU run remains queued as confirmation; no later-stage launch is
+automatic. See [early forecasting](early_forecasting_20261008.md).
+
 This records the resource and scheduling change authorized on October 4 to
 prioritize experimental completion by October 10. It is an operational override,
 not a new scientific amendment. The frozen A1 document and scientific source
@@ -603,3 +632,58 @@ SUs and unspent reservations.
 
 Evidence: `runs/deployment/evidence/a2_progress_307.json` and
 `a2_progress_metadata_304.tar.gz`.
+
+## October 8: checkpoint recovery precedes Gate 2
+
+The original array has one TIMEOUT (index 20) and two remaining running
+Llama-math tasks. The timeout preserved four complete generations and two
+complete final-state branches. All existing evidence remains unchanged;
+versioned recovery recomputes unfinished work under frozen A2 settings and
+requires checkpoint/hash equivalence and full label audits.
+
+Validation 1057139 passed 122 tests but failed at scheduler handoff, before any
+GPU launch. Corrected operational handoff validation 1057163 is pending in a
+short development allocation; controller 1057164 waits for its success and
+the original array's end. Only actual timeouts receive recovery jobs. A new
+CPU label-audit/forecast job will follow successful recoveries and stop for
+Gate 2 review. No later scientific stage has been released.
+
+The versioned scheduler relay handles only bounded sbatch submissions on the
+login node; all validation and scientific work stay on compute nodes. Unix
+launcher endings are checked. The rejected submission and superseded pending
+validation/controller jobs remain recorded; no GPU launched from them.
+
+Measured cumulative GPU elapsed time is 899.809 hours as of 12:17 IST,
+including failed GPU allocations; CPU SUs and pending reservations are
+separate. Remaining allocation must be rechecked before subsequent stages.
+Recovery queue waits and continuation duration prevent a firm Gate 2 ETA or
+a promise that the full experimental program will finish by October 10.
+
+See [A2 execution](a2_execution.md) and
+`runs/deployment/evidence/a2_progress_332.json` for the dependency chain,
+evidence boundaries and accounting scope.
+
+## October 8: versioned forecasting extension
+
+The published snapshot supports forecasting before the three missing training
+states finish recovery. The original primary H=2 forecaster reached validation
+Spearman 0.21585 and top-1 accuracy 0.50, failing the unchanged correlation
+criterion. A matched patience-only diagnostic did not improve that result.
+
+The separately frozen F2 extension now compares candidates from the same
+parent and supervises immediate and continuation consequences separately.
+CPU job 1057239 queues 15 fixed fits, including matched H=1 controls, the
+original GRU with the new objective, and three ablations. It runs validation
+before fitting and stops for Gate 2 review. Test data remains excluded from
+F2 fitting and selection. No new GPU harvesting or scaling is released by
+this change. See [F2 execution](f2_execution.md) for the version, receipts
+and evidence limits.
+
+## October 8: F2 comparison completed
+
+Job 1057239 passed 126 tests and finished all fifteen fixed CPU fits in
+62 seconds. The primary F2 validation result was Spearman 0.14085 and top-1
+0.425, failing Gate 2 and below the original primary on the same snapshot.
+The negative comparison is preserved; no online or scaling launch followed.
+Three timeout-recovery GPU jobs are queued, followed by dependent final
+audit/forecast job 1057272. See [F2 execution](f2_execution.md) for all fits.

@@ -1,5 +1,28 @@
 # A2 execution: eight-attempt harvesting
 
+Latest forecasting outcome, October 8: all eighteen fixed fits completed in
+91 seconds in job 1057179 after 124 tests and the 177-state label audit passed.
+The fixed seed-42 snapshot misses Gate 2: Spearman 0.215849 < 0.30, despite
+top-1 0.50 > 0.45 on forty nonconstant validation states. No online/scaling
+release occurred. One separately logged stopping diagnostic, 1057195, is
+completed. Its six matched 200-epoch fits retain the same Direct validation
+results, so no diagnostic model is adopted. Original results and the full-data
+recovery chain remain preserved. Recovery validation 1057163 passed 129 tests
+and queued GPU recovery 1057197; original task 22 also timed out, with task 24
+still running at the latest check.
+
+At 12:35 IST, independent CPU forecasting job **1057170** was queued to audit
+and fit existing published states without waiting for GPU recovery. All forty
+validation and forty test states are present; the three missing states are in
+training. See [early forecasting](early_forecasting_20261008.md). The job stops
+for review, with no automatic later-stage launch.
+
+The first pending CPU job was superseded before execution by 1057179, which
+prioritized the fixed decision comparison and used available compute queues.
+The complete validation/test splits were already present, so forecasting did
+not wait for remaining GPU recovery. Gate 2 now presents a scientific
+learnability issue on the current snapshot, rather than a fitting-time delay.
+
 Submitted October 5, 2026, 04:40 UTC / 10:10 IST, following authorization
 to use eight harvesting attempts for new experiments.
 
@@ -440,3 +463,69 @@ and sufficient usable held-out states. Cumulative GPU elapsed time was
 Evidence: `runs/deployment/evidence/a2_progress_307.json`,
 `a2_progress_analysis_304.json`, and the time-limit check/extension request
 responses 305 and 306 in `runs/deployment/vista_monitor_requests/`.
+
+## October 8: preserve timeout evidence and resume unfinished work
+
+At 06:47:19 UTC / 12:17:19 IST, the original label array had 33 COMPLETED
+trajectories, one TIMEOUT (index 20), and two RUNNING (22 and 24). A TIMEOUT
+remains a failure even though Slurm reports exit code 0:0. The 11:28 IST
+metadata archive contains 177 published K=3 states / 531 labels: Qwen math,
+Qwen code and Llama code have 45 states each; Llama math has 42. These are
+publication counts, not a new full artifact audit or overall research progress.
+
+Timed-out index 20 preserved four accepted generations and two fully labeled
+branches of its fifth state. Its third branch has an immediate checkpoint but
+no complete H=2 consequence. Original artifacts and logs remain unchanged.
+Versioned recovery resumes from accepted generation 4 into a separate output
+directory. Completed pools, features, updates and evaluations are reused only
+under their matching hashes, seeds and frozen settings. Replayed unfinished
+immediate updates must reproduce any saved checkpoint hash. Incomplete
+harvests are recomputed; all three branches must pass the audit before a new
+state is published. The original trajectory identity and data split persist.
+
+CPU recovery validation 1057139 passed 122 tests, then failed during scheduler
+handoff before submitting a GPU. Its evidence is preserved. Version 2 added
+scheduler diagnostics and tests; its pending validation/controller jobs were
+superseded before execution. Version 3 routes submissions through a restricted
+login-node scheduler relay, as required by the Vista deployment. The relay
+imports no research package and runs only bounded scheduler submissions.
+All validation, audits, model work and forecasting stay on compute nodes.
+
+A version-3 submission was rejected before any job allocation because its
+launchers contained Windows line endings. The rejected package and release
+are preserved. Launchers now use Unix line endings, with an additional check.
+Five local relay/launcher checks passed; the complete 129-test command is
+queued for compute-node validation. No GPU bypasses that validation.
+
+The version-3 dependency chain, queued at 12:24 IST, is:
+
+- 1057163: pending short development allocation for the full CPU suite and
+  recovery checks; a successful check submits only index-20 GPU recovery.
+- 1057164: waits for 1057163 success and the entire original array to finish;
+  prepares additional recoveries only for actual TIMEOUT tasks.
+- Recovery GPUs request 48 hours and recompute only unfinished work. No
+  recovery GPU had been submitted at this check.
+- A replacement CPU audit/forecast job is submitted after recovery dependencies
+  are established. Only then is the obsolete pending forecaster 1049535
+  canceled. The replacement stops at Gate 2 review, with no online/scaling
+  launch.
+
+The original running trajectories remain untouched. Frozen A2 scientific
+source, original operational files, training budgets, eight-attempt harvesting
+and terminal rules remain unchanged. Supplemental recovery files are hashed
+in `runs/a2/recovery_20261008_v3/release_v3.json`; receipts and assembled
+dataset lineage are recorded separately. Reused logical work timings are not
+claimed as newly spent GPU time.
+
+Cumulative GPU elapsed time was 899.809 hours, including the original timeout
+and 101.606 prior GPU hours. CPU SUs, pending allocations and unspent
+reservations are separate. Gate 2 timing now depends on validation allocation,
+GPU recovery allocation, unfinished continuation harvesting and final CPU
+audits/fits; no unconditional October 8 completion estimate remains.
+
+Evidence: `runs/deployment/evidence/a2_progress_332.json`,
+`a2_progress_metadata_311.tar.gz`, `a2_recovery_inputs_313.tar.gz`, and versioned
+recovery release/queue receipts (request 340). Superseded pending jobs 1057149
+and 1057146 were canceled after the new chain was queued. The last full published-label artifact audit
+still covers 112 states / 336 labels; final CPU recovery audits cover the
+complete dataset before any forecaster fit.
