@@ -7,7 +7,7 @@ It does not support a completed T5 third-backbone or third-backbone noise-floor 
 
 ## Current state
 
-Verified October 9, 2026, approximately 09:30 IST. The setup receipt reports
+Verified October 9, 2026, 09:21 IST. The setup receipt reports
 `status=passed` and binds the prepared tasks to the frozen release. Official
 model revision: `a07cc9a04f16550a088caea529712d1d335b0ac1`.
 
