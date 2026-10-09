@@ -687,3 +687,19 @@ Job 1057239 passed 126 tests and finished all fifteen fixed CPU fits in
 The negative comparison is preserved; no online or scaling launch followed.
 Three timeout-recovery GPU jobs are queued, followed by dependent final
 audit/forecast job 1057272. See [F2 execution](f2_execution.md) for all fits.
+
+## October 8: deadline-bounded empirical direction review
+
+Job 1057337 passed 133 tests and completed 36 GRU / 24 ridge fits in 75
+seconds. Frozen held-out confirmation 1057342 passed its two checks and
+completed in 34 seconds. Both finished within twenty minutes of the request.
+Development forecasting improvements did not generalize: held-out mean H1
+Spearman was -0.0125 and H2 was 0.0311. The ranking phenomenon persists,
+with 57.5% strict winner reversal on the forty held-out states.
+
+Gate 2 remains failed. The supported direction is empirical analysis, subject
+to replication and claim limits, rather than architectural success or a
+universal predictability ceiling. The original held-out split lacks Llama-code
+coverage; preserve it and disclose this limitation. No new GPU expansion was
+launched. See [direction review](signal_direction_review_20261008.md) for all
+results, uncertainty, split coverage and the additional evidence required.
