@@ -101,6 +101,7 @@ def main():
             xlabel="Paired difference in Spearman",
             title=title,
             ylim=(-0.5, 2.6),
+            xlim=(-0.35, 0.8),
         )
         ax.invert_yaxis()
     fig.tight_layout()
