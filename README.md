@@ -128,3 +128,8 @@ The separately frozen [SmolLM3 supplement](docs/protocol_smollm_supplement_v1.md
 adds four early cross-backbone confirmation states after model-specific validation.
 Its [execution record](docs/smollm_execution.md) tracks preparation, the reserved
 GPU capacity and the automatic review stop.
+
+The [independent-selection analysis](docs/protocol_independent_selection_r1.md)
+uses the existing continuation controls to separate selection and scoring across
+both seeds and evaluation items. Its [execution record](docs/r1_execution.md)
+tracks CPU validation and the automatic analysis handoff; it adds no GPU runs.

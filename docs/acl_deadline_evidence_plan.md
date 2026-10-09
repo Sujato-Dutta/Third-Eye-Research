@@ -8,8 +8,11 @@ effects rather than the original forecaster proposal or raw reversal counts.
 The deadline package is fixed: complete the three original checkpoint recoveries;
 collect eight balanced five-generation trajectories; run matched optimizer and
 continuation controls on eight independent saved parents; and evaluate previously
-frozen methods without fitting or selecting using the new cohort. No additional
-backbone, architecture search or learned online rollout is scheduled.
+frozen methods without fitting or selecting using the new cohort. A separately
+declared four-state SmolLM3 sanity check was subsequently authorized under S1;
+it is excluded from E2's primary reliability and forecasting population. No
+architecture search, full third-backbone recursive campaign or learned online
+rollout is scheduled.
 
 ## Evidence needed for claims
 
@@ -28,6 +31,20 @@ units. The reliability supplement has eight independent parents, two per stream;
 the shared evaluation sets introduce an additional dependence limitation.
 
 ## Manuscript work that can proceed immediately
+
+The October 9 [R1 declaration](protocol_independent_selection_r1.md) adds
+independent-seed, disjoint-item selection evaluation using already queued
+continuations, with no extra GPU work. Keep observed forced-update oracle regret
+as a descriptive statistic, distinguish it from the signed independently scored
+selection gap, and prioritize the latter alongside matched noise comparisons.
+Do not infer a true oracle's value from the maximum of noisy observed outcomes.
+The bounded one-versus-two continuation comparison is secondary practitioner
+evidence, not a universal replicate recommendation. Mechanism claims remain
+correlational; no causal intervention is included in the deadline package.
+
+Write the abstract and claim-bearing title only after these analyses and fresh
+confirmation have been audited. The scope remains 3–4B backbones, LoRA, K=3,
+H=2, T=5 for the two-backbone core, with four early states for the third model.
 
 Draft the parameter-update setting, verification/harvesting procedure, matched
 candidate budgets, H=1/H=2 consequences, terminal rule, split and leakage controls,

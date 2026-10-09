@@ -104,6 +104,24 @@ trajectories within streams and weight streams equally; forty states and120
 labels are not120 independent units. Reliability estimates have eight independent
 parents, with only two per stream and shared evaluation items limiting precision.
 
+To reduce selection optimism, the separately declared R1 analysis chooses a
+future candidate using one fresh continuation seed and evaluates that fixed
+choice with the other. Selection and scoring use disjoint, deterministic halves
+of each evaluation role, averaging the two fold orientations within each parent.
+The immediate comparator is selected using M_t+1 outcomes on the selection
+half. We report the signed future-selection value difference, which may be
+negative, rather than presenting it as regret against a true oracle. Secondary
+analyses retain the full shared evaluation sets, all ordered seed pairs and a
+held-out-continuation comparison of one versus two selection continuations.
+Seed pairs and item folds are repeated observations within each of eight parent
+trajectories, not additional independent samples. These comparisons use existing
+control outcomes and do not alter the update or evaluation budget. Their
+uncertainty remains conditional on the shared finite evaluation item pools.
+
+The four SmolLM3 early-state experiments are a separately declared sanity check.
+They are excluded from the two-backbone reliability sample and do not establish
+third-backbone five-generation replication or matched-noise evidence.
+
 ## Scope and reproducibility limits
 
 Synthetic known-signal controls assess detection of a constructed forecastable
