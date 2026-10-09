@@ -47,6 +47,10 @@ to their import path; custom Python scripts can set `PYTHONPATH=src`.
 
 ## Cluster workflow
 
+The October 8 empirical supplement is tracked in
+[the execution record](docs/empirical_execution_20261008.md), including reliability
+validation, fixed comparator controls and the held balanced replication cohort.
+
 The active campaign is consolidated on [TACC Vista](docs/vista_execution.md),
 with an October 10 completion target. The current
 [A1 correction-scarcity calibration](docs/a1_execution.md) uses a separate
@@ -109,3 +113,18 @@ The versioned [F2 forecasting extension](docs/protocol_forecaster_f2.md) adds
 shared-parent candidate comparisons and supervised continuation residuals.
 Its [execution record](docs/f2_execution.md) tracks matched controls,
 ablations and validation.
+
+The [October 8 signal review](docs/signal_direction_review_20261008.md) records
+the fixed diagnostic study, held-out confirmation and current evidence limits.
+
+The adopted [checkpoint reliability supplement](docs/protocol_empirical_checkpoint_v3.md)
+adds eight balanced trajectories and eight independent matched-control parents
+without changing A2. Its [execution record](docs/empirical_execution_20261008.md)
+tracks validation, the automatic queue chain, review stops and deadline limits.
+The [paper evidence plan](docs/acl_deadline_evidence_plan.md) fixes claim boundaries
+and manuscript work that can proceed before new experimental outcomes.
+
+The separately frozen [SmolLM3 supplement](docs/protocol_smollm_supplement_v1.md)
+adds four early cross-backbone confirmation states after model-specific validation.
+Its [execution record](docs/smollm_execution.md) tracks preparation, the reserved
+GPU capacity and the automatic review stop.
