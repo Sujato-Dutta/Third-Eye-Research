@@ -66,6 +66,20 @@ def test_assistant_loss_is_finite_and_seeded_updates_differ():
 
 
 @pytest.mark.integration
+def test_checkpoint_rejects_different_input_rendering_context(tmp_path):
+    backend = make_tiny_backend()
+    backend.prompt_context = {"date_string": "11 Oct 2026"}
+    checkpoint = tmp_path / "dated"
+    backend.save_checkpoint(checkpoint, {})
+    original = backend.state_hash()
+    backend.load_checkpoint(checkpoint)
+    assert backend.state_hash() == original
+    backend.prompt_context = {"date_string": "12 Oct 2026"}
+    with pytest.raises(ValueError, match="input-rendering context"):
+        backend.load_checkpoint(checkpoint)
+
+
+@pytest.mark.integration
 def test_real_training_through_all_h2_branches(tmp_path):
     """Generation is a fixture; every LoRA/probe/checkpoint operation is real."""
     from third_eye.data.schema import ROLES

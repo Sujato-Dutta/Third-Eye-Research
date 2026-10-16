@@ -53,6 +53,34 @@ def test_online_error_restores_parent(tmp_path, monkeypatch):
     assert not (tmp_path / "accepted").exists()
 
 
+@pytest.mark.parametrize("retention_sign,committed", [(-1, False), (1, True)])
+def test_guarded_h1_restores_parent_or_commits_without_retraining(
+    tmp_path, monkeypatch, retention_sign, committed
+):
+    labeler = setup_labeler(tmp_path, monkeypatch)
+
+    def evaluation(backend, *args):
+        value = sum(backend.state) / 100
+        return Consequences(value, value / 2, retention_sign * value / 3)
+
+    monkeypatch.setattr("third_eye.experiments.online.evaluate", evaluation)
+    result = run_online(
+        labeler.backend,
+        labeler.config,
+        labeler.splits,
+        labeler.verifier,
+        tmp_path,
+        labeler.manifest_hash,
+        "guarded_h1",
+    )
+    assert result["complete"]
+    assert len(labeler.backend.starts) == 3
+    assert bool(labeler.backend.state) == committed
+    if not committed:
+        assert labeler.backend.state == ()
+    assert (tmp_path / "online/generation_0/guarded_decision.json").exists()
+
+
 def test_resume_keeps_complete_baseline_trajectory(tmp_path, monkeypatch):
     import json
 
