@@ -25,12 +25,38 @@ class LabelGenerator:
         manifest_hash,
         feature_extractor=extract_features,
         trajectory_id=None,
+        continuation_seed_offsets=(),
+        capture_item_outcomes=False,
     ):
         self.backend, self.config, self.splits = backend, config, splits
         self.verifier, self.output = verifier, Path(output)
         self.manifest_hash, self.feature_extractor = manifest_hash, feature_extractor
         self.trajectory_id = trajectory_id or digest(str(self.output.resolve()))[:20]
+        offsets = tuple(continuation_seed_offsets)
+        if offsets and (
+            len(offsets) < 2
+            or len(set(offsets)) != len(offsets)
+            or any(type(s) is not int or s <= 0 for s in offsets)
+        ):
+            raise ValueError(
+                "Repeated labels require >=2 distinct positive seed offsets"
+            )
+        self.continuation_seed_offsets = offsets
+        if type(capture_item_outcomes) is not bool:
+            raise ValueError("Item outcome capture must be boolean")
+        self.capture_item_outcomes = capture_item_outcomes
         self.output.mkdir(parents=True, exist_ok=True)
+
+    def measure(self, seed, item_output):
+        kwargs = {"item_output": item_output} if self.capture_item_outcomes else {}
+        return evaluate(
+            self.backend,
+            self.splits,
+            self.verifier,
+            self.config.protocol.max_new_tokens,
+            seed,
+            **kwargs,
+        )
 
     def label_state(self, generation, history=()):
         b, cfg, p = self.backend, self.config, self.config.protocol
@@ -49,7 +75,7 @@ class LabelGenerator:
         started = time.perf_counter()
         records = []
         try:
-            baseline = evaluate(b, self.splits, self.verifier, p.max_new_tokens, seed)
+            baseline = self.measure(seed, state_dir / "parent_evaluation.json")
             b.save_checkpoint(
                 state_dir / "parent", {"state_id": state_id, "generation": generation}
             )
@@ -90,7 +116,7 @@ class LabelGenerator:
                 train_log = b.train(
                     batch, update_seed, log_path=directory / "training_t1.jsonl"
                 )
-                t1 = evaluate(b, self.splits, self.verifier, p.max_new_tokens, seed)
+                t1 = self.measure(seed, directory / "evaluation_t1.json")
                 checkpoint_t1 = directory / "t1"
                 t1_hash = b.state_hash()
                 b.save_checkpoint(
@@ -136,7 +162,7 @@ class LabelGenerator:
                         continuation_seed,
                         log_path=directory / "training_t2.jsonl",
                     )
-                    t2 = evaluate(b, self.splits, self.verifier, p.max_new_tokens, seed)
+                    t2 = self.measure(seed, directory / "evaluation_t2.json")
                 else:
                     if b.state_hash() != t1_hash:
                         raise RuntimeError(
@@ -216,10 +242,35 @@ class LabelGenerator:
                         "pool_statistics": continuation_stats,
                     },
                 }
+                if self.capture_item_outcomes:
+                    record["evaluation_artifacts"] = {
+                        "parent": str((state_dir / "parent_evaluation.json").resolve()),
+                        "t1": str((directory / "evaluation_t1.json").resolve()),
+                        "t2": str(
+                            (
+                                directory
+                                / (
+                                    "evaluation_t2.json"
+                                    if continuation_available
+                                    else "evaluation_t1.json"
+                                )
+                            ).resolve()
+                        ),
+                    }
+                if self.continuation_seed_offsets:
+                    from third_eye.experiments.continuations import collect_replicates
+
+                    record["continuation_replicates"] = collect_replicates(
+                        self, record, directory, self.continuation_seed_offsets
+                    )
                 write_json(directory / "record.json", record)
                 records.append(record)
             # Publish labels only for a complete matched K=3 state. Partial branch
             # artifacts stay diagnostic; they cannot silently enter meta-training.
+            if self.continuation_seed_offsets:
+                from third_eye.forecasting.continuation import repeated_targets
+
+                repeated_targets(records)
             summary = {
                 "state_id": state_id,
                 "generation": generation,
@@ -334,6 +385,12 @@ def run_trajectory(
             "manifest_hash": labeler.manifest_hash,
             "trajectory_id": labeler.trajectory_id,
         }
+        if labeler.continuation_seed_offsets:
+            metadata["continuation_seed_offsets"] = list(
+                labeler.continuation_seed_offsets
+            )
+        if labeler.capture_item_outcomes:
+            metadata["capture_item_outcomes"] = True
         committed = output / "accepted" / f"generation_{generation + 1}"
         b.save_checkpoint(committed, metadata)
         write_json(committed / "resume.json", {"config": cfg.to_dict(), **metadata})

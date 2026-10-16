@@ -104,12 +104,60 @@ class Dynamics(nn.Module):
         }
 
 
+class ExpectedValue(nn.Module):
+    """Small set-relative MLP: H1 + continuation mean and joint draw covariance.
+
+    The Cholesky head includes cross-consequence covariance so utility risk is
+    computed from w' Sigma w rather than assuming independent task heads.
+    """
+
+    def __init__(self, hidden=64, scalar=False):
+        super().__init__()
+        if scalar:
+            raise ValueError(
+                "Expected-value forecasting requires three consequence heads"
+            )
+        self.net = nn.Sequential(
+            nn.Linear(3 + 3 * len(FEATURE_NAMES) + 18 + 3, hidden),
+            nn.ReLU(),
+            nn.Linear(hidden, hidden),
+            nn.ReLU(),
+        )
+        self.h1 = nn.Linear(hidden, 3)
+        self.continuation = nn.Linear(hidden, 3)
+        self.cholesky = nn.Linear(hidden, 6)
+        nn.init.zeros_(self.cholesky.weight)
+        nn.init.zeros_(self.cholesky.bias)
+        with torch.no_grad():
+            self.cholesky.bias[[0, 2, 5]] = -4.0
+
+    def forward(self, inputs):
+        hidden = self.net(inputs)
+        h1, continuation = self.h1(hidden), self.continuation(hidden)
+        raw = self.cholesky(hidden)
+        factor = raw.new_zeros(len(raw), 3, 3)
+        factor[:, 0, 0] = nn.functional.softplus(raw[:, 0]) + 1e-4
+        factor[:, 1, 0] = raw[:, 1]
+        factor[:, 1, 1] = nn.functional.softplus(raw[:, 2]) + 1e-4
+        factor[:, 2, 0] = raw[:, 3]
+        factor[:, 2, 1] = raw[:, 4]
+        factor[:, 2, 2] = nn.functional.softplus(raw[:, 5]) + 1e-4
+        return {
+            "prediction": h1 + continuation,
+            "h1": h1,
+            "continuation": continuation,
+            "factor": factor,
+            "covariance": factor @ factor.transpose(-1, -2),
+        }
+
+
 def build_model(kind, hidden=64, scalar=False):
     models = {
         "one_step": OneStep,
         "direct": Direct,
         "dynamics": Dynamics,
         "matched_h1": Direct,
+        "expected": ExpectedValue,
     }
     if kind not in models:
         raise ValueError("Unknown forecaster architecture")

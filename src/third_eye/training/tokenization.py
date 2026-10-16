@@ -1,7 +1,27 @@
 """Assistant-only SFT masking; reject truncation rather than train bad targets."""
 
 
+def frozen_chat_kwargs(tokenizer, configured, context=None):
+    """A wall-clock-dependent system prefix is part of the model input."""
+    context = dict(context or {})
+    if set(context) - {"date_string"}:
+        raise ValueError("Unknown rendering-context field")
+    if any(k in configured and configured[k] != v for k, v in context.items()):
+        raise ValueError("Rendering context conflicts with the frozen configuration")
+    kwargs = {**configured, **context}
+    template = tokenizer.chat_template
+    templates = template.values() if isinstance(template, dict) else [template or ""]
+    if any("strftime_now" in t for t in templates):
+        date = kwargs.get("date_string")
+        if not isinstance(date, str) or not date.strip():
+            raise ValueError(
+                "Date-dependent chat template requires an explicit frozen date_string"
+            )
+    return kwargs
+
+
 def format_prompt(tokenizer, prompt, chat_kwargs):
+    chat_kwargs = frozen_chat_kwargs(tokenizer, chat_kwargs)
     if tokenizer.chat_template:
         return tokenizer.apply_chat_template(
             [{"role": "user", "content": prompt}],
@@ -13,6 +33,7 @@ def format_prompt(tokenizer, prompt, chat_kwargs):
 
 
 def encode_completion(tokenizer, prompt, completion, max_length, chat_kwargs):
+    chat_kwargs = frozen_chat_kwargs(tokenizer, chat_kwargs)
     prefix = format_prompt(tokenizer, prompt, chat_kwargs)
     if tokenizer.chat_template:
         full = tokenizer.apply_chat_template(

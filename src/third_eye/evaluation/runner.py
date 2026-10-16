@@ -59,7 +59,11 @@ def verify_completions(verifier, examples, completions):
     return results
 
 
-def evaluate(backend, splits, verifier, max_new_tokens, seed):
+def evaluate(backend, splits, verifier, max_new_tokens, seed, item_output=None):
+    from third_eye.io import digest, write_json
+
+    before = backend.state_hash() if item_output is not None else None
+    items = {}
     metrics = []
     for role in ("target_dev", "ood_dev", "retention_dev"):
         examples = splits[role]
@@ -67,7 +71,37 @@ def evaluate(backend, splits, verifier, max_new_tokens, seed):
         completions = generate_greedy(
             backend, examples, max_new_tokens, [seed] * len(examples)
         )
-        passed = sum(verify_completions(verifier, examples, completions))
+        verdicts = verify_completions(verifier, examples, completions)
+        if item_output is not None:
+            items[role] = [
+                {
+                    "id": ex.id,
+                    "prompt_sha256": ex.prompt_hash,
+                    "prediction_sha256": digest(text),
+                    "correct": int(correct),
+                }
+                for ex, text, correct in zip(examples, completions, verdicts)
+            ]
+        passed = sum(verdicts)
         metrics.append(passed / len(examples))
         print(f"Completed {role}: {passed}/{len(examples)}", flush=True)
-    return Consequences(*metrics)
+    result = Consequences(*metrics)
+    if item_output is not None:
+        if backend.state_hash() != before:
+            raise RuntimeError("Evaluation changed the adapter being scored")
+        write_json(
+            item_output,
+            {
+                "schema_version": 1,
+                "seed": seed,
+                "adapter_hash": before,
+                **(
+                    {"input_rendering": backend.input_rendering}
+                    if hasattr(backend, "input_rendering")
+                    else {}
+                ),
+                "metrics": result.to_dict(),
+                "items": items,
+            },
+        )
+    return result

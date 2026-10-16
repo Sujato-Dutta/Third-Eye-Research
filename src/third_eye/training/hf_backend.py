@@ -27,7 +27,12 @@ from transformers import (
 )
 
 from third_eye.io import append_jsonl, file_digest, write_json
-from third_eye.training.tokenization import collate, encode_completion, format_prompt
+from third_eye.training.tokenization import (
+    collate,
+    encode_completion,
+    format_prompt,
+    frozen_chat_kwargs,
+)
 from third_eye.training.sources import resolve_source
 
 
@@ -40,8 +45,9 @@ def seed_everything(seed):
 
 
 class HFBackend:
-    def __init__(self, config, model=None, tokenizer=None):
+    def __init__(self, config, model=None, tokenizer=None, prompt_context=None):
         self.config = config
+        self.prompt_context = dict(prompt_context or {})
         if config.protocol.deterministic_execution:
             if os.environ.get("CUBLAS_WORKSPACE_CONFIG") not in {None, ":4096:8"}:
                 raise RuntimeError("A2 requires CUBLAS_WORKSPACE_CONFIG=:4096:8")
@@ -79,6 +85,8 @@ class HFBackend:
                 )
             tokenizer.pad_token = tokenizer.eos_token
         self.tokenizer = tokenizer
+        # Reject implicit wall-clock inputs before loading the large model.
+        frozen_chat_kwargs(tokenizer, config.model.chat_kwargs, self.prompt_context)
         dtype = getattr(torch, m.dtype)
         if model is None:
             kwargs = {
@@ -145,6 +153,21 @@ class HFBackend:
             else getattr(model.config, "_commit_hash", None) or m.revision
         )
 
+    @property
+    def chat_kwargs(self):
+        return frozen_chat_kwargs(
+            self.tokenizer, self.config.model.chat_kwargs, self.prompt_context
+        )
+
+    @property
+    def input_rendering(self):
+        from third_eye.io import digest
+
+        return {
+            "chat_kwargs": self.chat_kwargs,
+            "template_sha256": digest(self.tokenizer.chat_template),
+        }
+
     def snapshot(self):
         # Only the adapter changes. Copies on CPU avoid K simultaneous GPU models.
         return {
@@ -175,7 +198,7 @@ class HFBackend:
     def generate(self, prompt, max_new_tokens, seed=0, temperature=0.0):
         seed_everything(seed)
         self.model.eval()
-        text = format_prompt(self.tokenizer, prompt, self.config.model.chat_kwargs)
+        text = format_prompt(self.tokenizer, prompt, self.chat_kwargs)
         inputs = self.tokenizer(
             text,
             return_tensors="pt",
@@ -222,7 +245,7 @@ class HFBackend:
         for start in range(0, len(prompts), batch_size):
             seed_everything(seeds[start])
             texts = [
-                format_prompt(self.tokenizer, p, self.config.model.chat_kwargs)
+                format_prompt(self.tokenizer, p, self.chat_kwargs)
                 for p in prompts[start : start + batch_size]
             ]
             padding = self.tokenizer.padding_side
@@ -273,7 +296,7 @@ class HFBackend:
         batch_size = self.config.protocol.generation_batch_size
         for start in range(0, len(prompts), batch_size):
             prefixes = [
-                format_prompt(self.tokenizer, p, self.config.model.chat_kwargs)
+                format_prompt(self.tokenizer, p, self.chat_kwargs)
                 for p in prompts[start : start + batch_size]
             ]
             texts = [prefix + choice for prefix in prefixes for choice in "ABCD"]
@@ -336,7 +359,7 @@ class HFBackend:
         results = []
         for start in range(0, len(prompts), size):
             texts = [
-                format_prompt(self.tokenizer, p, self.config.model.chat_kwargs)
+                format_prompt(self.tokenizer, p, self.chat_kwargs)
                 for p in prompts[start : start + size]
             ]
             padding = self.tokenizer.padding_side
@@ -391,7 +414,7 @@ class HFBackend:
             prompt,
             completion,
             self.config.training.max_sequence_length,
-            self.config.model.chat_kwargs,
+            self.chat_kwargs,
         )
 
     def _autocast(self):
@@ -591,9 +614,7 @@ class HFBackend:
         distributions = []
         with torch.inference_mode():
             for example in anchor:
-                text = format_prompt(
-                    self.tokenizer, example.prompt, self.config.model.chat_kwargs
-                )
+                text = format_prompt(self.tokenizer, example.prompt, self.chat_kwargs)
                 inputs = self.tokenizer(
                     text,
                     return_tensors="pt",
@@ -632,6 +653,7 @@ class HFBackend:
                 "config": self.config.to_dict(),
                 "config_hash": self.config.fingerprint,
                 "adapter_hash": self.state_hash(),
+                "input_rendering": self.input_rendering,
                 "resolved_revision": self.resolved_revision,
                 "model_source": self.source_proof,
                 "weights": weights,
@@ -654,6 +676,11 @@ class HFBackend:
             raise ValueError(
                 "Checkpoint protocol/backbone differs; use its exact config and model revision"
             )
+        if (
+            "input_rendering" in saved
+            and saved["input_rendering"] != self.input_rendering
+        ):
+            raise ValueError("Checkpoint input-rendering context differs")
         for filename, sha in saved["weights"].items():
             if file_digest(path / filename) != sha:
                 raise ValueError("Checkpoint checksum mismatch")

@@ -69,12 +69,23 @@ def read_records(paths):
     return records
 
 
-def split_records(records, seed=42, held_out_models=()):
+def split_records(
+    records, seed=42, held_out_models=(), validation_fraction=0.20, test_fraction=0.20
+):
     """Union all shared states; train/validation/test never share a trajectory.
 
     Held-out families/scales go only to test. At least three independent
     components are needed; tiny pilot slices are rejected rather than leaked.
     """
+    if (
+        not math.isfinite(validation_fraction)
+        or not math.isfinite(test_fraction)
+        or min(validation_fraction, test_fraction) <= 0
+        or validation_fraction + test_fraction >= 1
+    ):
+        raise ValueError(
+            "Validation/test fractions must be positive and sum to less than one"
+        )
     parent = {r["trajectory_id"]: r["trajectory_id"] for r in records}
 
     def root(t):
@@ -103,9 +114,11 @@ def split_records(records, seed=42, held_out_models=()):
             "Need at least three independent core trajectories for train/validation/test"
         )
     random.Random(seed).shuffle(core)
-    nval = max(1, math.ceil(len(core) * 0.20))
-    ntest = max(1, math.ceil(len(core) * 0.20))
+    nval = max(1, math.ceil(len(core) * validation_fraction))
+    ntest = max(1, math.ceil(len(core) * test_fraction))
     ntrain = len(core) - nval - ntest
+    if ntrain < 1:
+        raise ValueError("Split fractions leave no independent training trajectory")
     parts = {
         "train": sum(core[:ntrain], []),
         "validation": sum(core[ntrain : ntrain + nval], []),

@@ -82,6 +82,8 @@ class Forecaster:
         )
 
     def predict(self, views):
+        if self.metadata["kind"] == "expected":
+            return self.predict_distribution(views)["mean"]
         arrays = list(stack_inputs(views, self.metadata["ablations"]))
         arrays[1] = np.clip((arrays[1] - self.mean) / self.scale, -20, 20)
         with torch.inference_mode():
@@ -91,7 +93,67 @@ class Forecaster:
             ]
             return self.model(*tensors)["prediction"].cpu().numpy()
 
+    def predict_distribution(self, views):
+        if self.metadata["kind"] != "expected":
+            raise ValueError("Saved forecaster has no continuation uncertainty head")
+        from third_eye.forecasting.continuation import candidate_inputs
+
+        array = candidate_inputs(views, self.metadata["ablations"])
+        array = np.clip((array - self.mean) / self.scale, -20, 20)
+        with torch.inference_mode():
+            out = self.model(
+                torch.tensor(array, dtype=torch.float32, device=self.device)
+            )
+        result = {key: value.cpu().numpy() for key, value in out.items()}
+        weights = np.asarray(self.metadata["utility_weights"])
+        variance = np.einsum("i,nij,j->n", weights, result["covariance"], weights)
+        if any(not np.isfinite(a).all() for a in result.values()):
+            raise ValueError("Non-finite expected-value forecast")
+        return {
+            "mean": result["prediction"],
+            "h1": result["h1"],
+            "continuation_mean": result["continuation"],
+            "covariance": result["covariance"],
+            "utility_std": np.sqrt(np.maximum(0, variance)),
+        }
+
+    def decision(self, views):
+        """Risk-sensitive action; draw spread is not a confidence interval."""
+        if self.metadata["kind"] != "expected":
+            raise ValueError(
+                "Distribution decisions require expected-value forecasting"
+            )
+        if len(views) != 3 or len({v["state_id"] for v in views}) != 1:
+            raise ValueError("A decision requires one whole K=3 state")
+        distribution = self.predict_distribution(views)
+        weights = np.asarray(self.metadata["utility_weights"])
+        means = distribution["mean"] @ weights
+        settings = self.metadata["decision"]
+        scores = means - settings["risk_penalty"] * distribution["utility_std"]
+        abstain = (
+            settings["allow_abstain"] and scores.max() <= settings["no_update_utility"]
+        )
+        tied = np.flatnonzero(np.isclose(scores, scores.max(), atol=1e-12, rtol=0))
+        seed = int(digest([views[0]["state_id"], self.metadata["weights_sha256"]]), 16)
+        selected = None if abstain else int(random.Random(seed).choice(tied.tolist()))
+        return {
+            "selected": selected,
+            "abstained": bool(abstain),
+            "candidate_ids": [v["candidate_id"] for v in views],
+            "mean": distribution["mean"].tolist(),
+            "h1": distribution["h1"].tolist(),
+            "continuation_mean": distribution["continuation_mean"].tolist(),
+            "covariance": distribution["covariance"].tolist(),
+            "utility_mean": means.tolist(),
+            "utility_draw_std": distribution["utility_std"].tolist(),
+            "risk_score": scores.tolist(),
+            "settings": settings,
+            "uncertainty_interpretation": self.metadata["uncertainty"],
+        }
+
     def select(self, views):
+        if self.metadata["kind"] == "expected":
+            return self.decision(views)["selected"]
         prediction = self.predict(views)
         utility = (
             prediction[:, 0]
@@ -108,12 +170,32 @@ class Forecaster:
             "feature_names"
         ] != list(FEATURE_NAMES):
             raise ValueError("Forecaster feature schema differs")
+        if metadata["kind"] == "expected" and (
+            metadata.get("target_version") != 1
+            or metadata.get("input_version") != "candidate_relative_v1"
+        ):
+            raise ValueError("Incompatible expected-value target/input schema")
+        if metadata["kind"] == "expected":
+            settings = metadata["decision"]
+            if (
+                not np.isfinite(settings["risk_penalty"])
+                or settings["risk_penalty"] < 0
+                or type(settings["allow_abstain"]) is not bool
+                or settings["no_update_utility"] != 0
+            ):
+                raise ValueError("Invalid saved expected-value decision settings")
         if file_digest(path / "weights.pt") != metadata["weights_sha256"]:
             raise ValueError("Forecaster checksum mismatch")
         model = build_model(metadata["kind"], metadata["hidden"], metadata["scalar"])
         model.load_state_dict(
             torch.load(path / "weights.pt", map_location="cpu", weights_only=True)
         )
+        if (
+            not np.isfinite(metadata["mean"]).all()
+            or not np.isfinite(metadata["scale"]).all()
+            or np.any(np.asarray(metadata["scale"]) <= 0)
+        ):
+            raise ValueError("Invalid saved feature normalization")
         return cls(
             model,
             metadata,
@@ -137,7 +219,19 @@ def train_forecaster(
     learning_rate=1e-3,
     scalar=False,
     device="cpu",
+    risk_penalty=0.0,
+    allow_abstain=False,
 ):
+    if set(parts) != {"train", "validation", "test"}:
+        raise ValueError("Require exactly train/validation/test partitions")
+    if kind == "expected" and (horizon != 2 or scalar):
+        raise ValueError(
+            "Expected-value forecasting requires H=2 multi-consequence labels"
+        )
+    if kind != "expected" and (risk_penalty != 0 or allow_abstain):
+        raise ValueError(
+            "Risk and abstention settings require expected-value forecasting"
+        )
     if kind in {"one_step", "matched_h1"} and horizon != 1:
         raise ValueError("H=1 baselines must be trained on H=1 targets")
     if kind == "dynamics" and horizon != 2:
@@ -194,6 +288,26 @@ def train_forecaster(
         for j in range(i)
     ):
         raise ValueError("Meta-split trajectory/state leakage")
+    if kind == "expected":
+        from third_eye.forecasting.expected import fit_expected
+        from third_eye.forecasting.continuation import repeated_targets
+
+        for rows in parts.values():
+            repeated_targets(rows)
+        return fit_expected(
+            parts,
+            output,
+            weights,
+            ablations,
+            seed,
+            epochs,
+            patience,
+            hidden,
+            learning_rate,
+            device,
+            risk_penalty,
+            allow_abstain,
+        )
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)

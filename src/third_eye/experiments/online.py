@@ -15,10 +15,12 @@ POLICIES = (
     "random",
     "heuristic",
     "greedy_h1",
+    "guarded_h1",
     "one_step",
     "matched_h1",
     "direct",
     "dynamics",
+    "expected",
 )
 
 
@@ -46,7 +48,7 @@ def run_online(
     """
     if policy not in POLICIES:
         raise ValueError("Unknown online policy")
-    if policy in {"one_step", "matched_h1", "direct", "dynamics"}:
+    if policy in {"one_step", "matched_h1", "direct", "dynamics", "expected"}:
         if forecaster is None or forecaster.metadata["kind"] != policy:
             raise ValueError("Policy and saved forecaster architecture differ")
         if forecaster.metadata["horizon"] != (
@@ -96,6 +98,7 @@ def run_online(
             selected_id = None
             pool_stats = {}
             update_log = {}
+            forecast_decision = None
             views = []
             if policy != "no_update":
                 pool, pool_stats = collect_corrections(
@@ -150,10 +153,16 @@ def run_online(
                         raise ValueError(
                             "Online evaluation trajectory was used to fit or select the forecaster"
                         )
-                    selected = forecaster.select(views)
-                    write_json(
-                        directory / "forecast.json", forecaster.predict(views).tolist()
-                    )
+                    if policy == "expected":
+                        forecast_decision = forecaster.decision(views)
+                        selected = forecast_decision["selected"]
+                        write_json(directory / "forecast.json", forecast_decision)
+                    else:
+                        selected = forecaster.select(views)
+                        write_json(
+                            directory / "forecast.json",
+                            forecaster.predict(views).tolist(),
+                        )
                 elif policy == "random":
                     selected = random.Random(p.seed + generation).randrange(
                         len(batches)
@@ -188,25 +197,69 @@ def run_online(
                         outcomes.append(
                             (outcome.utility(p.utility_weights), log, outcome)
                         )
-                    selected = max(range(len(outcomes)), key=lambda i: outcomes[i][0])
-                    backend.load_checkpoint(directory / f"branch_{selected}")
-                    update_log = outcomes[selected][1]
+                    if policy == "guarded_h1":
+                        eligible = [
+                            i
+                            for i, outcome in enumerate(outcomes)
+                            if outcome[2].delta(baseline).utility(p.utility_weights) > 0
+                            and outcome[2].retention >= baseline.retention
+                        ]
+                        if eligible:
+                            maximum = max(round(outcomes[i][0], 12) for i in eligible)
+                            tied = [
+                                i
+                                for i in eligible
+                                if round(outcomes[i][0], 12) == maximum
+                            ]
+                            selected = random.Random(seed + 900_000).choice(tied)
+                        else:
+                            selected = None
+                        write_json(
+                            directory / "guarded_decision.json",
+                            {
+                                "rule": "positive_immediate_utility_nonnegative_retention",
+                                "eligible": eligible,
+                                "selected": selected,
+                                "tie_seed": seed + 900_000,
+                            },
+                        )
+                    else:
+                        selected = max(
+                            range(len(outcomes)), key=lambda i: outcomes[i][0]
+                        )
+                    if selected is not None:
+                        backend.load_checkpoint(directory / f"branch_{selected}")
+                        update_log = outcomes[selected][1]
                     write_json(
                         directory / "greedy_cost.json",
                         {"candidate_logs": [o[1] for o in outcomes]},
                     )
-                selected_id = views[selected]["candidate_id"]
-                write_json(
-                    directory / "selected_batch.json",
-                    [c.to_dict() for c in batches[selected]],
-                )
-                if policy != "greedy_h1":
+                if selected is None:
                     backend.restore(parent)
-                    update_log = backend.train(
-                        batches[selected],
-                        seed + 300_000,
-                        log_path=directory / "selected_training.jsonl",
+                    update_log = {
+                        "optimizer_steps": 0,
+                        "seconds": 0.0,
+                        "reason": "guarded_h1_abstention"
+                        if policy == "guarded_h1"
+                        else "forecast_abstention",
+                    }
+                    if backend.state_hash() != parent_hash:
+                        raise RuntimeError(
+                            "Forecast abstention must preserve the parent"
+                        )
+                else:
+                    selected_id = views[selected]["candidate_id"]
+                    write_json(
+                        directory / "selected_batch.json",
+                        [c.to_dict() for c in batches[selected]],
                     )
+                    if policy not in {"greedy_h1", "guarded_h1"}:
+                        backend.restore(parent)
+                        update_log = backend.train(
+                            batches[selected],
+                            seed + 300_000,
+                            log_path=directory / "selected_training.jsonl",
+                        )
             after = evaluate(backend, splits, verifier, p.max_new_tokens, seed)
             delta = after.delta(baseline)
             history.append(
@@ -223,6 +276,9 @@ def run_online(
                 "policy": policy,
                 "mode": "online",
                 "forecaster_weights_sha256": forecaster.metadata["weights_sha256"]
+                if forecaster
+                else None,
+                "forecaster_metadata_hash": digest(forecaster.metadata)
                 if forecaster
                 else None,
                 "manifest_hash": manifest_hash,
@@ -245,6 +301,7 @@ def run_online(
                 "seconds": elapsed,
                 "pool_statistics": pool_stats,
                 "training": update_log,
+                "forecast_decision": forecast_decision,
                 "probe_seconds": sum(
                     v["precommit"]["features"].get("probe_seconds", 0) for v in views
                 ),

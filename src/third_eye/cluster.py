@@ -23,3 +23,11 @@ def require_gpu_allocation(device="cuda"):
         )
     if not os.environ.get("CUDA_VISIBLE_DEVICES"):
         raise RuntimeError("SLURM job has no visible GPU allocation")
+
+
+def require_compute_allocation():
+    """Real CPU scientific fitting/analysis belongs on allocated nodes too."""
+    if "login" in socket.gethostname().lower() or not os.environ.get("SLURM_JOB_ID"):
+        raise RuntimeError(
+            "Scientific execution requires a SLURM compute-node allocation"
+        )
