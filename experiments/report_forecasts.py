@@ -30,6 +30,10 @@ def main():
     for name in a.models:
         path = Path(name).resolve()
         meta = json.loads((path / "metadata.json").read_text(encoding="utf-8"))
+        if meta["kind"] == "expected":
+            p.error(
+                "Expected-value targets differ from single-draw H2; use score_forecaster.py for independent selector comparisons"
+            )
         metrics = json.loads((path / "metrics.json").read_text(encoding="utf-8"))[
             "test"
         ]["future_h2"]

@@ -7,7 +7,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from third_eye.forecasting.dataset import read_records, split_records
 from third_eye.forecasting.training import train_forecaster
-from third_eye.cluster import require_gpu_allocation
+from third_eye.cluster import require_gpu_allocation, require_compute_allocation
 
 
 def main():
@@ -16,7 +16,7 @@ def main():
     p.add_argument("--output", required=True)
     p.add_argument(
         "--kind",
-        choices=("one_step", "matched_h1", "direct", "dynamics"),
+        choices=("one_step", "matched_h1", "direct", "dynamics", "expected"),
         default="direct",
     )
     p.add_argument("--horizon", type=int, choices=(1, 2), default=2)
@@ -30,18 +30,34 @@ def main():
     p.add_argument("--held-out-model", action="append", default=[])
     p.add_argument("--seed", type=int, default=42)
     p.add_argument("--split-seed", type=int, default=42)
+    p.add_argument("--validation-fraction", type=float, default=0.20)
+    p.add_argument("--test-fraction", type=float, default=0.20)
     p.add_argument("--epochs", type=int, default=200)
     p.add_argument("--patience", type=int, default=20)
     p.add_argument("--hidden", type=int, default=64)
     p.add_argument("--learning-rate", type=float, default=1e-3)
     p.add_argument("--device", default="cuda")
     p.add_argument(
+        "--risk-penalty",
+        type=float,
+        default=0.0,
+        help="Expected policy: penalty on continuation draw standard deviation",
+    )
+    p.add_argument(
+        "--allow-abstain",
+        action="store_true",
+        help="Expected policy: hold parent when every risk score is <=0",
+    )
+    p.add_argument(
         "--utility-weights", nargs=3, type=float, default=(1 / 3, 1 / 3, 1 / 3)
     )
     a = p.parse_args()
+    require_compute_allocation()
     require_gpu_allocation(a.device)
     records = read_records(a.labels)
-    parts = split_records(records, a.split_seed, a.held_out_model)
+    parts = split_records(
+        records, a.split_seed, a.held_out_model, a.validation_fraction, a.test_fraction
+    )
     train_forecaster(
         parts,
         a.output,
@@ -56,6 +72,8 @@ def main():
         a.learning_rate,
         a.scalar,
         a.device,
+        a.risk_penalty,
+        a.allow_abstain,
     )
     print(f"Saved {a.kind} H={a.horizon} forecaster to {a.output}")
 

@@ -11,7 +11,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from third_eye.config import Config
-from third_eye.cluster import require_gpu_allocation
+from third_eye.cluster import require_gpu_allocation, require_compute_allocation
 from third_eye.data.splits import load_manifest
 from third_eye.evaluation.verifiers import VerifierRegistry
 from third_eye.experiments.labeling import LabelGenerator, run_trajectory
@@ -32,6 +32,18 @@ def main():
     )
     parser.add_argument("--policy", choices=POLICIES, default="random")
     parser.add_argument("--mode", choices=("labels", "online"), default="labels")
+    parser.add_argument(
+        "--capture-item-outcomes",
+        action="store_true",
+        help="Label mode: retain original per-item verifier outcomes for paired uncertainty analysis",
+    )
+    parser.add_argument(
+        "--continuation-seed-offsets",
+        type=int,
+        nargs="*",
+        default=[],
+        help="Label mode: extra predeclared seeds relative to the original continuation seed; use at least two",
+    )
     parser.add_argument(
         "--generations",
         type=int,
@@ -76,11 +88,24 @@ def main():
             "Label collection uses random or greedy_h1; learned policies use --mode online"
         )
     if (
-        args.policy in {"one_step", "matched_h1", "direct", "dynamics"}
+        args.policy in {"one_step", "matched_h1", "direct", "dynamics", "expected"}
         and not args.forecaster
     ):
         parser.error("Learned policies require --forecaster")
+    offsets = args.continuation_seed_offsets
+    if args.capture_item_outcomes and args.mode != "labels":
+        parser.error("Item outcome capture currently requires label mode")
+    if offsets and (
+        args.mode != "labels"
+        or len(offsets) < 2
+        or len(set(offsets)) != len(offsets)
+        or min(offsets) <= 0
+    ):
+        parser.error(
+            "Repeated labels need >=2 distinct positive continuation seed offsets in label mode"
+        )
     config = Config.load(args.config)
+    require_compute_allocation()
     require_gpu_allocation(config.model.device)
     if config.protocol.status != "frozen" and not args.pilot:
         parser.error(
@@ -136,7 +161,33 @@ def main():
             parser.error("Resume manifest/policy differs from the accepted checkpoint")
         start_generation, history = meta["generation"], meta["history"]
         trajectory_id = meta.get("trajectory_id", trajectory_id)
+        if args.mode == "labels":
+            # Older checkpoints may store collection settings only in run.json.
+            previous_run = Path(args.resume).resolve().parent.parent / "run.json"
+            prior_settings = (
+                json.loads(previous_run.read_text(encoding="utf-8"))
+                if previous_run.exists()
+                else {}
+            )
+            prior_offsets = meta.get(
+                "continuation_seed_offsets",
+                prior_settings.get("continuation_seed_offsets", []),
+            )
+            prior_capture = meta.get(
+                "capture_item_outcomes",
+                prior_settings.get("capture_item_outcomes", False),
+            )
+            if prior_offsets != offsets or prior_capture != args.capture_item_outcomes:
+                parser.error(
+                    "Resume continuation grid/item capture differs from the accepted checkpoint"
+                )
         if args.mode == "online":
+            if args.policy == "expected" and meta.get(
+                "forecaster_metadata_hash"
+            ) != digest(forecaster.metadata):
+                parser.error(
+                    "Resume expected-value model/decision metadata differs from the accepted checkpoint"
+                )
             if meta.get("forecaster_weights_sha256") != (
                 forecaster.metadata["weights_sha256"] if forecaster else None
             ):
@@ -187,6 +238,8 @@ def main():
             "resume": args.resume,
             "invocation_generations": generations,
             "label_units": "accuracy fractions",
+            "continuation_seed_offsets": offsets,
+            "capture_item_outcomes": args.capture_item_outcomes,
             "software_versions": versions(),
             "execution": execution_environment(),
             **source_inventory(),
@@ -230,6 +283,8 @@ def main():
         output,
         manifest_hash,
         trajectory_id=trajectory_id,
+        continuation_seed_offsets=offsets,
+        capture_item_outcomes=args.capture_item_outcomes,
     )
     accepted = run_trajectory(
         labeler,
