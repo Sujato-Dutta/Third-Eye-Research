@@ -1,5 +1,13 @@
 # Third Eye
 
+The core forecaster now supports expected continuation value, joint consequence
+variability, candidate-relative features and optional no-update decisions.
+See [the forecasting implementation and execution guide](docs/forecasting.md).
+The submission target is now late December; fresh-data collection is bounded by
+[the December research plan](docs/december_research_plan.md).
+The completed confirmation did **not** establish an H2 forecasting advantage;
+the revised objective needs fresh independent validation before that claim.
+
 **Forecasting the long-term value of persistent, verified LLM self-updates.**
 The project compares immediate update value with H=2 consequences, then uses
 compact learned forecasters to choose LoRA/QLoRA updates over T<=5 generations.
@@ -14,7 +22,8 @@ The research design is in [the project overview](docs/ACL27_Third_Eye_Research.d
 - Token/NLL/confidence/diversity features, retention-gradient interference,
   reversible probes, anchor KL, adapter drift, and three-generation history.
 - H=1 MLP, an architecture-matched H=1 temporal comparison, multi-head
-  Third Eye-Direct, latent Third Eye-Dynamics, and feature/scalar ablations.
+  Third Eye-Direct, latent Third Eye-Dynamics, expected continuation value with
+  joint uncertainty, and feature/scalar ablations.
 - Efficient online no-update/random/heuristic/greedy/learned policies; only
   label collection computes the H=2 branching tree.
 - Tie-aware ranking, per-head calibration/error, grouped bootstrap intervals,
@@ -22,8 +31,10 @@ The research design is in [the project overview](docs/ACL27_Third_Eye_Research.d
 - Staged SLURM study plans, three seeds, shuffled-pool stress tests, gated
   family/scale transfer, runtime reservations, and checkpoint/cache management.
 
-**Research results are pending completion of Vista experiments.** Local synthetic fixtures and
-random tiny-model checks establish software behavior, not benchmark gains.
+Completed evidence is summarized in [the October 11 review](docs/evidence_review_20261011.md).
+The frozen forecasting comparison did not demonstrate an advantage. Local
+synthetic fixtures and random tiny-model checks establish software behavior,
+not benchmark gains.
 The primal-dual extension remains gated on measured forecasting and retention
 signal. GPU execution requires a compute-node SLURM allocation.
 
@@ -51,15 +62,15 @@ The October 8 empirical supplement is tracked in
 [the execution record](docs/empirical_execution_20261008.md), including reliability
 validation, fixed comparator controls and the held balanced replication cohort.
 
-The active campaign is consolidated on [TACC Vista](docs/vista_execution.md),
-with an October 10 completion target. The current
-[A1 correction-scarcity calibration](docs/a1_execution.md) uses a separate
-manifest, at most four concurrent GPUs, and stops for Gate 1 review. The
-20-GPU expansion remains held. The first four A1 pilots also require evidence
-inspection before the remaining calibration states can launch. Setup,
-validation, downloads and training use
-SLURM compute nodes. The DGX deployment below is retained as the original
-execution workflow.
+Execution is consolidated on [TACC Vista](docs/vista_execution.md).
+[A1 calibration](docs/a1_execution.md) and the subsequent frozen campaigns are
+historical execution records. The original and balanced replication GPU
+collections have completed. The improved core forecaster's next checks are
+compute-node validation and the bounded continuation-signal audit described in
+[the forecasting guide](docs/forecasting.md). Fresh confirmation of that model
+remains separate from already inspected data. Setup, validation, downloads and
+training use Slurm compute nodes. The DGX deployment below is retained as the
+original execution workflow.
 
 See [the execution runbook](docs/runbook.md) for exact commands. Run setup,
 benchmark preparation, verification, and training through the scheduler.
