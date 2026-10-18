@@ -86,3 +86,41 @@ do not infer that this explains the forecasting results or rescues the paper.
 Qwen's inspected template has no corresponding dynamic-date field. Any later
 paper must disclose this issue and use a properly frozen fresh cohort for
 confirmatory claims, rather than silently pooling old and corrected outcomes.
+
+## Confirmed diagnosis and execution status, October16 evening
+
+At approximately20:52IST, the live check confirmed both1075226 diagnostic
+elements completed successfully. With the original Llama date restored to
+11Oct2026, all50steps reproduced the original adapter exactly:
+`009c29292a1b4ce6d4b47eb5dd6b690c7c860477e215939fbaf2b0ff723d1993`.
+The first-step loss also matched exactly. Fresh/repeated-fresh executions on
+the later date agreed with each other but had different encoded inputs and
+did not match the historical update. Original Llama base-weight file checksums
+matched. Qwen's negative control reproduced its full original adapter, and its
+encoded inputs were unchanged by the date kwarg. This confirms the date defect
+for the investigated replay; it does not quantify effects on prior paper claims.
+
+Corrected-source CPU validation1075255 passed **162 tests in57.03seconds** and
+lint. Preparation1075256 passed the date-proof and all-eight-parent input audit.
+The immutable corrected source is
+`a274ff920ac613d9ec78dad280e4dd153ea345bec1727cfbea2efbb929ab60df`.
+Campaign: `/scratch/11617/sujato_ts/third_eye_research/runs/crossed_corrections_a274ff920ac6`.
+Retrieved proof/audit artifacts: `runs/deployment/evidence/rendering_c1_20261016`.
+
+Four-stream CUDA validation1075257 is pending allocation. Its pending request
+was moved togh-dev with a two-hour cap for backfill; the original conservative
+4-SU reservation remains held. Both queues were fully allocated or in cleanup
+at inspection, so there is no reliable start estimate. Matrix1075258_0–23 remains
+dependent on successful CUDA validation, capped at20concurrent nodes; review
+1075259 follows the matrix and stops. No scientific matrix cell is yet complete.
+
+Completed diagnostic/CPU accounting has been reconciled. Additional charged
+plus reserved is259.30944SUs under the1,200-SU cap, including the still-unstarted
+matrix's192-SU upper reservation. The account display shows2,026available SUs.
+This later status update does not alter the pre-outcome declaration saved in
+the immutable execution release.
+
+At20:58:50IST on October16, the scheduler confirmed1075257 RUNNING on
+`c642-042`, started20:55:50IST, with180seconds elapsed and a two-hour limit.
+The24-task matrix and final review remained pending their dependencies.
+This is a validation execution milestone; no new matrix result was available.
