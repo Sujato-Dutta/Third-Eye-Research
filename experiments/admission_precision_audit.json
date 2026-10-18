@@ -1,0 +1,54 @@
+{
+  "recorded": "2026-10-18",
+  "scope": "Descriptive extraction from primary text, not reproduced outcomes or invalidation using Third Eye variance",
+  "papers": [
+    {
+      "paper": "Self-Healing Harness",
+      "url": "https://arxiv.org/html/2609.24130v1",
+      "sections": "Experimental Setup; Results; metric appendix",
+      "units": "16 matched settings, not 16 independent repeats of one condition; seed 1; four trials per task",
+      "reported_precision": "10,000 paired task-level bootstrap resamples; repeated trials not treated as independent tasks",
+      "example_effect": "AppWorld gpt-terra: +0.022 task-completion score, CI [0.006,0.040], 166 matched tasks",
+      "selection_scoring": "Online instruction-rule admission uses replay; each split is one continuous adaptation stream without separate learning/evaluation partition",
+      "MDE": null,
+      "MDE_missing_reason": "No transferable parent/continuation repeated-outcome design; example CI is not an MDE or seed-variance estimate",
+      "comparison_limit": "Fixed weights, context-rule adaptation; protected-regression statistic is conditional on replay-decided rejections"
+    },
+    {
+      "paper": "Rehearse",
+      "url": "https://arxiv.org/html/2607.27687v1",
+      "sections": "5.1-5.3; Limitations; budget appendix",
+      "units": "Five seeds per configuration and loop; 100 budgeted experiments per run; 4,000 experiments total are not 4,000 independent policy replicates",
+      "reported_precision": "Mean and one standard deviation over five seeds; per-seed outcomes; do not reinterpret standard deviation bands as confidence intervals",
+      "example_effect": "Nanochat final baseline-relative improvement 10.7% with outcome store versus 8.4% for selection without store",
+      "selection_scoring": "Pre-execution proposal judgement then live run; store uses earlier observed outcomes",
+      "MDE": null,
+      "MDE_missing_reason": "Endpoint differences and their paired covariance are not extracted here; experiment counts alone do not give policy-level precision",
+      "comparison_limit": "Code-modification search; budgets count full training experiments rather than all proposal/judge inference"
+    },
+    {
+      "paper": "Predict Before You Modify",
+      "url": "https://arxiv.org/html/2610.13991v2",
+      "sections": "4; A.3; B.3 Table 7",
+      "units": "Five runs per experimental condition, 40 generations each; underlying LLM weights fixed",
+      "reported_precision": "95% run-level bootstrap intervals; generations are not independent runs",
+      "example_effect": "Table 7 coding matched-token AUBC: Selective IDM minus Reflective HyperAgents +1.21 scaled points, CI [-6.32,4.79]",
+      "selection_scoring": "Additional held-out task evaluation; candidate predictor updates validated on subsequent outcomes",
+      "MDE": null,
+      "MDE_missing_reason": "Bootstrap median intervals are not directly convertible to mean-effect power; no raw paired runs imported",
+      "comparison_limit": "Table 7 is one contrast, not a verdict on other primary comparisons or reported domains"
+    },
+    {
+      "paper": "TuneAhead",
+      "url": "https://arxiv.org/html/2606.17660v1",
+      "sections": "Abstract; introduction; prediction evaluation",
+      "units": "1,300+ fine-tuning runs; 370 held-out run outcomes; one stated backbone",
+      "reported_precision": "Held-out prediction RMSE 1.47 percentage points and 95.1% of predictions within +/-3 percentage points",
+      "example_effect": "Prediction error, not a paired recursive admission-policy gain",
+      "selection_scoring": "Predict before full fine-tuning using static descriptors and a standardized training probe",
+      "MDE": null,
+      "MDE_missing_reason": "Prediction RMSE does not determine a policy-effect MDE; run dependence and repeat covariance not imported",
+      "comparison_limit": "Isolated training-run screening; cannot substitute its held-out sample count for recursive trajectory replication"
+    }
+  ]
+}
