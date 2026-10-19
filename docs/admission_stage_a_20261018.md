@@ -107,3 +107,21 @@ the new 0.44-SU chain. These are reservations until accounting completes. Failed
 jobs and subsequent fixes still count toward the same caps; no retry is automatic.
 This status append does not change the pre-execution declaration packaged with
 the immutable source.
+
+At12:12IST on October18, both jobs were still pending, with no allocated node,
+failure log or scientific output. The gg partition showed230allocated nodes and
+21reserved nodes. Slurm's tentative validation start was18:24:11IST that day;
+this is a scheduler estimate, not a promised start or completion.
+
+For backfill, the still-pending validation request was shortened from20to10minutes
+and analysis from60to30minutes. Both updates were accepted. Source, test suite,
+analyses, dependencies and resource accounting limits remain unchanged. The full
+original0.44-SU reservation is conservatively retained. The scheduler adjustment
+is recorded remotely in `backfill_adjustment_20261018.json`.
+
+Both jobs subsequently completed successfully. Validation passed171tests and
+lint; analysis finished in30seconds without a failure artifact. Completed cost
+is0.165SUs, and the reconciled ledger totals87.79611SUs charged plus reserved.
+The [results review](admission_results_20261018.md) records corrected harm,
+independent admission headroom, shared-item uncertainty and the Stage B review
+decision. No fresh pilot or confirmation was submitted automatically.
