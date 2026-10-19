@@ -16,7 +16,10 @@ from third_eye.forecasting.continuation import candidate_inputs, repeated_target
 
 
 @pytest.mark.parametrize("terminal", [False, True])
-def test_five_draws_capture_items_and_preserve_real_adapters(tmp_path, terminal):
+@pytest.mark.parametrize("offsets", [(100, 200), (100, 200, 300, 400)])
+def test_repeated_draws_capture_items_and_preserve_real_adapters(
+    tmp_path, terminal, offsets
+):
     from verify_backend import make_tiny_backend
 
     backend = make_tiny_backend(os.environ.get("THIRD_EYE_REPEAT_VERIFY_DEVICE", "cpu"))
@@ -62,7 +65,7 @@ def test_five_draws_capture_items_and_preserve_real_adapters(tmp_path, terminal)
         VerifierRegistry(),
         tmp_path,
         digest(manifest),
-        continuation_seed_offsets=(100, 200, 300, 400),
+        continuation_seed_offsets=offsets,
         capture_item_outcomes=True,
     )
     with (
@@ -80,7 +83,8 @@ def test_five_draws_capture_items_and_preserve_real_adapters(tmp_path, terminal)
     candidate_inputs(rows)  # Captured outcomes are never input features.
     for index, row in enumerate(rows):
         draws = row["continuation_replicates"]
-        assert len(draws) == len({d["seed"] for d in draws}) == 5
+        count = len(offsets) + 1
+        assert len(draws) == len({d["seed"] for d in draws}) == count
         assert row["runtime"]["candidate"]["optimizer_steps"] == 3
         baseline = json.loads(Path(row["evaluation_artifacts"]["parent"]).read_text())
         assert baseline["adapter_hash"] == parent
@@ -105,13 +109,13 @@ def test_five_draws_capture_items_and_preserve_real_adapters(tmp_path, terminal)
             # Distinct fixture batches can tokenize identically and yield equal
             # hashes; check each branch's five starts rather than hash counts.
             assert (
-                starts[index * 7 + 2 : index * 7 + 7]
-                == [row["candidate_adapter_hash"]] * 5
+                starts[index * (count + 2) + 2 : (index + 1) * (count + 2)]
+                == [row["candidate_adapter_hash"]] * count
             )
     committed = backend.state_hash()
     assert committed in {r["candidate_adapter_hash"] for r in rows}
     assert accepted[0]["capture_item_outcomes"] is True
-    assert accepted[0]["continuation_seed_offsets"] == [100, 200, 300, 400]
+    assert accepted[0]["continuation_seed_offsets"] == list(offsets)
     # Exercise the real pilot inspector against the actual fixture artifacts.
     from forecasting_pilots import inspect_task
 
@@ -123,7 +127,7 @@ def test_five_draws_capture_items_and_preserve_real_adapters(tmp_path, terminal)
             "config_hash": cfg.fingerprint,
             "manifest_hash": digest(manifest),
             "source_tree_sha256": sha,
-            "continuation_seed_offsets": [100, 200, 300, 400],
+            "continuation_seed_offsets": list(offsets),
             "capture_item_outcomes": True,
         },
     )
@@ -138,14 +142,18 @@ def test_five_draws_capture_items_and_preserve_real_adapters(tmp_path, terminal)
         "stream": "fixture/math",
         "seed": cfg.protocol.seed,
     }
-    _, report = inspect_task(task, [100, 200, 300, 400], sha)
-    assert report["terminal_draws"] == (15 if terminal else 0)
+    _, report = inspect_task(task, list(offsets), sha)
+    assert report["terminal_draws"] == (3 * count if terminal else 0)
+    assert report["continuation_draws"] == 3 * count
+    assert all(
+        r["precommit"]["input_rendering"] == baseline["input_rendering"] for r in rows
+    )
     item_file = Path(rows[0]["evaluation_artifacts"]["t1"])
     damaged = json.loads(item_file.read_text())
     damaged["items"]["target_dev"][0]["correct"] = 2
     write_json(item_file, damaged)
     with pytest.raises(ValueError, match="invalid per-item"):
-        inspect_task(task, [100, 200, 300, 400], sha)
+        inspect_task(task, list(offsets), sha)
 
 
 def test_item_capture_reuses_existing_predictions_and_rejects_mutation(tmp_path):
