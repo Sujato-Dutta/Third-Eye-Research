@@ -294,12 +294,17 @@ covers the entire historical project. Account availability does not raise the ca
 | Stage | Maximum additional SUs |
 | --- | ---: |
 | A: headroom, variance, precision audit and release analysis | 8 |
-| B: fresh development, conditional pooled control | 120 |
+| B: fresh development, conditional pooled control | 192 |
 | C: powered independent confirmation and scoring precision | 560 |
 | D: optional paired recursive check | 250 |
-| Failed jobs, retries and contingency | 150 |
+| Failed jobs, retries and contingency | 78 |
 | **New reservations maximum** | **1,088** |
 | **Existing plus planned maximum** | **1,175.6311** |
+
+Before fresh B outcomes, transfer 72 SUs from contingency to B for measured
+runtime headroom; the total ceiling is unchanged. B uses selection-half H1
+gains and actual update norms; archive probes but exclude them from gates
+because their retention anchors overlap scoring items.
 
 These are ceilings, not proven cost forecasts. Benchmark a representative job
 before each GPU stage. Reserve every array element, validation, CPU minimum and
