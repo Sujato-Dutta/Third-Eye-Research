@@ -23,4 +23,4 @@ export OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=1
 export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 PYTHONDONTWRITEBYTECODE=1
 export THIRD_EYE_VERIFIER=third_eye.evaluation.benchmarks:make_verifier
 export THIRD_EYE_VERIFIER_WORKERS=16 THIRD_EYE_SYMBOLIC_WORKERS=1
-"$venv_root/bin/python" experiments/forecasting_pilots.py run --plan "${THIRD_EYE_PILOT_PLAN:?}" --index "$SLURM_ARRAY_TASK_ID"
+"$venv_root/bin/python" experiments/forecasting_pilots.py run --plan "${THIRD_EYE_PILOT_PLAN:?}" --index "$((SLURM_ARRAY_TASK_ID + ${THIRD_EYE_INDEX_BASE:-0}))"

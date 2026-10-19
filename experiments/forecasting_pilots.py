@@ -23,8 +23,12 @@ def checked_plan(path):
     plan = json.loads(Path(path).read_text())
     if plan["source_tree_sha256"] != source_inventory()["source_tree_sha256"]:
         raise ValueError("Pilot plan/source snapshot differs")
-    if plan["purpose"] != "development_reliability_pilots" or len(plan["tasks"]) != 8:
-        raise ValueError("Expected eight explicitly developmental pilots")
+    expected = {"development_reliability_pilots": 8, "admission_development_pilots": 16}
+    if (
+        plan["purpose"] not in expected
+        or len(plan["tasks"]) != expected[plan["purpose"]]
+    ):
+        raise ValueError("Expected declared balanced developmental pilots")
     for task in plan["tasks"]:
         if (
             file_digest(task["config"]) != task["config_sha256"]
@@ -83,7 +87,8 @@ def inspect_task(task, offsets, source_sha):
     ]
     if len(rows) != 3 or len({r["state_id"] for r in rows}) != 1:
         raise ValueError("Pilot must contain exactly one complete K=3 state")
-    repeated_targets(rows, minimum_replicates=5)
+    draw_count = 1 + len(offsets)
+    repeated_targets(rows, minimum_replicates=draw_count)
     hashes = set()
     terminal = 0
     pool = json.loads(next(output.glob("states/*/correction_pool.json")).read_text())
@@ -128,7 +133,7 @@ def inspect_task(task, offsets, source_sha):
                 raise ValueError("Immediate label differs from item outcomes")
         draws = row["continuation_replicates"]
         expected_seeds = [row["continuation"]["seed"] + o for o in [0, *offsets]]
-        if len(draws) != 5 or [d["seed"] for d in draws] != expected_seeds:
+        if len(draws) != draw_count or [d["seed"] for d in draws] != expected_seeds:
             raise ValueError("Continuation seed grid differs")
         for draw in draws:
             item = item_artifact(
@@ -149,7 +154,7 @@ def inspect_task(task, offsets, source_sha):
         "seed": task["seed"],
         "complete": True,
         "candidates": 3,
-        "continuation_draws": 15,
+        "continuation_draws": 3 * draw_count,
         "terminal_draws": terminal,
         "evaluation_sizes": {r: len(splits[r]) for r in splits},
         "state_seconds": json.loads(
@@ -184,7 +189,12 @@ def main():
             # Exercise the real sandbox/benchmark verifier for each task family.
             ex = splits["train"][0]
             verifier.verify(ex, ex.answer)
-            if cfg.model.name in checked:
+            validation_key = (
+                task["stream"]
+                if plan["purpose"] == "admission_development_pilots"
+                else cfg.model.name
+            )
+            if validation_key in checked:
                 continue
             backend = HFBackend(cfg)
             parent, before = backend.snapshot(), backend.state_hash()
@@ -209,7 +219,7 @@ def main():
                     "purpose": "discarded implementation smoke; not experiment evidence",
                 }
             )
-            checked.add(cfg.model.name)
+            checked.add(validation_key)
             del backend, parent
             gc.collect()
             torch.cuda.empty_cache()
@@ -220,8 +230,8 @@ def main():
         return
     if args.mode == "run":
         require_gpu_allocation("cuda")
-        if args.index is None or not 0 <= args.index < 8:
-            parser.error("Run requires a task index 0..7")
+        if args.index is None or not 0 <= args.index < len(plan["tasks"]):
+            parser.error("Run requires an index inside the declared task grid")
         task = plan["tasks"][args.index]
         for key in ("cpu_validation", "cuda_validation"):
             receipt = json.loads(Path(plan[key]).read_text())
