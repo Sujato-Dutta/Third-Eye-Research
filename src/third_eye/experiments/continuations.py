@@ -62,7 +62,15 @@ def collect_replicates(labeler, record, directory, seed_offsets):
             )
             write_json(
                 destination / "pool.json",
-                {"stats": stats, "items": [c.to_dict() for c in pool]},
+                {
+                    "stats": stats,
+                    "items": [c.to_dict() for c in pool],
+                    **(
+                        {"input_rendering": backend.input_rendering}
+                        if hasattr(backend, "input_rendering")
+                        else {}
+                    ),
+                },
             )
             write_json(destination / "batch.json", [c.to_dict() for c in batch])
             if available:

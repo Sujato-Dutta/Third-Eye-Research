@@ -126,10 +126,17 @@ def views(panel, assignment, fold, fraction=1.0):
         index = assignment[role][fold]
         index = index[: max(1, int(len(index) * fraction))]
         h1.append(panel[role]["h1"][:, index].mean(-1))
-        x = panel[role]["cube"][:, :, :, index].mean(-1)
-        crossed.append(x)
-        future.append(x[:, np.arange(3), np.arange(3)])
-    return np.stack(h1, -1), np.stack(future, -1), np.stack(crossed, -1)
+        if "native" in panel[role]:
+            future.append(panel[role]["native"][:, :, index].mean(-1))
+        else:
+            x = panel[role]["cube"][:, :, :, index].mean(-1)
+            crossed.append(x)
+            future.append(x[:, np.arange(3), np.arange(3)])
+    return (
+        np.stack(h1, -1),
+        np.stack(future, -1),
+        np.stack(crossed, -1) if crossed else None,
+    )
 
 
 def state_summary(parent, panel):
@@ -295,10 +302,13 @@ def gate_mass(immediate, predicted, threshold):
     )
 
 
-def gate_review(states):
+def gate_review(states, expected_parents=8, validation_stride=2):
     """Whole-parent nested fits; train/validation never access scoring items."""
-    if len(states) != 8 or len({s["trajectory_id"] for s in states}) != 8:
-        raise ValueError("Eight distinct parent groups required")
+    if (
+        len(states) != expected_parents
+        or len({s["trajectory_id"] for s in states}) != expected_parents
+    ):
+        raise ValueError("Declared distinct parent groups required")
     output = []
     for fold in (0, 1):
         prepared = []
@@ -317,9 +327,9 @@ def gate_review(states):
                     "scored": scored.mean(0),
                 }
             )
-        for test in range(8):
-            validation = (test + 2) % 8
-            train = [i for i in range(8) if i not in (test, validation)]
+        for test in range(expected_parents):
+            validation = (test + validation_stride) % expected_parents
+            train = [i for i in range(expected_parents) if i not in (test, validation)]
             for horizon in ("h1", "h2"):
                 x = np.concatenate([prepared[i]["x"] for i in train])
                 y = np.concatenate([prepared[i][horizon] for i in train])
@@ -406,10 +416,10 @@ def gate_review(states):
     return output
 
 
-def stratified_indices(streams, draws=5000, seed=20261018):
+def stratified_indices(streams, draws=5000, seed=20261018, parents_per_stream=2):
     groups = [np.flatnonzero(np.asarray(streams) == s) for s in sorted(set(streams))]
-    if len(groups) != 4 or any(len(g) != 2 for g in groups):
-        raise ValueError("Two parents in each of four streams required")
+    if len(groups) != 4 or any(len(g) != parents_per_stream for g in groups):
+        raise ValueError("Declared balanced parents in four streams required")
     rng = np.random.default_rng(seed)
     return np.concatenate(
         [rng.choice(group, size=(draws, len(group))) for group in groups], axis=1
@@ -418,24 +428,34 @@ def stratified_indices(streams, draws=5000, seed=20261018):
 
 def summarize(values, indices):
     values = np.asarray(values, float)
-    if values.shape != (8,) or not np.isfinite(values).all():
-        raise ValueError("Eight finite parent effects required")
+    if values.shape != (indices.shape[1],) or not np.isfinite(values).all():
+        raise ValueError("Declared finite parent effects required")
     means = values[indices].mean(1)
     return {
         "mean": float(values.mean()),
         "std": float(values.std(ddof=1)),
         "ci95": np.quantile(means, [0.025, 0.975]).tolist(),
-        "units": 8,
+        "units": len(values),
         "conditional_on_fixed_item_pool_and_fits": True,
     }
 
 
-def planning(effects):
+def planning(effects, strata=None):
     """Sensitivity only: pilot estimates are uncertain and CV fits overlap."""
     x = np.asarray(effects, float)
-    if x.shape != (8, 2) or not np.isfinite(x).all():
-        raise ValueError("Two paired contrasts on eight parents required")
+    if x.ndim != 2 or x.shape[1] != 2 or len(x) < 8 or not np.isfinite(x).all():
+        raise ValueError("Two paired contrasts on at least eight parents required")
     covariance = np.cov(x, rowvar=False)
+    if strata is not None:
+        if len(strata) != len(x) or len(set(strata)) != 4:
+            raise ValueError("Four matched stream strata required")
+        residuals = np.zeros_like(x)
+        for stream in sorted(set(strata)):
+            indices = np.flatnonzero(np.asarray(strata) == stream)
+            if len(indices) < 2:
+                raise ValueError("Within-stream variance needs replication")
+            residuals[indices] = x[indices] - x[indices].mean(0)
+        covariance = residuals.T @ residuals / (len(x) - 4)
     sd = np.sqrt(np.maximum(0, np.diag(covariance)))
     if sd.max() < 1e-10:
         return {"status": "degenerate_pilot_variance_not_a_power_guarantee", "rows": []}
@@ -464,9 +484,13 @@ def planning(effects):
                 )
     return {
         "status": "normal_planning_only",
+        "pilot_parents": len(x),
+        "variance_basis": "within_fixed_stream"
+        if strata is not None
+        else "overall_parent",
         "rows": rows,
         "pilot_covariance": covariance.tolist(),
-        "limitations": "No guarantee for new parents/items, fitted-policy uncertainty, retention noninferiority or practical point-estimate threshold. Eight inspected parents and overlapping CV fits provide uncertain variance; draws never increase parent N.",
+        "limitations": "No guarantee for new parents/items, fitted-policy uncertainty, retention noninferiority or practical point-estimate threshold. Small development cohorts and overlapping CV fits provide uncertain variance; draws never increase parent N.",
     }
 
 
@@ -638,7 +662,12 @@ def conditional_item_bootstrap(states, gate_fits, draws=1000):
                 key = (role, ids)
                 if key not in shared:
                     shared[key] = rng.integers(len(indices), size=(draws, len(indices)))
-                raw = state["panel"][role]["cube"][:, np.arange(3), np.arange(3)]
+                role_panel = state["panel"][role]
+                raw = (
+                    role_panel["native"]
+                    if "native" in role_panel
+                    else role_panel["cube"][:, np.arange(3), np.arange(3)]
+                )
                 raw = raw[:, :, indices]
                 mean = raw.mean(0)
                 vectors = [greedy @ mean]

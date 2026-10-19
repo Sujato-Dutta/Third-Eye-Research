@@ -74,6 +74,7 @@ class LabelGenerator:
         state_dir.mkdir(parents=True, exist_ok=False)
         started = time.perf_counter()
         records = []
+        input_rendering = getattr(b, "input_rendering", None)
         try:
             baseline = self.measure(seed, state_dir / "parent_evaluation.json")
             b.save_checkpoint(
@@ -88,6 +89,11 @@ class LabelGenerator:
                     "state_id": state_id,
                     "stats": pool_stats,
                     "items": [item.to_dict() for item in pool],
+                    **(
+                        {"input_rendering": input_rendering}
+                        if input_rendering is not None
+                        else {}
+                    ),
                 },
             )
             batches = sample_batches(
@@ -135,6 +141,11 @@ class LabelGenerator:
                         {
                             "stats": continuation_stats,
                             "items": [item.to_dict() for item in continuation_pool],
+                            **(
+                                {"input_rendering": input_rendering}
+                                if input_rendering is not None
+                                else {}
+                            ),
                         },
                     )
                 if not continuation_available and not p.terminal_continuation:
@@ -257,6 +268,12 @@ class LabelGenerator:
                             ).resolve()
                         ),
                     }
+                if input_rendering is not None:
+                    if b.input_rendering != input_rendering:
+                        raise RuntimeError(
+                            "Rendering context changed inside a label state"
+                        )
+                    record["precommit"]["input_rendering"] = input_rendering
                 if self.continuation_seed_offsets:
                     from third_eye.experiments.continuations import collect_replicates
 
