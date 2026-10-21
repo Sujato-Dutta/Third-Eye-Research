@@ -53,3 +53,22 @@ Update at 10:33:31 IST: validation **1085722** completed, exit 0, in102seconds:
 **186 tests passed in86.30seconds**, plus lint. Analysis **1085723** is eligible
 with no outstanding dependency and PENDING for Priority. Slurm supplies no start
 estimate. No audit result is available yet and no confirmation job was submitted.
+
+At 11:02:17 IST, a fresh SSH check still showed audit **1085723** PENDING for
+Priority, elapsed zero. Validation remained successfully completed. No new
+scientific result was available.
+
+Reviewed the pending CPU walltime on October21 to improve backfill eligibility.
+A full-size synthetic numerical audit (16 fixture parents,64/64/256 items,
+all declared bootstrap/planning paths) completed locally in23.7seconds; this is
+an implementation benchmark, not research evidence. Real saved-artifact loading
+adds overhead. Reduced the existing pending job's effective walltime from the
+declared two-hour ceiling to30minutes, retaining a large implementation margin.
+Slurm accepted the update at11:05:05IST. Job ID, queue age, source, observations,
+models, statistical settings and endpoints are unchanged. The original0.66-SU
+analysis reservation remains conservative and unreleased until final accounting.
+Remote `time_limit_review_20261021.json` records the reviewed change.
+
+Start estimates moved substantially during these checks. No start/finish time
+is promised from a transient scheduler forecast. All computations remain in
+the allocated CPU job; login access was scheduler/metadata control only.
