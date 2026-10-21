@@ -102,3 +102,10 @@ At most16 GPUs run concurrently. Reserve before every submission and retain all
 ambiguous reservations. Failed validation blocks downstream launches. All
 computation runs under Slurm; login access only stages files, hashes, metadata
 and scheduler requests. All queued jobs continue independently of local SSH.
+
+Operational erratum, October 19: Vista rejects scheduler submission from compute
+hosts. The allocated controller therefore prepares a bounded metadata handoff;
+`cluster/admission_dispatch.py` submits it from a login resource after validating
+all successful compute receipts. This changes only scheduler dispatch. All
+computations and scientific gates above remain in allocated Slurm jobs. Accepted
+pilot/review job IDs must be recorded before describing the experiment as queued.

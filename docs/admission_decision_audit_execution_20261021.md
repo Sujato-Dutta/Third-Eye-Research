@@ -1,0 +1,55 @@
+# Decision audit execution record
+
+Declared in [the saved-data audit](admission_decision_audit_20261021.md) before
+running the new exploratory comparisons. Original B outcomes were already
+inspected; this is development review, not untouched confirmation.
+
+Immutable analysis source:
+`6f87e4f482b8791a71ac14090e9b14e04e9489e4849b64c72132cc5e08269ef4`.
+Archive SHA256:
+`bff6464a166e25d52cc5329560381adbddd3d3ab33843e9ed652f5a177896f33`.
+
+Inputs bind the completed B plan/report/fits/completion/accounting/submissions to
+hashes. The analysis uses the 16 fully fresh matched-rendering parents only.
+It revalidates stored observations and actual adapter norms and must reproduce
+the original H1/H2 hyperparameters, predictions and admission decisions.
+No historical label, report, fitted gate or run directory is overwritten.
+
+The audit compares transparent global/backbone/task/stream admission means,
+the original ridge gates and an exploratory stream-residual ridge diagnostic.
+It uses original whole-parent CV plus four held-seed-group folds, with fitting
+and threshold selection restricted to selection-half outcomes. It reports
+fixed-action parent/item/crossed uncertainty and explicitly hypothetical larger-
+item/N sensitivities. It prices base collection from all 16 measured pilot
+runtimes; additional sealed-item inference remains unbenchmarked.
+
+Local verification: lint passes; 17 admission/audit tests passed in 28.86 seconds.
+Meaningful controls check context-only recoverability, original-gate reproduction,
+held-parent future exclusion, scoring-item exclusion, seed-group separation and
+shared-item bootstrap consistency. These synthetic fixtures are not evidence
+for admission effectiveness.
+
+Submitted directly from the login resource using only file staging, hashes,
+accounting and scheduler commands. All tests, saved-weight checks, fitting and
+statistics run on allocated CPU nodes, with CUDA hidden.
+
+| Job | Work | Dependency | Reserved SUs |
+| --- | --- | --- | ---: |
+| 1085722 | Full CPU suite/lint on immutable release | None | 0.11 |
+| 1085723 | Saved-data decision audit, 2-hour ceiling | afterok:1085722 | 0.66 |
+
+At 10:29:18 IST, validation was RUNNING and analysis PENDING for dependency.
+Maximum added reservation is **0.77 SU**, charged to B development. The persistent
+bounded-additions ledger is **232.599167 SUs charged/reserved** against1,200.
+No GPU, confirmation or recursive experiment was submitted. Audit completion
+stops for a policy/precision/cost review; it cannot authorize C automatically.
+
+Campaign:
+`/scratch/11617/sujato_ts/third_eye_research/runs/admission_decision_audit_6f87e4f482b8`.
+Local submission receipt:
+`runs/deployment/admission_decision_audit_6f87e4f482b8_submissions.json`.
+
+Update at 10:33:31 IST: validation **1085722** completed, exit 0, in102seconds:
+**186 tests passed in86.30seconds**, plus lint. Analysis **1085723** is eligible
+with no outstanding dependency and PENDING for Priority. Slurm supplies no start
+estimate. No audit result is available yet and no confirmation job was submitted.

@@ -116,6 +116,19 @@ New campaign:
 | 1080367 | CUDA and real four-stream preflight | PENDING, afterok:1080366 |
 | 1080368 | Submit bounded pilots and review | PENDING, afterok:1080367 |
 
+Update at approximately 12:11 IST: replacement validation completed with exit 0
+in 78 seconds (**176 tests in 63.56 seconds, plus lint**). Preparation completed
+with exit 0 in 46 seconds, preserving the 16-parent grid and 186.8525-SU new-chain
+ceiling. CUDA **1080367** is PENDING for Priority; controller **1080368** remains
+dependency-blocked. No pilot array has been submitted yet.
+
+Scheduler forecast was 04:00 CDT on October 19, equivalent to **14:30 IST**.
+This is a mutable scheduling estimate. A read-only `sbatch --test-only` check
+for the regular `gh` partition estimated October 20 instead, so no partition
+change or extra GPU job was submitted. Actual launch still requires CUDA and
+real-model/sandbox preflight to pass. Review receipts are downloaded to
+`runs/deployment/evidence/admission_stage_b_20261019_env1/`.
+
 Reconciled every old job against complete final scheduler accounting before
 reserving replacements. Original B attempt: two CPU billing minima (0.165 SU)
 plus one GPU minimum (0.25 SU), cancelled controller zero: **0.415 SU total**.
@@ -124,3 +137,88 @@ combined B maximum **187.2675 SUs**, below the 192 ceiling. Persistent ledger
 charged plus reserved after replacement submission: **89.733611 SUs**; the large
 GPU arrays remain unreserved/unsubmitted until the validated controller runs.
 The overall 1,200-SU cap remains unchanged. No new scientific results yet.
+
+## October 19 evening: preflight passed and all pilots submitted
+
+At 22:19:56 IST, CUDA job **1080367** was confirmed COMPLETED, exit 0, in
+125 seconds. Tiny CUDA training/rollback/checkpoint tests and all five repeated-
+draw tests passed. All four real-model/task stream preflights passed, with
+adapter restoration and the pinned Llama/Qwen revisions verified. The sandbox,
+offline model registry and rendering configuration were exercised successfully.
+
+Controller **1080368** then failed in 10 seconds: Vista explicitly rejected
+`sbatch` from its compute host and instructed submission through login resources.
+No pilot job was accepted. The recorded first submission response had return
+code 1 with that explicit host rejection; no later array attempt existed.
+
+Added a standalone standard-library-only login dispatcher. It imports only the
+existing serialization/accounting helpers, never models, datasets or numerical
+analysis. It verifies the immutable release and successful source-bound CPU/CUDA
+receipts, bound runtime configuration hashes, exact existing reservations and
+absence of duplicate outputs/jobs before submission. All training, inference,
+code execution, item audits, norms and statistical analysis remain compute jobs.
+This follows the site's submission policy; no host spoofing or bypass was used.
+
+Using those existing reservations, login dispatch succeeded. Live scheduler and
+array accounting verification at **22:24:09 IST** confirmed all 16 elements:
+
+| Array | Stream | Elements | State at observation |
+| --- | --- | ---: | --- |
+| 1081443 | Llama code | 0–3 | PENDING, Priority |
+| 1081444 | Llama math | 0–3 | PENDING, Priority |
+| 1081445 | Qwen code | 0–3 | PENDING, Priority |
+| 1081446 | Qwen math | 0–3 | PENDING, Priority |
+| 1081447 | CPU structural/statistical review | One job | PENDING, afterany of all four arrays |
+
+The arrays permit four concurrent GPUs each, at most 16 total. The review runs
+automatically after every array finishes, including failures; incomplete cohorts
+stop before confirmation. Slurm supplied no reliable array start estimate at
+this observation. No fresh pilot has completed and no new scientific result is
+claimed. These accepted jobs persist independently of the SSH connection.
+
+Reconciled all four replacement preparation/preflight/controller jobs before
+dispatch. Total B preprocessing/preflight cost across both attempts is 0.9125 SU.
+All pending pilot arrays plus review reserve 185.33 SUs, giving a conservative
+**186.2425-SU B charged-plus-reserved total**, within 192. Persistent bounded-
+additions ledger charged-plus-reserved is **274.038611 SUs**, within 1,200.
+Reservations are ceilings, not actual consumed GPU hours.
+
+Login dispatcher SHA256:
+`ad72f75299f784804f2336915372c924dacc30d8f96784a931c99aca70b938e5`.
+The compute jobs continue to use immutable source `ef78aa1ed056...`; no model or
+scientific protocol change was required. Local main now makes the allocated
+controller publish a dispatch-ready metadata handoff instead of calling sbatch,
+preventing the same host error in future snapshots. Five scheduler/handoff
+regression checks passed locally, including host rejection, ambiguous-result
+handling, duplicate blocking and a no-subprocess compute handoff. Lint passes.
+This local infrastructure update does not replace the frozen running snapshot.
+
+Local dispatch receipt:
+`runs/deployment/admission_b_ef78aa1ed056_env1_dispatch.json`.
+The remote `login_dispatch.json` and updated `submissions.json` retain exact job
+IDs, scheduler responses, prior accounting and dispatcher/source/plan hashes.
+
+## October 21: cohort and review complete
+
+Verified at 10:07:11 IST: all 16 pilot array elements completed with exit 0;
+review **1081447** completed with exit 0 in 35 seconds. All 16 GPU allocations
+overlapped. First pilot start: October 20, 13:40:59 IST. Final pilot end:
+October 21, 02:33:37 IST. Review finished at 04:46:56 IST. The queue is empty.
+
+Structural inspection passed for all 16 parents: K=3 labels and three native
+continuation draws per candidate, with zero terminal observations. The report
+and supporting artifacts were downloaded and hash-verified. Full interpretation:
+[fresh development results](admission_results_20261021.md).
+
+Fresh forced candidate-plus-continuation utility is -2.31pp versus hold, with
+both conditional parent and shared-item intervals below zero. H1/H2 learned
+gates are approximately +0.16/+0.13pp versus hold, with intervals crossing zero;
+no restored forecasting or useful admission advantage over hold/replay has been
+established. The privileged headroom proxy is +0.84pp but does not establish
+learnability. The predeclared review stop remains in force: no confirmation,
+scaling, recursive rollout or additional experiment was submitted.
+
+Final accounting includes every array element, review and earlier failed
+infrastructure attempt. B cost:144.033056SUs. Bounded-additions ledger:
+231.829167SUs charged/reserved against1,200. About968.17SUs remain under that
+project cap; this is not the account's current allocation balance.
