@@ -3,10 +3,7 @@
 import argparse
 from collections import defaultdict
 import json
-import os
 from pathlib import Path
-import re
-import subprocess
 import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
@@ -235,79 +232,34 @@ def submit(request):
     receipt["pilot_arrays"] = {}
     write_json(output / "submissions.json", receipt)
 
-    def sbatch(name, script, partition, seconds, extra, env):
-        command = [
-            "sbatch",
-            "--parsable",
-            "--chdir",
-            request["source"],
-            "--partition",
-            partition,
-            "--time",
-            str(seconds // 60),
-            "--output",
-            str(output / (name + "_%A_%a.out")),
-            *extra,
-            str(Path(request["source"]) / script),
-        ]
-        write_json(output / (name + "_request.json"), {"command": command})
-        result = subprocess.run(command, env=env, text=True, capture_output=True)
-        write_json(
-            output / (name + "_response.json"),
-            {
-                "returncode": result.returncode,
-                "stdout": result.stdout,
-                "stderr": result.stderr,
-            },
-        )
-        ids = re.findall(r"^\s*(\d+)(?:;[A-Za-z0-9_.-]+)?\s*$", result.stdout, re.M)
-        if result.returncode or len(ids) != 1:
-            raise RuntimeError(
-                "Submission failed/ambiguous; preserve reservation, no retry"
-            )
-        return ids[0]
-
-    dependencies = []
-    for offset, (stream, seconds) in enumerate(
-        sorted(plan["runtime_limits_by_stream"].items())
-    ):
-        name = stream.replace("/", "_")
-        env = dict(os.environ, THIRD_EYE_INDEX_BASE=str(offset * 4))
-        job = sbatch(
-            name,
-            "experiments/jobs/forecast_pilots.slurm",
-            "gh",
-            seconds,
-            ["--array=0-3%4"],
-            env,
-        )
-        ledger["jobs"][prefix + name].update(job_id=job, status="submitted")
-        write_json(ledger_path, ledger)
-        receipt["pilot_arrays"][stream] = {
-            "job": job,
-            "index_base": offset * 4,
-            "seconds": seconds,
-        }
-        write_json(output / "submissions.json", receipt)
-        dependencies.append(job)
-    job = sbatch(
-        "review",
-        "experiments/jobs/admission_pilot_review.slurm",
-        "gg",
-        3600,
-        ["--dependency=afterany:" + ":".join(dependencies)],
-        dict(os.environ),
+    # Vista accepts scheduler submissions only from login resources. This
+    # allocated controller prepares a source-bound metadata handoff instead.
+    # cluster/admission_dispatch.py performs sbatch without importing models,
+    # datasets or numerical analysis on the login host.
+    write_json(
+        output / "dispatch_ready.json",
+        {
+            "source_tree_sha256": plan["source_tree_sha256"],
+            "plan_sha256": file_digest(output / "plan.json"),
+            "parents": 16,
+            "reserved_stage_sus": stage,
+            "scheduler_dispatch_host": "login_resource_only",
+            "automatic_scientific_expansion": False,
+        },
     )
-    ledger["jobs"][prefix + "review"].update(job_id=job, status="submitted")
-    write_json(ledger_path, ledger)
-    receipt["review"] = job
-    write_json(output / "submissions.json", receipt)
-    print(json.dumps(receipt))
+    print(
+        json.dumps(
+            {
+                "dispatch_ready": True,
+                "parents": 16,
+                "next": "login-only cluster/admission_dispatch.py --request <request.json>",
+            }
+        )
+    )
 
 
-def inspect(request):
-    output = Path(request["output"])
-    plan = checked_plan(output / "plan.json")
+def load_pilot_states(plan):
+    """Read and validate saved pilots without changing historical artifacts."""
     states, coverage, hashes = [], [], {}
     for task in plan["tasks"]:
         try:
@@ -383,6 +335,7 @@ def inspect(request):
                 {
                     "trajectory_id": rows[0]["trajectory_id"],
                     "stream": task["stream"],
+                    "seed": task["seed"],
                     "parent": parent,
                     "panel": native_arrays(parent, immediate, future),
                     "effective_update_norms": norms,
@@ -399,6 +352,13 @@ def inspect(request):
                     "error_type": type(exc).__name__,
                 }
             )
+    return states, coverage, hashes
+
+
+def inspect(request):
+    output = Path(request["output"])
+    plan = checked_plan(output / "plan.json")
+    states, coverage, hashes = load_pilot_states(plan)
     write_json(
         output / "pilot_inspection.json",
         {"tasks": coverage, "passed": len(states) == 16, "automatic_expansion": False},
