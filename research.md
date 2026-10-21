@@ -66,6 +66,16 @@ Evidence: [core](docs/evidence_review_20261011.md),
 [LR intervention](docs/mechanism_review_20261014.md),
 [corrected matrix](docs/crossed_results_review_20261018.md).
 
+October 21 outcome addendum: the [fresh 16-parent B collection](docs/admission_results_20261021.md)
+completed cleanly, with no terminal draws. Forced candidate-plus-continuation
+utility was -2.31 pp versus hold; both separate parent/item intervals exclude
+zero. Learned H1/H2 gates were +0.16/+0.13 pp versus hold, with intervals crossing
+zero and no demonstrated replay or forecasting advantage. Privileged admission
+headroom was +0.84 pp, not learned prediction. The declared development rule
+provisionally prefers H1. Confirmation remains unreleased: useful learned
+admission and the planned power requirement are unresolved. This addendum
+records outcomes; the predeclared protocol and endpoints below remain unchanged.
+
 ## 3. Position relative to existing work
 
 - [Self-Healing Harness](https://arxiv.org/html/2609.24130v1) already gates
@@ -287,7 +297,8 @@ and model redistribution permissions. Preserve failed forecasters and nulls.
 ## 6. Budget and execution boundaries
 
 **Hard cap: 1,200 SUs for the existing bounded-additions ledger and all work below.**
-It already records 87.6311 SUs; remaining headroom is 1,112.3689 SUs. Earlier original
+At declaration it recorded 87.6311 SUs. Following A/B closeout on October 21,
+the ledger records 231.8292 SUs; remaining cap headroom is 968.1708 SUs. Earlier original
 campaign costs must be disclosed separately; do not claim this cap retroactively
 covers the entire historical project. Account availability does not raise the cap.
 
