@@ -76,6 +76,18 @@ provisionally prefers H1. Confirmation remains unreleased: useful learned
 admission and the planned power requirement are unresolved. This addendum
 records outcomes; the predeclared protocol and endpoints below remain unchanged.
 
+The [exploratory CPU audit](docs/admission_decision_audit_results_20261021.md)
+reproduced B fits. A training-only H2 backbone mean achieved +1.14 pp versus
+hold in both CV schemes; crossed parent/item uncertainty remains [-0.01,+2.36].
+It admits Qwen and holds Llama; candidate features add no consistent benefit.
+This is context calibration, not restored forecasting. C remains stopped for
+independent-item precision, provenance and measured-cost review.
+
+October 22: [four inference benchmarks and checked fixture classification](docs/scoring_precision_results_20261022.md)
+completed. No recorded research exposure remained in the searched artifacts;
+this is not an absence-of-exposure guarantee. Measured scoring costs now inform
+design, but a powered, fully priced confirmation remains unfrozen.
+
 ## 3. Position relative to existing work
 
 - [Self-Healing Harness](https://arxiv.org/html/2609.24130v1) already gates
@@ -297,8 +309,8 @@ and model redistribution permissions. Preserve failed forecasters and nulls.
 ## 6. Budget and execution boundaries
 
 **Hard cap: 1,200 SUs for the existing bounded-additions ledger and all work below.**
-At declaration it recorded 87.6311 SUs. Following A/B closeout on October 21,
-the ledger records 231.8292 SUs; remaining cap headroom is 968.1708 SUs. Earlier original
+At declaration it recorded 87.6311 SUs. Through October 22 provenance/cost closeout,
+the ledger records 233.4067 SUs; remaining cap headroom is 966.5933 SUs. Earlier original
 campaign costs must be disclosed separately; do not claim this cap retroactively
 covers the entire historical project. Account availability does not raise the cap.
 

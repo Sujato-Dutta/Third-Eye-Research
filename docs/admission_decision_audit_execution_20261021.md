@@ -72,3 +72,17 @@ Remote `time_limit_review_20261021.json` records the reviewed change.
 Start estimates moved substantially during these checks. No start/finish time
 is promised from a transient scheduler forecast. All computations remain in
 the allocated CPU job; login access was scheduler/metadata control only.
+
+Completion review at 18:35 IST: validation **1085722** and analysis **1085723**
+both COMPLETED, exit 0. Analysis ran 41 seconds and finished at 11:57:38 IST.
+It reproduced the original B gate fits exactly. Downloaded report SHA256:
+`8bf8b1c541ce5327dfd019c05a7fee96e3ff763cbe086aff06dcc5ec9ed36398`.
+See the [result review](admission_decision_audit_results_20261021.md) for context
+baseline gains, crossed uncertainty and the unresolved power/cost constraints.
+The review stop remains active; no GPU confirmation was submitted.
+
+Final accounting charges 0.165 SU for these two CPU jobs, releasing unused
+reservation. The bounded-additions ledger now totals **231.9942 SUs**, leaving
+**968.0058 SUs** under its 1,200-SU cap. Including the audit, B development costs
+144.1981 SUs against its 192-SU ceiling. Remote campaign `accounting.json`
+records the terminal scheduler rows and these totals.
