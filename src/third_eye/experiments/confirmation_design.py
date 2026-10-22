@@ -13,14 +13,24 @@ DECLARATION = {
     "automatic_expansion": False,
     "orientation": 0,
     "orientation_reason": "fixed first hash half for selection; never choose an orientation by results",
-    "policies": ["forced", "replay", "ridge_h1", "ridge_h2", "backbone_h1", "backbone_h2"],
+    "policies": [
+        "forced",
+        "replay",
+        "ridge_h1",
+        "ridge_h2",
+        "backbone_h1",
+        "backbone_h2",
+    ],
     "parents": [48, 64, 32],
     "target_ood_sizes": [128, 256, 384],
     "retention_size": 256,
     "bootstrap_draws": 2000,
     "practical_effect": 0.005,
     "required_planning_power": 0.8,
-    "measurement_primary": ["forced_future_utility_below_hold", "qwen_minus_llama_forced_future_utility"],
+    "measurement_primary": [
+        "forced_future_utility_below_hold",
+        "qwen_minus_llama_forced_future_utility",
+    ],
     "effect_shrinkage": [0.5, 0.75, 1.0],
     "sd_inflation": [1.0, 1.25, 1.5],
     "design_gate_shrinkage": 0.75,
@@ -41,11 +51,23 @@ def policy_actions(records, count=16):
     # Forced/replay are reconstructed by the caller from selection items.
     for index in range(count):
         for offset, name in enumerate(names[2:], 2):
-            rows = [r for r in records if r["policy"] == name and r["test_index"] == index and r["fold"] == 0 and r["scheme"] == "leave_parent"]
+            rows = [
+                r
+                for r in records
+                if r["policy"] == name
+                and r["test_index"] == index
+                and r["fold"] == 0
+                and r["scheme"] == "leave_parent"
+            ]
             if len(rows) != 1:
                 raise ValueError("One source-bound decision per parent/policy required")
             mass = np.asarray(rows[0]["admitted_mass"], float)
-            if mass.shape != (3,) or not np.isfinite(mass).all() or (mass < 0).any() or mass.sum() > 1 + 1e-9:
+            if (
+                mass.shape != (3,)
+                or not np.isfinite(mass).all()
+                or (mass < 0).any()
+                or mass.sum() > 1 + 1e-9
+            ):
                 raise ValueError("Finite sub-probability admission actions required")
             result[index, offset] = mass
     return result
@@ -74,7 +96,13 @@ def bootstrap(states, actions, parents, item_counts, draws=2000):
         assignment = folds(state["parent"])
         for role in ROLES:
             selected = assignment[role][1]
-            identities = tuple((state["parent"]["items"][role][i]["id"], state["parent"]["items"][role][i]["prompt_sha256"]) for i in selected)
+            identities = tuple(
+                (
+                    state["parent"]["items"][role][i]["id"],
+                    state["parent"]["items"][role][i]["prompt_sha256"],
+                )
+                for i in selected
+            )
             target_count = item_counts[task + "/" + role]
             key = (role, identities, target_count)
             if key not in shared:
@@ -97,7 +125,9 @@ def conditional_power(point, boot, shrinkage, inflation):
     center = np.array([-point[0], point[6]])
     noise = (contrasts - center) * inflation
     sd = contrasts.std(0, ddof=1) * inflation
-    measurement = float(np.mean((center * shrinkage + noise - critical * sd > 0).all(1)))
+    measurement = float(
+        np.mean((center * shrinkage + noise - critical * sd > 0).all(1))
+    )
     methods = {}
     better_constant = max(0.0, point[0])
     target = np.array([better_constant + 0.005, better_constant + 0.005 - point[0]])
@@ -106,12 +136,25 @@ def conditional_power(point, boot, shrinkage, inflation):
         mean = np.array([point[offset], point[offset] - point[0]])
         residual = (pair - mean) * inflation
         se = pair.std(0, ddof=1) * inflation
-        methods[name] = {"joint_power_at_practical_effect": float(np.mean((target + residual - critical * se > 0).all(1))), "contrast_sd_pp": (se * 100).tolist()}
-    return {"measurement_joint_power": measurement, "measurement_effects_pp": (center * shrinkage * 100).tolist(), "measurement_sd_pp": (sd * 100).tolist(), "admission_counterfactual_effect_pp": (target * 100).tolist(), "admission_planning": methods}
+        methods[name] = {
+            "joint_power_at_practical_effect": float(
+                np.mean((target + residual - critical * se > 0).all(1))
+            ),
+            "contrast_sd_pp": (se * 100).tolist(),
+        }
+    return {
+        "measurement_joint_power": measurement,
+        "measurement_effects_pp": (center * shrinkage * 100).tolist(),
+        "measurement_sd_pp": (sd * 100).tolist(),
+        "admission_counterfactual_effect_pp": (target * 100).tolist(),
+        "admission_planning": methods,
+    }
 
 
 def price(parents, item_counts, base_limits, benchmarks, humaneval_rates=None):
-    if len(benchmarks) != 4 or {b["task"]["stream"] for b in benchmarks} != set(base_limits):
+    if len(benchmarks) != 4 or {b["task"]["stream"] for b in benchmarks} != set(
+        base_limits
+    ):
         raise ValueError("All four measured stream benchmarks required")
     if parents % 4 or any(type(v) is not int or v <= 0 for v in item_counts.values()):
         raise ValueError("Balanced N and positive integer item counts required")
@@ -121,24 +164,64 @@ def price(parents, item_counts, base_limits, benchmarks, humaneval_rates=None):
         task = stream.split("/")[1]
         rates = {}
         for row in benchmark["observations"]:
-            rates[row["role"]] = max(rates.get(row["role"], 0), (row["generation_seconds"] + row["verification_seconds"]) / row["count"])
+            rates[row["role"]] = max(
+                rates.get(row["role"], 0),
+                (row["generation_seconds"] + row["verification_seconds"])
+                / row["count"],
+            )
         if task == "code":
-            rates["ood_dev"] = humaneval_rates[stream] if humaneval_rates else rates["ood_dev"] * 4
+            rates["ood_dev"] = (
+                humaneval_rates[stream] if humaneval_rates else rates["ood_dev"] * 4
+            )
         evaluation = sum(rates[role] * item_counts[task + "/" + role] for role in ROLES)
         restore = max(row["restore_seconds"] for row in benchmark["observations"])
-        extra = 1.25 * (13 * (evaluation + restore) + benchmark["model_load_seconds"] + 120)
+        extra = 1.25 * (
+            13 * (evaluation + restore) + benchmark["model_load_seconds"] + 120
+        )
         limits[stream] = int(np.ceil((base_limits[stream] + extra) / 900) * 900)
-    return {"walltime_seconds_by_stream": limits, "base_plus_scoring_reservation_sus": (parents // 4) * sum(limits.values()) / 3600, "includes": "thirteen final-scored checkpoints, measured generation/verifier/restore/load rates, margin and overhead, plus full conservative base collection", "humaneval_directly_measured": humaneval_rates is not None}
+    return {
+        "walltime_seconds_by_stream": limits,
+        "base_plus_scoring_reservation_sus": (parents // 4)
+        * sum(limits.values())
+        / 3600,
+        "includes": "thirteen final-scored checkpoints, measured generation/verifier/restore/load rates, margin and overhead, plus full conservative base collection",
+        "humaneval_directly_measured": humaneval_rates is not None,
+    }
 
 
 def choose_design(rows, method_promising, remaining_sus):
     """Fixed preference order; never call a measurement result method efficacy."""
     for parents in DECLARATION["parents"]:
-        candidates = [row for row in rows if row["parents"] == parents and row["cost"]["base_plus_scoring_reservation_sus"] + 2 <= min(810, remaining_sus - 100)]
-        for row in sorted(candidates, key=lambda value: value["cost"]["base_plus_scoring_reservation_sus"]):
-            gate = next(v for v in row["sensitivity"] if v["effect_shrinkage"] == 0.75 and v["sd_inflation"] == 1.25)
-            if method_promising and gate["admission_planning"]["ridge_h1"]["joint_power_at_practical_effect"] >= .8:
-                return {"purpose": "admission_confirmation_design_candidate", "design": row}
-            if gate["measurement_joint_power"] >= .8:
-                return {"purpose": "measurement_confirmation_design_candidate_not_method_efficacy", "design": row}
+        candidates = [
+            row
+            for row in rows
+            if row["parents"] == parents
+            and row["cost"]["base_plus_scoring_reservation_sus"] + 2
+            <= min(810, remaining_sus - 100)
+        ]
+        for row in sorted(
+            candidates,
+            key=lambda value: value["cost"]["base_plus_scoring_reservation_sus"],
+        ):
+            gate = next(
+                v
+                for v in row["sensitivity"]
+                if v["effect_shrinkage"] == 0.75 and v["sd_inflation"] == 1.25
+            )
+            if (
+                method_promising
+                and gate["admission_planning"]["ridge_h1"][
+                    "joint_power_at_practical_effect"
+                ]
+                >= 0.8
+            ):
+                return {
+                    "purpose": "admission_confirmation_design_candidate",
+                    "design": row,
+                }
+            if gate["measurement_joint_power"] >= 0.8:
+                return {
+                    "purpose": "measurement_confirmation_design_candidate_not_method_efficacy",
+                    "design": row,
+                }
     return None

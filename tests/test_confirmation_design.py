@@ -7,7 +7,13 @@ import pytest
 
 from test_admission_audit import data
 from third_eye.experiments.admission_audit import evaluate
-from third_eye.experiments.confirmation_design import bootstrap, choose_design, conditional_power, policy_actions, price
+from third_eye.experiments.confirmation_design import (
+    bootstrap,
+    choose_design,
+    conditional_power,
+    policy_actions,
+    price,
+)
 from third_eye.experiments.mechanism import ROLES, folds
 
 
@@ -39,18 +45,34 @@ def test_projection_uses_only_scoring_half_and_identical_actions_pair_exactly():
 
 def test_joint_power_requires_both_measurement_effects():
     rng = np.random.default_rng(42)
-    point = np.array([-.03, 0, .001, .001, .001, .01, .10])
-    boot = point + rng.normal(0, .001, (1000, 7))
-    assert conditional_power(point, boot, .75, 1.25)["measurement_joint_power"] > .99
-    point[6] = -.10
-    boot[:, 6] -= .20
-    assert conditional_power(point, boot, .75, 1.25)["measurement_joint_power"] == 0
+    point = np.array([-0.03, 0, 0.001, 0.001, 0.001, 0.01, 0.10])
+    boot = point + rng.normal(0, 0.001, (1000, 7))
+    assert conditional_power(point, boot, 0.75, 1.25)["measurement_joint_power"] > 0.99
+    point[6] = -0.10
+    boot[:, 6] -= 0.20
+    assert conditional_power(point, boot, 0.75, 1.25)["measurement_joint_power"] == 0
 
 
 def test_design_cannot_rename_measurement_as_method_efficacy_or_ignore_cost():
-    row = {"parents": 48, "cost": {"base_plus_scoring_reservation_sus": 700}, "sensitivity": [{"effect_shrinkage": .75, "sd_inflation": 1.25, "measurement_joint_power": .95, "admission_planning": {"ridge_h1": {"joint_power_at_practical_effect": .99}}}]}
+    row = {
+        "parents": 48,
+        "cost": {"base_plus_scoring_reservation_sus": 700},
+        "sensitivity": [
+            {
+                "effect_shrinkage": 0.75,
+                "sd_inflation": 1.25,
+                "measurement_joint_power": 0.95,
+                "admission_planning": {
+                    "ridge_h1": {"joint_power_at_practical_effect": 0.99}
+                },
+            }
+        ],
+    }
     assert "not_method_efficacy" in choose_design([row], False, 966)["purpose"]
-    assert choose_design([row], True, 966)["purpose"] == "admission_confirmation_design_candidate"
+    assert (
+        choose_design([row], True, 966)["purpose"]
+        == "admission_confirmation_design_candidate"
+    )
     assert choose_design([row], True, 750) is None
     row["cost"]["base_plus_scoring_reservation_sus"] = 809
     assert choose_design([row], True, 966) is None
@@ -58,7 +80,24 @@ def test_design_cannot_rename_measurement_as_method_efficacy_or_ignore_cost():
 
 def test_cost_requires_all_streams_and_counts_thirteen_checkpoints():
     counts = {task + "/" + role: 128 for task in ("math", "code") for role in ROLES}
-    benchmarks = [{"task": {"stream": model + "/" + task}, "model_load_seconds": 20, "observations": [{"role": role, "generation_seconds": 16, "verification_seconds": 0, "count": 16, "restore_seconds": 1} for role in ROLES]} for model in ("llama", "qwen") for task in ("code", "math")]
+    benchmarks = [
+        {
+            "task": {"stream": model + "/" + task},
+            "model_load_seconds": 20,
+            "observations": [
+                {
+                    "role": role,
+                    "generation_seconds": 16,
+                    "verification_seconds": 0,
+                    "count": 16,
+                    "restore_seconds": 1,
+                }
+                for role in ROLES
+            ],
+        }
+        for model in ("llama", "qwen")
+        for task in ("code", "math")
+    ]
     limits = {row["task"]["stream"]: 3600 for row in benchmarks}
     result = price(48, counts, limits, benchmarks)
     assert result["base_plus_scoring_reservation_sus"] > 48
