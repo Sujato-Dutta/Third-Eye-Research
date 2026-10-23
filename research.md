@@ -1,10 +1,18 @@
 # Third Eye: When to Commit Recursive Parameter Updates
 
-Research direction revised October 18, 2026. This is the active forward plan;
+Research direction revised October 22, 2026. This is the active forward plan;
 historical protocols, failures and results remain immutable. The study combines
 controlled measurement with one prospective update-versus-hold policy test.
-Successful forecasting, useful admission control and a causal explanation remain
-hypotheses. This document does not launch experiments.
+Historical forecasting recovery is closed. Useful admission and a causal
+explanation remain unproven; the final study tests update-effect reliability.
+
+Execution update: the [fixed32-parent final cohort](docs/final_confirmation_execution_20261022.md)
+is submitted with up to20 parallel GPUs and automatic final results generation.
+Validation passed209 tests; preparation froze all seeds/items with85.65%
+conditional planned power. A runtime-only correction passed direct code timing;
+the same cohort remains frozen. The bounded ledger is766.9267 SUs used/reserved,
+including533.355 SUs maximum for the complete cohort and earlier attempts.
+No new forecasting experiment.
 
 ## 1. Question, contribution and claim boundaries
 
@@ -137,15 +145,10 @@ immediate-gain candidate using selection items and the fixed tie rule. Third Eye
 then admits that candidate or preserves the parent. It does not search for a
 different winning candidate after seeing future outcomes.
 
-Compare two regularized linear gates with the same feature family: immediate
-multi-head gain, correction/probe loss change, retention interference and effective
-update norm. Train/calibrate one using H1 outcomes only and the other using H2
-outcomes; neither uses spectral features. Freeze a development-only selection
-criterion, breaking practical ties toward the cheaper H1 gate, then select one
-primary gate before confirmation. Freeze all normalization and thresholds. Disclose
-future labels used for development selection; H1-only fitting is not zero-cost
-method development. Preserve a simple target-improvement/protected-replay gate
-as a distinct baseline, not a synonym for either learned gate.
+Historical learned H1/H2 gates failed to establish practical or forecasting
+advantage. They remain negative evidence, not a requirement for further fitting.
+The final cohort compares only frozen hold, forced, replay and model-family
+rules. New final outcomes never select a rule, threshold or candidate.
 
 This is **before persistent commitment, after disposable candidate training**.
 Candidate training, evaluation and gradients are not zero-cost features.
@@ -230,70 +233,49 @@ confirmation design after B. Require useful discrimination and feasible power;
 reject apparent gains from holding everything or exploiting one stream. Preserve
 all negative results. Synthetic recoverability does not establish real-data power.
 
-### C. Untouched admission confirmation
+### C. Final empirical confirmation
 
-Prioritize 48–64 fresh parents, 12–16 per stream, with three continuation draws
-per candidate. Use A/B to choose fixed N and scoring-item counts for at least
-80% planned joint power for the two superiority tests at a 0.5 pp effect over
-the better constant action. Separately evaluate retention noninferiority and the
-practical point-estimate threshold; do not call their combined pass probability
-80%. Include larger-effect and uncertain-variance sensitivities. The historical
-40-state cohort had eight trajectory units, not 40 independent parents. Neither
-32 nor 64 is automatically sufficient.
-If item noise dominates, consider larger disjoint evaluation sets before more
-training. Freeze allocation and N before C; no resizing from sealed outcomes.
-If powered comparisons cannot fit, stop or narrow the claim before collecting C.
+The October 22 design audit did not establish an affordable, powered learned-
+admission confirmation. Preserve that decision. The active final experiment is
+now the separately declared [32-parent empirical confirmation](docs/final_confirmation_20261022.md),
+with no new forecaster fitting or forecasting comparison. H2 remains an observed
+future consequence, not a prediction model. This replaces the unexecuted C/D
+proposal below the completed development work; historical declarations stay intact.
 
-Select using calibration items and score on sealed items and independent
-continuation seeds. Offline labels measure the candidate-plus-standardized-
-continuation outcome; hold has zero parameter-change utility. This estimand is
-not the value of an arbitrary adaptive recursive policy; stage D tests that.
+Use eight independent fresh seeds per model/task stream, the same K=3 size-two
+A2 update budget and three native continuation draws. Freeze 128 target,128 OOD,
+256 retention scoring items per task independently of selection. Exclude the
+eight reserved code cost-calibration items; disclose HumanEval final OOD versus
+MBPP development OOD. Freeze source, identities, seeds and rules before outcomes.
 
-Use a hierarchy fixed before C:
+Primary: Qwen-minus-Llama future forced-update utility, macro-averaging math/code,
+with joint parent/shared-item two-sided95% intervals. This tests an interaction
+for two fixed models, not universal harm or a causal model-identity effect.
+Pooled harm is secondary: heterogeneous benefit can exist when its mean is zero.
+Require conditional planned power at least80% at75% pilot effect and1.25 SD
+inflation before collection. Preserve the failed joint two-endpoint calculation.
 
-1. **Admission test:** the single frozen primary gate versus forced immediate
-   selection and hold, with simultaneous 95% intervals. Require positive lower
-   bounds for both and at least 0.5 pp estimated gain over the better constant
-   action. Require the one-sided 95% retention lower bound versus hold above
-   -0.5 pp. A rule that only matches hold shows no useful adaptation.
-2. **Horizon-label test:** H2-trained versus H1-trained gating. This tests the
-   extra value of future supervision, not whether admission works at all. A tie
-   does not invalidate successful admission. Nonsignificance is not equivalence;
-   any equivalence claim needs a predeclared +/-0.5 pp margin and adequate power.
-3. **Novelty test:** compare calibrated gates with simple protected replay. A
-   future-specific or improved-controller claim requires its own positive,
-   independently scored advantage. If replay matches the method at adequate
-   precision, report the practical result without claiming a novel superior gate.
+Compare hold, forced update, protected replay, and a transparent development-
+derived fixed rule that commits Qwen and holds Llama. The latter is a scoped
+baseline, not a novel learned controller. No test-time fitting. Save actions
+before final outcomes. Score parent, three M1 and nine M2 checkpoints per parent.
+Retain terminal M2=M1 and all failures; never replace unfavorable seeds.
 
-Report all heads, harmful-update rates, coverage, calibration, no-update and
-resource costs. Drop a separate TuneAhead adaptation; discuss its different
-information/budget setting transparently. Adjust the declared horizon/replay
-secondary family for multiplicity. Infer over independent parents, not candidates,
-folds, model-fitting seeds or continuation draws. No repeated significance peeks,
-favorable seed replacement or endpoint substitution.
+Secondary family: family-rule minus hold/forced/replay; replay minus hold/forced;
+forced future minus forced immediate. Report Holm adjustments and simultaneous
+intervals, retention, coverage, all heads/streams, scarcity and resource costs.
+Useful family-rule admission requires positive simultaneous comparisons, at least
+0.5pp above the better constant and retention lower bound above-0.5pp. A positive
+model gap alone does not prove a benefit/harm crossover or useful admission.
 
-Do not adopt whichever gate looks best on C. No H2 superiority means no restored
-forecasting claim, even if calibrated H1 admission succeeds.
+### D. Evidence freeze and writing
 
-### D. Recursive decision value
-
-This is secondary/descriptive, not a substitute for C. Only after useful C results
-and measured affordability, plan 16 paired T=5 initial conditions, four seeds per
-stream, with two evolving policies: the already frozen gate and the strongest
-non-hold baseline selected using B, not favorable C outcomes. This is 32 rollouts,
-not 32 independent pairs. Score hold from the same initial checkpoints.
-
-Omit D if the minimum balanced design cannot fit its cap; do not buy eight weak
-trajectories instead. Larger N requires power/cost justification, not adapter
-counts alone. Use five **offered update opportunities**; rejection retains the
-parent but counts its proposal cost. No confirmation claim from generation count.
-
-Use matched initial conditions and equal total compute allowances. Histories
-diverge after decisions; do not count generations as independent replicates.
-Freeze primary final utility and retention endpoints; report cumulative utility,
-coverage, accepted-update count, terminal states, tokens, SUs and elapsed time.
-No full H2 branch-label expansion is needed online. Any savings must include
-rejected candidate training, harvesting and diagnostics; do not promise 50% savings.
+Do not launch additional recursion, scaling, architecture sweeps or forecasting
+recovery for this paper. Existing T=5 results remain clearly labeled historical
+or development evidence. After the single fixed cohort, produce verified JSON,
+CSV, findings text, uncertainty plots and provenance/cost records automatically.
+Write the supported empirical paper whether the interaction replicates or not;
+no automatic follow-up or result-dependent reframing into method success.
 
 ### Release and fixed scope
 
@@ -319,10 +301,10 @@ covers the entire historical project. Account availability does not raise the ca
 | A: headroom, variance, precision audit and release analysis | 8 |
 | B: fresh development, conditional pooled control | 192 |
 | C: powered independent confirmation and scoring precision | 560 |
-| D: optional paired recursive check | 250 |
+| D: no new recursive campaign for this paper | 0 |
 | Failed jobs, retries and contingency | 78 |
-| **New reservations maximum** | **1,088** |
-| **Existing plus planned maximum** | **1,175.6311** |
+| **New reservations maximum** | **838** |
+| **Existing plus planned maximum** | **925.6311** |
 
 Before fresh B outcomes, transfer 72 SUs from contingency to B for measured
 runtime headroom; the total ceiling is unchanged. B uses selection-half H1
@@ -336,25 +318,24 @@ and within the hard cap; drop D before weakening C. If essential powered
 comparisons cannot fit, stop rather than silently reduce controls. Never auto-renew
 failed jobs.
 
-Count candidate training as well as continuations: C's 48–64 parents imply
-576–768 updates before terminal skips, not just 432–576 continuation updates.
-D's two-policy design permits up to 480 candidate updates. Harvesting, token
-length, evaluation and queue delay prevent converting these counts directly to
-SUs or elapsed time. No stage proceeds from an unbenchmarked cost assertion.
+Count candidate training as well as continuations: the fixed32-parent C cohort
+allows384 updates before terminal skips and416 checkpoint evaluations. Its
+conservative complete reservation after the documented runtime correction is
+533.355 SUs, within C's560-SU ceiling.
+No new recursive or forecasting campaign is part of paper completion. Harvesting,
+output length, verification and scheduling prevent promising an exact finish.
 
 All training, inference and statistical analysis runs in Slurm allocations;
 login nodes only stage files and inspect scheduler/metadata. Use up to 20 allocated
 Vista GH200s, prioritizing complete independent units. Queue delay is unbounded.
 
-Target A within two working days, B within the following week, C within the next
-week, D over the following two weeks; these are conditional milestones. Freeze
-evidence by late November and reserve December for manuscript/reproducibility
-review. No stage launches automatically after a scientific review stop.
+A/B are complete. Queue the one fixed C cohort with validated dependencies and
+up to20 concurrent allocated GPUs, then freeze evidence and write. No new study
+is launched automatically after that cohort. Scheduler delay remains unbounded.
 
 **Completion decision:** retain the chosen title and measurement-led scope. Make
 admission effectiveness the headline only after fresh utility and retention
-criteria pass. Successful admission without an H2-label advantage is a distinct
-result, not an automatic failure; matching simple replay does not establish a
-new algorithmic contribution. If clean headroom, power or practical superiority
+criteria pass. A useful fixed baseline is a decision result, not restored forecasting; matching
+simple replay does not establish a new algorithmic contribution. If clean headroom, power or practical superiority
 is absent, stop expansion and assess the narrower empirical result honestly.
 Further novelty requires a justified finding, not a stronger-sounding title.
