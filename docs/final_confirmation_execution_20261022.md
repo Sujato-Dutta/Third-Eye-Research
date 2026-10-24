@@ -143,3 +143,37 @@ are `191-final-cohort-progress.response.json`,
 At14:31:56 IST, Slurm confirmed all3 released tasks RUNNING: **all18 remaining
 parents were running, with no research task left pending**. Final review alone
 awaits their completion (`194-final-cohort-released-status.response.json`).
+
+At19:50:09 IST, **21/32 parents completed successfully**: Llama code6/8,
+Llama math5/8, Qwen code5/8 and Qwen math5/8. All11 remaining experiments were
+RUNNING; no research task was pending or failed. Completion metadata confirms
+13 scored checkpoints, passing receipts, matching source and zero forecaster
+fits for every completed parent. No traceback, CUDA memory or Slurm error
+appeared in the32 inspected log tails. Final review1089050 awaits the cohort.
+
+The completed Qwen math parents took approximately12–13.2 allocated hours;
+the last3 had run5.3 hours at this check. If their pace is comparable, collection
+should finish overnight into October24, followed by the scheduled analysis.
+This is an estimate, not a scheduler guarantee. No partial effect estimates
+were inspected or used to alter the study. Status receipts195 and196 are in
+the same request archive.
+
+## October24 completion and evidence freeze
+
+At09:39:45 IST, Slurm confirmed all32 parents and final review1089050 COMPLETED
+with exit0; no job remained queued or running. Review completed at02:56:18 IST
+on October24. Its checked receipt declares all experiments complete, no
+automatic expansion and zero forecaster fits. The verified report SHA256 is
+`2037f908cd29778d60d1444a12f410fa7d79a86be3783b46768912963a9c1c43`.
+
+All13 checkpoints per parent were scored;288 native continuation draws completed,
+none terminal. Results, tables, plots and receipts were downloaded to
+`runs/deployment/evidence/final_confirmation_20261024/`. See the
+[results interpretation](final_confirmation_results_20261024.md).
+
+Full allocated-task accounting replaces earlier maximum reservations. Complete
+C cost is309.0019 SUs including original checks/failure. The bounded ledger is
+542.5736 SUs used/reserved, leaving657.4264 under1,200. These figures use existing
+partition rates and minimum billing applied to Slurm allocation records; they
+exclude earlier original campaigns and do not represent the account's remaining
+allocation. No new scientific experiment follows this closeout.

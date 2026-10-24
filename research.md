@@ -6,13 +6,14 @@ controlled measurement with one prospective update-versus-hold policy test.
 Historical forecasting recovery is closed. Useful admission and a causal
 explanation remain unproven; the final study tests update-effect reliability.
 
-Execution update: the [fixed32-parent final cohort](docs/final_confirmation_execution_20261022.md)
-is submitted with up to20 parallel GPUs and automatic final results generation.
-Validation passed209 tests; preparation froze all seeds/items with85.65%
-conditional planned power. A runtime-only correction passed direct code timing;
-the same cohort remains frozen. The bounded ledger is766.9267 SUs used/reserved,
-including533.355 SUs maximum for the complete cohort and earlier attempts.
-No new forecasting experiment.
+October24 closeout: the [fixed32-parent final cohort](docs/final_confirmation_results_20261024.md)
+and automatic analysis completed successfully. Forced future utility was-1.76pp
+versus hold, joint95% interval[-3.11,-0.42]. The Qwen-minus-Llama difference
+was+2.80pp[+0.27,+5.33], but positive Qwen benefit and useful admission did not
+replicate. The fixed rule did not outperform hold or replay. Validation passed209
+tests; no forecasters were fitted. The bounded ledger is542.5736 SUs used/reserved;
+complete C cost was309.0019 SUs. Freeze evidence and write the scoped empirical
+paper. No further experiment is queued or launched automatically.
 
 ## 1. Question, contribution and claim boundaries
 
