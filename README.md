@@ -1,17 +1,30 @@
 # Third Eye
 
-The core forecaster now supports expected continuation value, joint consequence
-variability, candidate-relative features and optional no-update decisions.
-See [the forecasting implementation and execution guide](docs/forecasting.md).
-The submission target is now late December; fresh-data collection is bounded by
-[the December research plan](docs/december_research_plan.md).
-The completed confirmation did **not** establish an H2 forecasting advantage;
-the revised objective needs fresh independent validation before that claim.
+**Measuring the immediate and downstream consequences of verified language-model
+self-updates.** The fresh32-run confirmation and automatic analysis are complete.
+The current paper studies future utility, model differences and update-versus-hold
+decisions under a fixed small-batch LoRA protocol.
 
-**Forecasting the long-term value of persistent, verified LLM self-updates.**
-The project compares immediate update value with H=2 consequences, then uses
-compact learned forecasters to choose LoRA/QLoRA updates over T<=5 generations.
-The research design is in [the project overview](docs/ACL27_Third_Eye_Research.docx).
+Read the [manuscript PDF](paper/main.pdf), edit the [LaTeX source](paper/main.tex),
+or consult the [paper build guide](paper/README.md). The
+[completed results](docs/final_confirmation_results_20261024.md) and
+[active research scope](research.md) document the supported claims. Historical
+forecasting and recursive-policy implementations remain available as development
+records; the current paper does not claim a forecasting or controller advantage.
+
+The [review-driven revision plan](revision_plan.md) includes matched controls,
+recipe checks and a balanced third-model extension within500 additional SUs.
+The approved [SmolLM3-3B confirmation](docs/smollm16_execution_20261024.md) is
+submitted:16 fresh runs, eight per task, with validation, preparation, GPU checks
+and final analysis linked by scheduler dependencies. Measured timing requires
+23h per code run and30h per math run:424 SUs across the16 parent tasks.
+Including checks and reporting,425.853 SUs are charged or reserved against the
+500-SU revision cap. The October26 replacement release passed217 tests and lint after
+repairing a preflight verifier call; the original collection never started.
+Both GPU checks subsequently passed. An operational reservation supplement
+preserves the validated source and experiment. Other revision controls remain
+deferred to avoid exceeding the cap. Qwen3-8B and
+Llama-3.1-8B-Instruct are future DGX extensions, excluded from current results.
 
 ## Implementation
 
@@ -65,12 +78,11 @@ validation, fixed comparator controls and the held balanced replication cohort.
 Execution is consolidated on [TACC Vista](docs/vista_execution.md).
 [A1 calibration](docs/a1_execution.md) and the subsequent frozen campaigns are
 historical execution records. The original and balanced replication GPU
-collections have completed. The improved core forecaster's next checks are
-compute-node validation and the bounded continuation-signal audit described in
-[the forecasting guide](docs/forecasting.md). Fresh confirmation of that model
-remains separate from already inspected data. Setup, validation, downloads and
-training use Slurm compute nodes. The DGX deployment below is retained as the
-original execution workflow.
+collections have completed. The active extension is the16-run SmolLM3-3B
+confirmation; [the forecasting guide](docs/forecasting.md) records an earlier
+research direction. Setup, validation, downloads and training use Slurm compute
+nodes. The DGX deployment below is retained as the original execution workflow;
+future8B work there requires restored access and a separate measured budget.
 
 See [the execution runbook](docs/runbook.md) for exact commands. Run setup,
 benchmark preparation, verification, and training through the scheduler.
