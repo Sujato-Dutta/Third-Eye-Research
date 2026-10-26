@@ -15,6 +15,13 @@ tests; no forecasters were fitted. The bounded ledger is542.5736 SUs used/reserv
 complete C cost was309.0019 SUs. Freeze evidence and write the scoped empirical
 paper. No further experiment is queued or launched automatically.
 
+October24 review follow-up: [the revision plan](revision_plan.md) uses the new
+500-additional-SU allowance. The16-run SmolLM3 extension is approved for immediate
+execution; other revision controls remain planned. Qwen3-8B and Llama-3.1-8B
+are future DGX extensions when access returns. The eventual five-model study
+would span family and scale; unrun models are not counted as results.
+The original confirmation and its endpoints remain unchanged.
+
 ## 1. Question, contribution and claim boundaries
 
 **Question:** When does committing a verified correction update improve future
