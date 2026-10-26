@@ -434,9 +434,6 @@ def code_preflight(request):
 
 
 def run(request, index):
-    from third_eye.evaluation.verifiers import VerifierRegistry
-    from third_eye.training.hf_backend import HFBackend
-
     require_gpu_allocation()
     plan = checked_plan(request)
     preflight = read(Path(request["output"]) / "code_preflight/completed.json")
@@ -447,6 +444,15 @@ def run(request, index):
     ):
         raise ValueError("Successful source-bound direct code verification required")
     task = plan["tasks"][index]
+    run_task(request, plan, task)
+
+
+def run_task(request, plan, task, decision_rule=actions):
+    """Collect one immutable parent using a validated caller's frozen policy."""
+    from third_eye.evaluation.verifiers import VerifierRegistry
+    from third_eye.training.hf_backend import HFBackend
+
+    require_gpu_allocation()
     if (
         file_digest(task["config"]) != task["config_sha256"]
         or file_digest(task["manifest"]) != task["manifest_sha256"]
@@ -520,7 +526,7 @@ def run(request, index):
         "stream": task["stream"],
         "seed": task["seed"],
         "development_h1_heads": immediate,
-        "actions": actions(task["stream"], immediate),
+        "actions": decision_rule(task["stream"], immediate),
         "selection_orientation": 0,
         "no_scoring_outcomes_used": True,
         "forecaster_fits": 0,

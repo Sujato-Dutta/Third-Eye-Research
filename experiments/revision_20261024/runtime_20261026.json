@@ -1,0 +1,38 @@
+{
+  "date": "2026-10-26",
+  "status": "measured_runtime_check_passed_16_parents_pending_priority",
+  "source_experiment_unchanged": true,
+  "operational_supplement_supersedes_reservation_only": true,
+  "original_manifest_preserved": "manifest.json",
+  "runtime_seconds_by_task": {
+    "code": 82800,
+    "math": 108000
+  },
+  "parent_array_sus": 424,
+  "additional_revision_cap_sus": 500,
+  "revision_charged_plus_reserved_sus": 425.85249999999985,
+  "remaining_unreserved_sus": 74.14750000000015,
+  "other_revision_gpu_controls": "deferred_until_complete_design_fits_remaining_allowance",
+  "jobs": {
+    "price": {
+      "job": "1101554",
+      "dependency": null,
+      "reserved_sus": 0.11
+    },
+    "code": {
+      "job": "1101555",
+      "dependency": "afterok:1101554",
+      "reserved_sus": 184.0
+    },
+    "math": {
+      "job": "1101556",
+      "dependency": "afterok:1101554",
+      "reserved_sus": 240.0
+    },
+    "review": {
+      "job": "1101557",
+      "dependency": "afterok:1101555:1101556",
+      "reserved_sus": 0.33
+    }
+  }
+}

@@ -1,0 +1,259 @@
+{
+  "status": "smollm16_approved_implementation_other_blocks_not_submitted",
+  "source_cohort_plan_sha256": "af32280984dbe09ea433c1bb93a84e7ea51437828a37a554133bc0f2321a588f",
+  "selection_namespace": "third-eye-review-controls-20261024",
+  "selection_uses_final_outcomes": false,
+  "parents_per_existing_stream": 4,
+  "existing_parent_tasks": [
+    {
+      "config": "/scratch/11617/sujato_ts/third_eye_research/runs/final_empirical_confirmation_43b5c215c6b0/configs/llama-3.2-3b-instruct_code_2026102200.json",
+      "config_sha256": "a91425538a1393c05e6b3f036c98443fefaf5965abf71549ccf8767b7a83dda5",
+      "final_manifest": "/scratch/11617/sujato_ts/third_eye_research/runs/final_empirical_confirmation_43b5c215c6b0/scoring/code/final.json",
+      "final_manifest_sha256": "903fd59c9325ad17fe731098c41f7abd03f342b6c3d96de37d7a54d6585c67f0",
+      "index": 0,
+      "manifest": "/scratch/11617/sujato_ts/third_eye_research/amendments/a2/data/processed/a1/code/selection.json",
+      "manifest_sha256": "68ee39108540df9573738410417c3f0f0257ffe1eeecc7f5dfa00f4a26753d3f",
+      "output": "/scratch/11617/sujato_ts/third_eye_research/runs/final_empirical_confirmation_43b5c215c6b0/parents/llama-3.2-3b-instruct/code/seed2026102200",
+      "seed": 2026102200,
+      "stream": "llama-3.2-3b-instruct/code"
+    },
+    {
+      "config": "/scratch/11617/sujato_ts/third_eye_research/runs/final_empirical_confirmation_43b5c215c6b0/configs/llama-3.2-3b-instruct_code_2026102206.json",
+      "config_sha256": "e3365b9cf3c58e6a7b5ef873308d2af5ab5fbcd1492e2ac7d23d1ce0a0a06e07",
+      "final_manifest": "/scratch/11617/sujato_ts/third_eye_research/runs/final_empirical_confirmation_43b5c215c6b0/scoring/code/final.json",
+      "final_manifest_sha256": "903fd59c9325ad17fe731098c41f7abd03f342b6c3d96de37d7a54d6585c67f0",
+      "index": 6,
+      "manifest": "/scratch/11617/sujato_ts/third_eye_research/amendments/a2/data/processed/a1/code/selection.json",
+      "manifest_sha256": "68ee39108540df9573738410417c3f0f0257ffe1eeecc7f5dfa00f4a26753d3f",
+      "output": "/scratch/11617/sujato_ts/third_eye_research/runs/final_empirical_confirmation_43b5c215c6b0/parents/llama-3.2-3b-instruct/code/seed2026102206",
+      "seed": 2026102206,
+      "stream": "llama-3.2-3b-instruct/code"
+    },
+    {
+      "config": "/scratch/11617/sujato_ts/third_eye_research/runs/final_empirical_confirmation_43b5c215c6b0/configs/llama-3.2-3b-instruct_code_2026102205.json",
+      "config_sha256": "59e653b661f8dad53a0bba1d6b4dbf6de05108359ca1b1ae90fe150fd1a6c771",
+      "final_manifest": "/scratch/11617/sujato_ts/third_eye_research/runs/final_empirical_confirmation_43b5c215c6b0/scoring/code/final.json",
+      "final_manifest_sha256": "903fd59c9325ad17fe731098c41f7abd03f342b6c3d96de37d7a54d6585c67f0",
+      "index": 5,
+      "manifest": "/scratch/11617/sujato_ts/third_eye_research/amendments/a2/data/processed/a1/code/selection.json",
+      "manifest_sha256": "68ee39108540df9573738410417c3f0f0257ffe1eeecc7f5dfa00f4a26753d3f",
+      "output": "/scratch/11617/sujato_ts/third_eye_research/runs/final_empirical_confirmation_43b5c215c6b0/parents/llama-3.2-3b-instruct/code/seed2026102205",
+      "seed": 2026102205,
+      "stream": "llama-3.2-3b-instruct/code"
+    },
+    {
+      "config": "/scratch/11617/sujato_ts/third_eye_research/runs/final_empirical_confirmation_43b5c215c6b0/configs/llama-3.2-3b-instruct_code_2026102207.json",
+      "config_sha256": "f158bbc811740cb22ab9c026ee613e049dac436eb54a93e527c3568503094131",
+      "final_manifest": "/scratch/11617/sujato_ts/third_eye_research/runs/final_empirical_confirmation_43b5c215c6b0/scoring/code/final.json",
+      "final_manifest_sha256": "903fd59c9325ad17fe731098c41f7abd03f342b6c3d96de37d7a54d6585c67f0",
+      "index": 7,
+      "manifest": "/scratch/11617/sujato_ts/third_eye_research/amendments/a2/data/processed/a1/code/selection.json",
+      "manifest_sha256": "68ee39108540df9573738410417c3f0f0257ffe1eeecc7f5dfa00f4a26753d3f",
+      "output": "/scratch/11617/sujato_ts/third_eye_research/runs/final_empirical_confirmation_43b5c215c6b0/parents/llama-3.2-3b-instruct/code/seed2026102207",
+      "seed": 2026102207,
+      "stream": "llama-3.2-3b-instruct/code"
+    },
+    {
+      "config": "/scratch/11617/sujato_ts/third_eye_research/runs/final_empirical_confirmation_43b5c215c6b0/configs/llama-3.2-3b-instruct_math_2026102302.json",
+      "config_sha256": "dc73971c19f3f13559c784e2d031165df70cc88366f59403a7ba3a6adf6c1399",
+      "final_manifest": "/scratch/11617/sujato_ts/third_eye_research/runs/final_empirical_confirmation_43b5c215c6b0/scoring/math/final.json",
+      "final_manifest_sha256": "d67d8dfb3992b5f22222c85982cd0d63c2fbc7bed8b61a7d793c081fcaf89a69",
+      "index": 10,
+      "manifest": "/scratch/11617/sujato_ts/third_eye_research/amendments/a2/data/processed/a1/math/selection.json",
+      "manifest_sha256": "ea8a79436951588029af86558f15887db44de0deb56353d080b9298cdb1e1780",
+      "output": "/scratch/11617/sujato_ts/third_eye_research/runs/final_empirical_confirmation_43b5c215c6b0/parents/llama-3.2-3b-instruct/math/seed2026102302",
+      "seed": 2026102302,
+      "stream": "llama-3.2-3b-instruct/math"
+    },
+    {
+      "config": "/scratch/11617/sujato_ts/third_eye_research/runs/final_empirical_confirmation_43b5c215c6b0/configs/llama-3.2-3b-instruct_math_2026102306.json",
+      "config_sha256": "3d56da2cf8f6e85537cfc2023aab852cd9ff43809566b8c92810dc6db5b86d3f",
+      "final_manifest": "/scratch/11617/sujato_ts/third_eye_research/runs/final_empirical_confirmation_43b5c215c6b0/scoring/math/final.json",
+      "final_manifest_sha256": "d67d8dfb3992b5f22222c85982cd0d63c2fbc7bed8b61a7d793c081fcaf89a69",
+      "index": 14,
+      "manifest": "/scratch/11617/sujato_ts/third_eye_research/amendments/a2/data/processed/a1/math/selection.json",
+      "manifest_sha256": "ea8a79436951588029af86558f15887db44de0deb56353d080b9298cdb1e1780",
+      "output": "/scratch/11617/sujato_ts/third_eye_research/runs/final_empirical_confirmation_43b5c215c6b0/parents/llama-3.2-3b-instruct/math/seed2026102306",
+      "seed": 2026102306,
+      "stream": "llama-3.2-3b-instruct/math"
+    },
+    {
+      "config": "/scratch/11617/sujato_ts/third_eye_research/runs/final_empirical_confirmation_43b5c215c6b0/configs/llama-3.2-3b-instruct_math_2026102301.json",
+      "config_sha256": "6392cae1ff25258f62c023c4acf3a989781daffcadea71193df324283cdc45aa",
+      "final_manifest": "/scratch/11617/sujato_ts/third_eye_research/runs/final_empirical_confirmation_43b5c215c6b0/scoring/math/final.json",
+      "final_manifest_sha256": "d67d8dfb3992b5f22222c85982cd0d63c2fbc7bed8b61a7d793c081fcaf89a69",
+      "index": 9,
+      "manifest": "/scratch/11617/sujato_ts/third_eye_research/amendments/a2/data/processed/a1/math/selection.json",
+      "manifest_sha256": "ea8a79436951588029af86558f15887db44de0deb56353d080b9298cdb1e1780",
+      "output": "/scratch/11617/sujato_ts/third_eye_research/runs/final_empirical_confirmation_43b5c215c6b0/parents/llama-3.2-3b-instruct/math/seed2026102301",
+      "seed": 2026102301,
+      "stream": "llama-3.2-3b-instruct/math"
+    },
+    {
+      "config": "/scratch/11617/sujato_ts/third_eye_research/runs/final_empirical_confirmation_43b5c215c6b0/configs/llama-3.2-3b-instruct_math_2026102305.json",
+      "config_sha256": "4da282cb50645f8ba6c0ab1f2aec74fe0f0b5a9d5fcbd1da28223b435cc83bab",
+      "final_manifest": "/scratch/11617/sujato_ts/third_eye_research/runs/final_empirical_confirmation_43b5c215c6b0/scoring/math/final.json",
+      "final_manifest_sha256": "d67d8dfb3992b5f22222c85982cd0d63c2fbc7bed8b61a7d793c081fcaf89a69",
+      "index": 13,
+      "manifest": "/scratch/11617/sujato_ts/third_eye_research/amendments/a2/data/processed/a1/math/selection.json",
+      "manifest_sha256": "ea8a79436951588029af86558f15887db44de0deb56353d080b9298cdb1e1780",
+      "output": "/scratch/11617/sujato_ts/third_eye_research/runs/final_empirical_confirmation_43b5c215c6b0/parents/llama-3.2-3b-instruct/math/seed2026102305",
+      "seed": 2026102305,
+      "stream": "llama-3.2-3b-instruct/math"
+    },
+    {
+      "config": "/scratch/11617/sujato_ts/third_eye_research/runs/final_empirical_confirmation_43b5c215c6b0/configs/qwen3-4b_code_2026102402.json",
+      "config_sha256": "c5472e05c22d41c9e4f74cfbd05457e6fba276f905071b17c7f731109925bf07",
+      "final_manifest": "/scratch/11617/sujato_ts/third_eye_research/runs/final_empirical_confirmation_43b5c215c6b0/scoring/code/final.json",
+      "final_manifest_sha256": "903fd59c9325ad17fe731098c41f7abd03f342b6c3d96de37d7a54d6585c67f0",
+      "index": 18,
+      "manifest": "/scratch/11617/sujato_ts/third_eye_research/amendments/a2/data/processed/a1/code/selection.json",
+      "manifest_sha256": "68ee39108540df9573738410417c3f0f0257ffe1eeecc7f5dfa00f4a26753d3f",
+      "output": "/scratch/11617/sujato_ts/third_eye_research/runs/final_empirical_confirmation_43b5c215c6b0/parents/qwen3-4b/code/seed2026102402",
+      "seed": 2026102402,
+      "stream": "qwen3-4b/code"
+    },
+    {
+      "config": "/scratch/11617/sujato_ts/third_eye_research/runs/final_empirical_confirmation_43b5c215c6b0/configs/qwen3-4b_code_2026102400.json",
+      "config_sha256": "4ef1acbe1d16a2ea63b4fda049147b53cc55253562e0698fca958aafe8f80171",
+      "final_manifest": "/scratch/11617/sujato_ts/third_eye_research/runs/final_empirical_confirmation_43b5c215c6b0/scoring/code/final.json",
+      "final_manifest_sha256": "903fd59c9325ad17fe731098c41f7abd03f342b6c3d96de37d7a54d6585c67f0",
+      "index": 16,
+      "manifest": "/scratch/11617/sujato_ts/third_eye_research/amendments/a2/data/processed/a1/code/selection.json",
+      "manifest_sha256": "68ee39108540df9573738410417c3f0f0257ffe1eeecc7f5dfa00f4a26753d3f",
+      "output": "/scratch/11617/sujato_ts/third_eye_research/runs/final_empirical_confirmation_43b5c215c6b0/parents/qwen3-4b/code/seed2026102400",
+      "seed": 2026102400,
+      "stream": "qwen3-4b/code"
+    },
+    {
+      "config": "/scratch/11617/sujato_ts/third_eye_research/runs/final_empirical_confirmation_43b5c215c6b0/configs/qwen3-4b_code_2026102405.json",
+      "config_sha256": "977236d6aa20f5dc6c9a1601353f9eb430efc76e7332dc63fae5eb496d216dee",
+      "final_manifest": "/scratch/11617/sujato_ts/third_eye_research/runs/final_empirical_confirmation_43b5c215c6b0/scoring/code/final.json",
+      "final_manifest_sha256": "903fd59c9325ad17fe731098c41f7abd03f342b6c3d96de37d7a54d6585c67f0",
+      "index": 21,
+      "manifest": "/scratch/11617/sujato_ts/third_eye_research/amendments/a2/data/processed/a1/code/selection.json",
+      "manifest_sha256": "68ee39108540df9573738410417c3f0f0257ffe1eeecc7f5dfa00f4a26753d3f",
+      "output": "/scratch/11617/sujato_ts/third_eye_research/runs/final_empirical_confirmation_43b5c215c6b0/parents/qwen3-4b/code/seed2026102405",
+      "seed": 2026102405,
+      "stream": "qwen3-4b/code"
+    },
+    {
+      "config": "/scratch/11617/sujato_ts/third_eye_research/runs/final_empirical_confirmation_43b5c215c6b0/configs/qwen3-4b_code_2026102401.json",
+      "config_sha256": "20194949993802cc482450db64f1fbec4af9235d8bc32070b5c57f7375410c86",
+      "final_manifest": "/scratch/11617/sujato_ts/third_eye_research/runs/final_empirical_confirmation_43b5c215c6b0/scoring/code/final.json",
+      "final_manifest_sha256": "903fd59c9325ad17fe731098c41f7abd03f342b6c3d96de37d7a54d6585c67f0",
+      "index": 17,
+      "manifest": "/scratch/11617/sujato_ts/third_eye_research/amendments/a2/data/processed/a1/code/selection.json",
+      "manifest_sha256": "68ee39108540df9573738410417c3f0f0257ffe1eeecc7f5dfa00f4a26753d3f",
+      "output": "/scratch/11617/sujato_ts/third_eye_research/runs/final_empirical_confirmation_43b5c215c6b0/parents/qwen3-4b/code/seed2026102401",
+      "seed": 2026102401,
+      "stream": "qwen3-4b/code"
+    },
+    {
+      "config": "/scratch/11617/sujato_ts/third_eye_research/runs/final_empirical_confirmation_43b5c215c6b0/configs/qwen3-4b_math_2026102502.json",
+      "config_sha256": "5e1e795b5d10f8758d725e2b71cdd0b0901504611481a253211f611f121acc7e",
+      "final_manifest": "/scratch/11617/sujato_ts/third_eye_research/runs/final_empirical_confirmation_43b5c215c6b0/scoring/math/final.json",
+      "final_manifest_sha256": "d67d8dfb3992b5f22222c85982cd0d63c2fbc7bed8b61a7d793c081fcaf89a69",
+      "index": 26,
+      "manifest": "/scratch/11617/sujato_ts/third_eye_research/amendments/a2/data/processed/a1/math/selection.json",
+      "manifest_sha256": "ea8a79436951588029af86558f15887db44de0deb56353d080b9298cdb1e1780",
+      "output": "/scratch/11617/sujato_ts/third_eye_research/runs/final_empirical_confirmation_43b5c215c6b0/parents/qwen3-4b/math/seed2026102502",
+      "seed": 2026102502,
+      "stream": "qwen3-4b/math"
+    },
+    {
+      "config": "/scratch/11617/sujato_ts/third_eye_research/runs/final_empirical_confirmation_43b5c215c6b0/configs/qwen3-4b_math_2026102505.json",
+      "config_sha256": "893722992bca4aa6c08acff481ed550e7d23cd90c201191392bc9750ef10acf3",
+      "final_manifest": "/scratch/11617/sujato_ts/third_eye_research/runs/final_empirical_confirmation_43b5c215c6b0/scoring/math/final.json",
+      "final_manifest_sha256": "d67d8dfb3992b5f22222c85982cd0d63c2fbc7bed8b61a7d793c081fcaf89a69",
+      "index": 29,
+      "manifest": "/scratch/11617/sujato_ts/third_eye_research/amendments/a2/data/processed/a1/math/selection.json",
+      "manifest_sha256": "ea8a79436951588029af86558f15887db44de0deb56353d080b9298cdb1e1780",
+      "output": "/scratch/11617/sujato_ts/third_eye_research/runs/final_empirical_confirmation_43b5c215c6b0/parents/qwen3-4b/math/seed2026102505",
+      "seed": 2026102505,
+      "stream": "qwen3-4b/math"
+    },
+    {
+      "config": "/scratch/11617/sujato_ts/third_eye_research/runs/final_empirical_confirmation_43b5c215c6b0/configs/qwen3-4b_math_2026102501.json",
+      "config_sha256": "ec92573fbcac8ad01cd63f09a4fda05725f051e42adc4519686b99cb3521942a",
+      "final_manifest": "/scratch/11617/sujato_ts/third_eye_research/runs/final_empirical_confirmation_43b5c215c6b0/scoring/math/final.json",
+      "final_manifest_sha256": "d67d8dfb3992b5f22222c85982cd0d63c2fbc7bed8b61a7d793c081fcaf89a69",
+      "index": 25,
+      "manifest": "/scratch/11617/sujato_ts/third_eye_research/amendments/a2/data/processed/a1/math/selection.json",
+      "manifest_sha256": "ea8a79436951588029af86558f15887db44de0deb56353d080b9298cdb1e1780",
+      "output": "/scratch/11617/sujato_ts/third_eye_research/runs/final_empirical_confirmation_43b5c215c6b0/parents/qwen3-4b/math/seed2026102501",
+      "seed": 2026102501,
+      "stream": "qwen3-4b/math"
+    },
+    {
+      "config": "/scratch/11617/sujato_ts/third_eye_research/runs/final_empirical_confirmation_43b5c215c6b0/configs/qwen3-4b_math_2026102504.json",
+      "config_sha256": "d4e6306a77293d4fd9bb48c1c858ec99b4e04de2fdb81595b9551e2b19832edb",
+      "final_manifest": "/scratch/11617/sujato_ts/third_eye_research/runs/final_empirical_confirmation_43b5c215c6b0/scoring/math/final.json",
+      "final_manifest_sha256": "d67d8dfb3992b5f22222c85982cd0d63c2fbc7bed8b61a7d793c081fcaf89a69",
+      "index": 28,
+      "manifest": "/scratch/11617/sujato_ts/third_eye_research/amendments/a2/data/processed/a1/math/selection.json",
+      "manifest_sha256": "ea8a79436951588029af86558f15887db44de0deb56353d080b9298cdb1e1780",
+      "output": "/scratch/11617/sujato_ts/third_eye_research/runs/final_empirical_confirmation_43b5c215c6b0/parents/qwen3-4b/math/seed2026102504",
+      "seed": 2026102504,
+      "stream": "qwen3-4b/math"
+    }
+  ],
+  "additional_su_hard_cap": 500,
+  "stage_caps_sus": {
+    "saved_data_and_cpu_validation": 4,
+    "integrated_gpu_preflight": 6,
+    "matched_controls": 128,
+    "recipe_controls": 96,
+    "third_model": 224,
+    "final_report": 4,
+    "contingency": 38
+  },
+  "third_model": {
+    "name": "HuggingFaceTB/SmolLM3-3B",
+    "revision": "a07cc9a04f16550a088caea529712d1d335b0ac1",
+    "seeds": {
+      "math": [
+        2026102800,
+        2026102801,
+        2026102802,
+        2026102803,
+        2026102804,
+        2026102805,
+        2026102806,
+        2026102807
+      ],
+      "code": [
+        2026102900,
+        2026102901,
+        2026102902,
+        2026102903,
+        2026102904,
+        2026102905,
+        2026102906,
+        2026102907
+      ]
+    },
+    "pending_cluster_seed_collision_check": true,
+    "parents_per_task": 8,
+    "continuation_draws": 3,
+    "scoring_items": [
+      128,
+      128,
+      256
+    ],
+    "approved": true,
+    "future_scale_models": [
+      "Qwen/Qwen3-8B",
+      "meta-llama/Llama-3.1-8B-Instruct"
+    ],
+    "future_scale_execution": "DGX when access returns; not currently queued"
+  },
+  "baseline_ledger_sus": 542.5736111111111,
+  "maximum_ledger_after_revision_sus": 1042.573611111111,
+  "account_snapshot": {
+    "available_sus": 1531,
+    "checked_utc": "2026-10-24 06:04:41 UTC"
+  },
+  "no_forecasting": true,
+  "runtime_only_transfer_sus": 32
+}
