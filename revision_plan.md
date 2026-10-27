@@ -1,11 +1,20 @@
 # Third Eye: review-driven revision implementation plan
 
 October24,2026. **SmolLM3 sixteen-run extension approved for execution.**
-Other revision blocks remain planned and are not submitted in this launch.
+The matched continuation and recipe controls are now authorized for DGX;
+[their separate execution record](docs/dgx_revision_execution_20261026.md)
+documents the one-GPU chain. They are not charged to the Vista SU allowance.
 **October26 operational update:** both SmolLM GPU checks passed. Measured
 complete costs exceed the original14h limits. The same16-run study now reserves
 23h per code parent and30h per math parent; all scientific settings remain
-unchanged. Other GPU-control blocks are deferred under the500-SU cap.
+unchanged. Other GPU-control blocks are deferred on Vista under the500-SU cap
+and have instead been submitted on DGX, pending verified input transfer.
+**October26 allocation instruction:** use Vista first within this allowance;
+DGX takes work that cannot fit. Preserve the sixteen queued SmolLM parents on
+Vista and retain the remaining Vista allowance for finishing work and complete,
+measured follow-ups. Transfer only the frozen inputs needed by DGX controls,
+not the Vista project or model cache. This is an allocation change, not a new
+scientific protocol or a duplicate launch of the same tasks on both clusters.
 The latest allowance is **500 additional SUs from now**, superseding the earlier
 800-total interpretation. Existing completed results, declarations and manuscript
 remain preserved. No forecasting development is included.
@@ -35,7 +44,10 @@ the service-reported account balance, distinct from our project ledger.
 
 The bounded-work ledger is542.573611 SUs used/reserved. The proposed additional
 ceiling gives at most**1,042.573611 SUs** in that ledger, still below its existing
-1,200-SU cap. Earlier original campaigns are excluded from this ledger.
+1,200-SU cap. On October26 the live ledger's hard cap was reduced to
+**1,042.573611 SUs**, enforcing the500-additional-SU ceiling directly; its
+previous contents were preserved. Earlier original campaigns are excluded
+from this ledger. Account balance does not increase this authorization.
 
 | Work | Fixed scope | Maximum additional SUs |
 | --- | --- | ---: |
@@ -54,9 +66,16 @@ in reservations. Running all three original blocks would exceed500 even
 before contingency; only the explicitly approved SmolLM block is submitted.
 The other complete control designs below are preserved as future work, rather
 than silently reducing their sample sizes or promising them within this budget.
-At submission of the increased reservations,425.8525 revision SUs were charged
-or reserved, leaving74.1475 unreserved. Actual charges can release headroom,
-but no additional GPU control is automatically launched with that headroom.
+At12:24 UTC October26, including the allocated input export,426.0175 revision
+SUs were charged or reserved, leaving73.9825 available on Vista. These are
+conservative full-walltime reservations, not426 SUs already consumed. Actual
+charges can release headroom. Use this remaining allowance on Vista for
+finishing work or complete follow-ups whose measured total fits; account for
+all failures and minimum billing before each submission. The full16-parent
+paired-control block is overflow work on DGX. Do not split a paired parent
+across sites or duplicate a task to spend the remainder. The frozen
+[allocation receipt](experiments/revision_20261024/allocation_20261026.json)
+records the enforced cap, jobs and bounded transfer scope.
 Scientific budgets are unchanged. Operational details and job IDs are in
 [the execution record](docs/smollm16_execution_20261024.md).
 These are **allocation ceilings, not measured
@@ -112,6 +131,13 @@ Keep the original confirmation primary and adjusted secondary family intact.
 New analyses are explicitly review-driven and exploratory.
 
 ## B. Frozen subset and matched recipient/data-source control
+
+DGX execution uses supplement R-DGX1 in the execution record: re-score both
+receivers and repeat the native50-step baseline on DGX for every selected draw.
+This prevents direct pairing of an A100 arm with an archived Vista outcome.
+The96-cell count below describes missing cells under the original Vista design;
+DGX additionally recomputes32 native baselines. All16 parents, draw choices,
+correction batches and recipe definitions remain fixed.
 
 Use **16 existing parents**, four per model/task stream, selected by a published
 hash ordering of identifiers before reading per-parent effect estimates. Save

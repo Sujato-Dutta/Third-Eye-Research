@@ -18,12 +18,19 @@ The approved [SmolLM3-3B confirmation](docs/smollm16_execution_20261024.md) is
 submitted:16 fresh runs, eight per task, with validation, preparation, GPU checks
 and final analysis linked by scheduler dependencies. Measured timing requires
 23h per code run and30h per math run:424 SUs across the16 parent tasks.
-Including checks and reporting,425.853 SUs are charged or reserved against the
+Including checks, reporting and the input export,426.018 SUs are charged or reserved against the
 500-SU revision cap. The October26 replacement release passed217 tests and lint after
 repairing a preflight verifier call; the original collection never started.
 Both GPU checks subsequently passed. An operational reservation supplement
-preserves the validated source and experiment. Other revision controls remain
-deferred to avoid exceeding the cap. Qwen3-8B and
+preserves the validated source and experiment. Vista retains its remaining
+73.983-SU allowance for finishing work and complete follow-ups that fit;
+DGX handles overflow under the same fixed protocol. The authorized
+[DGX continuation and recipe controls](docs/dgx_revision_execution_20261026.md)
+have a separate one-A100 dependency chain and reuse the archived parents.
+Only their required frozen inputs are transferred; the Vista project and
+model cache stay in place. The live budget ledger now directly enforces
+the500-additional-SU cap.
+Qwen3-8B and
 Llama-3.1-8B-Instruct are future DGX extensions, excluded from current results.
 
 ## Implementation
@@ -75,7 +82,8 @@ The October 8 empirical supplement is tracked in
 [the execution record](docs/empirical_execution_20261008.md), including reliability
 validation, fixed comparator controls and the held balanced replication cohort.
 
-Execution is consolidated on [TACC Vista](docs/vista_execution.md).
+SmolLM collection runs on [TACC Vista](docs/vista_execution.md); the authorized
+[paired follow-up controls](docs/dgx_revision_execution_20261026.md) run on DGX.
 [A1 calibration](docs/a1_execution.md) and the subsequent frozen campaigns are
 historical execution records. The original and balanced replication GPU
 collections have completed. The active extension is the16-run SmolLM3-3B
