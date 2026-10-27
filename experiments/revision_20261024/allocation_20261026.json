@@ -1,0 +1,17 @@
+{
+  "time_utc": "2026-10-26T12:24:24.555101+00:00",
+  "previous_hard_cap_sus": 1200,
+  "new_hard_cap_sus": 1042.573611111111,
+  "revision_baseline_sus": 542.5736111111111,
+  "additional_hard_cap_sus": 500,
+  "charged_plus_reserved_revision_sus": 426.0174999999998,
+  "remaining_vista_revision_allowance_sus": 73.98250000000007,
+  "existing_vista_gpu_jobs": [
+    "1101555",
+    "1101556"
+  ],
+  "existing_vista_summary_job": "1101557",
+  "dgx_overflow_controls_array": "28800",
+  "migration_scope": "Only exact frozen adapters, manifests and saved item outcomes; no full Vista project or model cache",
+  "scientific_settings_changed": false
+}
