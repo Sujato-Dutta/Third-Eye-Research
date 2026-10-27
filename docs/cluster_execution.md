@@ -1,5 +1,11 @@
 # DGX campaign status
 
+**October26 reactivation:** the authorized review controls now run through
+[the new DGX execution record](dgx_revision_execution_20261026.md).
+The account was cleaned as explicitly requested, and a new isolated environment
+and immutable source release were created. The October1 record below is
+historical and does not describe the current job chain.
+
 The active research campaign migrated to [TACC Vista](vista_execution.md) on
 October 1. DGX jobs `25240`, `25241`, `25244`, and `25245` were retired; `25239`
 completed its pilot. The record below describes the archived DGX deployment.
