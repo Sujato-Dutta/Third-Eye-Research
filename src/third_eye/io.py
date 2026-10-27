@@ -14,11 +14,12 @@ def digest(value):
 
 def file_digest(path):
     with Path(path).open("rb") as stream:
-        return (
-            hashlib.file_digest(stream, "sha256").hexdigest()
-            if hasattr(hashlib, "file_digest")
-            else hashlib.sha256(stream.read()).hexdigest()
-        )
+        if hasattr(hashlib, "file_digest"):
+            return hashlib.file_digest(stream, "sha256").hexdigest()
+        hasher = hashlib.sha256()
+        for chunk in iter(lambda: stream.read(8 * 1024**2), b""):
+            hasher.update(chunk)
+        return hasher.hexdigest()
 
 
 def write_json(path, value):
