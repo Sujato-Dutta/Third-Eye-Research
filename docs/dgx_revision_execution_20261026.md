@@ -1,5 +1,25 @@
 # DGX review-control execution
 
+**October28,11:17 IST live check:** eleven of sixteen control parents completed;
+their source/registry-matched receipts contain187 scored cells. Element11 is
+running on dgxb and elements12-15 await the one-GPU array limit. The completed
+set includes all eight Llama parents and three Qwen/code parents. No control
+element has failed. All sixteen Vista SmolLM parents are now running, each for
+about6.2h, across sixteen GPU nodes. Their bounded log tails show completed
+development evaluation and ongoing correction harvesting, with no traceback.
+Both final analyses retain scheduler dependencies; no complete-cohort scientific
+claim is inferred from this partial execution status.
+
+**October27,20:09 IST live check:** seven of sixteen control parents completed,
+with119 scored cells and matching source/registry completion receipts. Element7
+is running; elements8-15 await the one-GPU array limit. The completed set is
+four Llama/code and three Llama/math parents; Qwen is not yet represented in
+the completed subset. No control element has failed. Vista's sixteen SmolLM
+jobs remain pending priority, with no estimated start. Scheduler metadata shows
+no idle gh nodes (572 allocated, two reserved and two planned). Preserve their
+queue age and current reservations; do not cancel/re-submit unchanged jobs.
+Final DGX inference remains dependent on the complete cohort.
+
 **October27,09:29 IST live check:** compatibility28972 passed all four streams.
 Array28973 completed its first four parents successfully, each with all17 scored
 cells; their completion receipts were downloaded and checked against the source

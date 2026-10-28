@@ -1,5 +1,13 @@
 # Approved third-family confirmation
 
+**Live status, October28,11:17 IST:** all sixteen parents are running:
+code array1101555 and math array1101556 each occupy eight GPU nodes. Elapsed
+times are6h11m--6h24m; no parent has completed or failed. Bounded tails of all
+sixteen logs show development scoring and correction harvesting, without a
+traceback. Final analysis1101557 remains dependent on both arrays. The500-SU
+revision ceiling and existing reservations are unchanged. The October26 records
+below describe the preserved setup attempts and successful runtime supplement.
+
 **Current status, October26:** the original CPU validation and preparation
 passed, but both CUDA preflights failed on an incorrect verifier API call.
 All16 collection tasks were cancelled without allocation; no new scientific
