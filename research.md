@@ -22,6 +22,13 @@ are future DGX extensions when access returns. The eventual five-model study
 would span family and scale; unrun models are not counted as results.
 The original confirmation and its endpoints remain unchanged.
 
+October28 extension: execute the two authorized8B models serially on DGX after
+the matched controls. Freeze eight fresh parents per model, four per task,
+with unchanged update/harvest/scoring budgets. These smaller cohorts provide
+scale sensitivity; they do not establish a causal size effect. Preserve all
+adapter bytes with verified lossless archives and rotate pretrained caches
+within50GB. [Execution declaration](docs/dgx_scale_execution_20261028.md).
+
 ## 1. Question, contribution and claim boundaries
 
 **Question:** When does committing a verified correction update improve future
