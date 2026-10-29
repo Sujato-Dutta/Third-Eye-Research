@@ -1,5 +1,12 @@
 # DGX review-control execution
 
+**October28,20:03 IST live check:** thirteen of sixteen control parents completed,
+with221 scored cells in source/registry-matched completion receipts. Element13
+is running, elements14-15 await the one-GPU array limit, and analysis28974
+remains dependent. No control element has failed. Vista completed15/16 SmolLM
+parents; the remaining math parent finished label collection and is in final
+scoring. Both final analyses remain automatic and have not started.
+
 **October28,11:17 IST live check:** eleven of sixteen control parents completed;
 their source/registry-matched receipts contain187 scored cells. Element11 is
 running on dgxb and elements12-15 await the one-GPU array limit. The completed

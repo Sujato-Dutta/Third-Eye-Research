@@ -1,5 +1,13 @@
 # Approved third-family confirmation
 
+**Live status, October28,20:03 IST:** fifteen of sixteen parents completed:
+all eight code parents and seven math parents. Their passed completion receipts
+match the frozen source and plan hashes and record195 scored checkpoints.
+Math array element1101556_2 remains running, with completed label collection
+and final scoring underway. No parent has failed. Analysis1101557 is waiting
+on that last array element and will start automatically. No cohort-level result
+is claimed from the partial completion receipts.
+
 **Live status, October28,11:17 IST:** all sixteen parents are running:
 code array1101555 and math array1101556 each occupy eight GPU nodes. Elapsed
 times are6h11m--6h24m; no parent has completed or failed. Bounded tails of all

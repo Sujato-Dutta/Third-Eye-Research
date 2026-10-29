@@ -1,5 +1,17 @@
 # Third Eye: review-driven revision implementation plan
 
+**October28 scale authorization:** queue Qwen3-8B and Llama3.1-8B-Instruct
+behind the complete DGX controls and their analysis. Each adds eight fresh
+parents (four math/four code), with unchanged training, harvesting and scoring.
+This is a separately frozen scale-sensitivity extension, not an equal-N
+replacement for the main cohorts. The serial dependency and lossless storage
+handoff are specified in [the8B execution record](docs/dgx_scale_execution_20261028.md).
+It consumes no Vista SUs; the500-additional-SU ceiling is unchanged.
+Both blocks are submitted: Qwen array29452, Llama array29456, with serial
+preparation, compatibility, statistics and storage dependencies after28974.
+The full source passed230 CPU tests and lint in29448. The original2--3-day
+estimate below predates this serial8B extension and does not cover its runtime.
+
 October24,2026. **SmolLM3 sixteen-run extension approved for execution.**
 The matched continuation and recipe controls are now authorized for DGX;
 [their separate execution record](docs/dgx_revision_execution_20261026.md)
