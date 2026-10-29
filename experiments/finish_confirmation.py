@@ -447,7 +447,7 @@ def run(request, index):
     run_task(request, plan, task)
 
 
-def run_task(request, plan, task, decision_rule=actions):
+def run_task(request, plan, task, decision_rule=actions, scale_authorization=None):
     """Collect one immutable parent using a validated caller's frozen policy."""
     from third_eye.evaluation.verifiers import VerifierRegistry
     from third_eye.training.hf_backend import HFBackend
@@ -479,6 +479,7 @@ def run_task(request, plan, task, decision_rule=actions):
             "--continuation-seed-offsets",
             "50000000",
             "100000000",
+            *(["--scale-confirmation", str(scale_authorization)] if scale_authorization else []),
         ],
         check=True,
     )

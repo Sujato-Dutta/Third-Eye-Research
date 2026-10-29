@@ -16,7 +16,7 @@ from third_eye.data.splits import load_manifest
 from third_eye.evaluation.verifiers import VerifierRegistry
 from third_eye.experiments.labeling import LabelGenerator, run_trajectory
 from third_eye.experiments.online import POLICIES, run_online
-from third_eye.io import digest, write_json
+from third_eye.io import digest, file_digest, write_json
 from third_eye.provenance import source_inventory, versions, execution_environment
 
 
@@ -82,6 +82,10 @@ def main():
     parser.add_argument(
         "--gate2", help="JSON decision artifact with passed=true; required for 8B runs"
     )
+    parser.add_argument(
+        "--scale-confirmation",
+        help="Source-bound empirical scale-study authorization; not a forecasting result",
+    )
     args = parser.parse_args()
     if args.mode == "labels" and args.policy not in {"random", "greedy_h1"}:
         parser.error(
@@ -112,7 +116,15 @@ def main():
             "Protocol is a pilot; use --pilot or freeze measured hyperparameters first"
         )
     if "8b" in config.model.name.lower():
-        if (
+        if args.scale_confirmation:
+            from third_eye.experiments.scale import validate_authorization
+
+            validate_authorization(
+                args.scale_confirmation, args.config, args.manifest,
+                mode=args.mode, policy=args.policy, generations=args.generations,
+                offsets=offsets, capture=args.capture_item_outcomes,
+            )
+        elif (
             not args.gate2
             or json.loads(Path(args.gate2).read_text()).get("passed") is not True
         ):
@@ -240,6 +252,8 @@ def main():
             "label_units": "accuracy fractions",
             "continuation_seed_offsets": offsets,
             "capture_item_outcomes": args.capture_item_outcomes,
+            **({"scale_confirmation_authorization_sha256": file_digest(args.scale_confirmation)}
+               if args.scale_confirmation else {}),
             "software_versions": versions(),
             "execution": execution_environment(),
             **source_inventory(),
