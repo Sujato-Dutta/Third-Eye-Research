@@ -30,8 +30,10 @@ have a separate one-A100 dependency chain and reuse the archived parents.
 Only their required frozen inputs are transferred; the Vista project and
 model cache stay in place. The live budget ledger now directly enforces
 the500-additional-SU cap.
-Qwen3-8B and
-Llama-3.1-8B-Instruct are future DGX extensions, excluded from current results.
+The authorized [Qwen3-8B and Llama3.1-8B extension](docs/dgx_scale_execution_20261028.md)
+adds eight fresh parents per model, four per task, after the DGX controls.
+The dependency chain uses one GPU at a time and lossless adapter retention
+within50GB. These models remain excluded from results until completed.
 
 ## Implementation
 
