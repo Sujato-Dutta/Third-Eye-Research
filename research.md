@@ -29,6 +29,15 @@ scale sensitivity; they do not establish a causal size effect. Preserve all
 adapter bytes with verified lossless archives and rotate pretrained caches
 within50GB. [Execution declaration](docs/dgx_scale_execution_20261028.md).
 
+October29: SmolLM16 completed. Selected continuation loss is-4.262pp,
+95% interval[-6.163,-2.581]; H1 is already negative. This supports continued
+harm across a third family, without universal immediate harmlessness or a
+mechanism claim. [Results](docs/smollm16_results_20261029.md). Completed Vista
+revision usage is218.1069/500 SUs. DGX controls and their analysis completed;
+mechanism and mitigation contrasts remain inconclusive. Qwen8B is running;
+Llama8B follows. [Control results](docs/dgx_controls_results_20261029.md).
+Preserve original primary tests and separate cohorts.
+
 ## 1. Question, contribution and claim boundaries
 
 **Question:** When does committing a verified correction update improve future

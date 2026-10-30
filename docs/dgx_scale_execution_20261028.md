@@ -1,5 +1,13 @@
 # Two-model8B scale extension
 
+**October29 evening status:** control analysis28974 passed. Lossless storage
+rotation29449 reduced home usage from40,174,997,504 to21,710,651,392 bytes.
+Qwen preparation29450 and real both-task GPU preflight29451 completed;
+Qwen parent29452_0 is running and has finished label collection, with final
+scoring underway. Llama's preparation and GPU array remain dependent on the
+complete Qwen block. Parent reservations are protective ceilings, not measured
+completion estimates; no full8B cohort result is available yet.
+
 October28,2026. Execute on DGX after complete paired-control analysis28974.
 Use the existing one-A100,32-CPU/256GB association limits,50GB home policy,
 and compute-node-only execution. Vista's500-additional-SU cap is unchanged;

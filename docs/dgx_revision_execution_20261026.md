@@ -1,5 +1,22 @@
 # DGX review-control execution
 
+**October29 evening:** all16 controls and analysis28974 completed successfully;
+all272 cells and544 scored-file hashes passed. [Results and the independent
+format/exposure audit](dgx_controls_results_20261029.md) document inconclusive
+recipient/recipe contrasts and a negative, recipe-conditional gold-source
+effect. Storage rotation29449 and Qwen8B preparation/preflight29450/29451
+passed. Qwen array29452 has started; Llama29456 follows its completed block.
+The read-only audit needed a local tokenizer metadata-path correction;
+replacement29581 passed, preserving the failed nine-second29578 attempt.
+
+**October29,10:29 IST live check:** fifteen of sixteen control parents completed,
+with255 cells and matching completion receipts. Element15 is running; no
+control parent has failed. Analysis28974 waits for this final element. The
+two8B chains remain pending their declared dependencies. SmolLM16 and its final
+analysis on Vista are complete; selected H2-H1=-4.262pp,95% interval
+[-6.163,-2.581]. Its H1 is already negative; do not infer neutral immediate
+effects across all three model families.
+
 **October28,20:03 IST live check:** thirteen of sixteen control parents completed,
 with221 scored cells in source/registry-matched completion receipts. Element13
 is running, elements14-15 await the one-GPU array limit, and analysis28974

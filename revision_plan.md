@@ -1,5 +1,22 @@
 # Third Eye: review-driven revision implementation plan
 
+**October29 evening:** all16 [matched controls and their analysis](docs/dgx_controls_results_20261029.md)
+completed. Shorter-step, pooling and recipient-state contrasts remain
+inconclusive. A reference-solution source effect is significant but confounded
+with text style and label-token exposure; the completed read-only audit
+documents these differences without establishing mediation. Storage rotation
+and Qwen8B GPU validation passed; its first parent is running, followed by
+the remaining Qwen parents and the queued Llama8B block. No additional
+experimental arm or Vista GPU job was introduced by the audit.
+
+**October29 progress:** the16-parent SmolLM extension and final analysis are
+complete; [results](docs/smollm16_results_20261029.md) support further continuation
+loss, with harm already visible at H1. DGX controls are15/16 complete, with
+the final element running and both8B blocks queued afterward. Full accounting
+reduces actual completed Vista revision usage to218.1069 SUs, leaving281.8931
+under the500-additional-SU cap. Earlier reservation figures remain historical;
+no new Vista GPU job has been submitted with the released headroom.
+
 **October28 scale authorization:** queue Qwen3-8B and Llama3.1-8B-Instruct
 behind the complete DGX controls and their analysis. Each adds eight fresh
 parents (four math/four code), with unchanged training, harvesting and scoring.

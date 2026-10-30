@@ -14,19 +14,19 @@ records; the current paper does not claim a forecasting or controller advantage.
 
 The [review-driven revision plan](revision_plan.md) includes matched controls,
 recipe checks and a balanced third-model extension within500 additional SUs.
-The approved [SmolLM3-3B confirmation](docs/smollm16_execution_20261024.md) is
-submitted:16 fresh runs, eight per task, with validation, preparation, GPU checks
-and final analysis linked by scheduler dependencies. Measured timing requires
-23h per code run and30h per math run:424 SUs across the16 parent tasks.
-Including checks, reporting and the input export,426.018 SUs are charged or reserved against the
-500-SU revision cap. The October26 replacement release passed217 tests and lint after
-repairing a preflight verifier call; the original collection never started.
-Both GPU checks subsequently passed. An operational reservation supplement
-preserves the validated source and experiment. Vista retains its remaining
-73.983-SU allowance for finishing work and complete follow-ups that fit;
+The [SmolLM3-3B confirmation](docs/smollm16_results_20261029.md) is complete:
+16 fresh parents,208 scored checkpoints and144 continuation draws. Selected
+H2-H1 utility is-4.262pp,95% interval[-6.163,-2.581]. H1 is already negative:
+this extends continuation loss without reproducing the earlier near-neutral
+immediate aggregate. Actual completed revision usage, including checks,
+failures and export, is218.107 SUs. Vista retains281.893 under the500-SU cap;
+the earlier426-SU figure was a conservative reservation, not actual spending.
 DGX handles overflow under the same fixed protocol. The authorized
 [DGX continuation and recipe controls](docs/dgx_revision_execution_20261026.md)
-have a separate one-A100 dependency chain and reuse the archived parents.
+completed all16 paired follow-ups and272 scored cells. Their
+[results and format/exposure audit](docs/dgx_controls_results_20261029.md)
+leave the recipient-state mechanism and shorter-step/pooling benefits
+unresolved. The one-A100 dependency chain now runs the8B extension.
 Only their required frozen inputs are transferred; the Vista project and
 model cache stay in place. The live budget ledger now directly enforces
 the500-additional-SU cap.

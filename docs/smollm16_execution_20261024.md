@@ -1,5 +1,14 @@
 # Approved third-family confirmation
 
+**Complete, October29,10:29 IST:** all16 parents and final analysis1101557
+completed successfully. All208 scored checkpoints and144 continuation draws
+passed verification; none were terminal. Selected H2-H1 is-4.262pp,95% interval
+[-6.163,-2.581]. Immediate utility is already negative, so this extends
+continuation loss without reproducing the original near-neutral H1 aggregate.
+[Full results](smollm16_results_20261029.md). Actual completed revision usage
+is218.1069 SUs including checks, failures and export, leaving281.8931 under500;
+the earlier full-walltime reservations below are historical.
+
 **Live status, October28,20:03 IST:** fifteen of sixteen parents completed:
 all eight code parents and seven math parents. Their passed completion receipts
 match the frozen source and plan hashes and record195 scored checkpoints.

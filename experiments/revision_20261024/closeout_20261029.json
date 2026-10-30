@@ -1,0 +1,18 @@
+{
+  "time_utc": "2026-10-29T05:01:17.300264+00:00",
+  "revision_baseline_sus": 542.5736111111111,
+  "additional_cap_sus": 500,
+  "previous_charged_plus_reserved_revision_sus": 426.0174999999998,
+  "actual_completed_revision_sus": 218.10694444444425,
+  "remaining_authorized_vista_sus": 281.89305555555575,
+  "unused_reservations_released_sus": 207.91055555555556,
+  "fully_accounted_jobs": {
+    "revision_smol16_runtime_20261026_price": 0.0825,
+    "revision_smol16_runtime_20261026_code": 108.61888888888888,
+    "revision_smol16_runtime_20261026_math": 107.82805555555555,
+    "revision_smol16_runtime_20261026_review": 0.0825,
+    "review_dgx_export_20261026": 0.0825
+  },
+  "raw_accounting": "1101554|COMPLETED|9|1\n1101555_0|COMPLETED|49886|1\n1101555_1|COMPLETED|50391|1\n1101555_2|COMPLETED|48170|1\n1101555_3|COMPLETED|48053|1\n1101555_4|COMPLETED|51969|1\n1101555_5|COMPLETED|49204|1\n1101555_6|COMPLETED|44590|1\n1101555_7|COMPLETED|48765|1\n1101557|COMPLETED|18|1\n1101556_0|COMPLETED|45021|1\n1101556_1|COMPLETED|44838|1\n1101556_2|COMPLETED|57990|1\n1101556_3|COMPLETED|45454|1\n1101556_4|COMPLETED|50796|1\n1101556_5|COMPLETED|51060|1\n1101556_6|COMPLETED|48450|1\n1101556_7|COMPLETED|44572|1\n1101572|COMPLETED|395|1\n",
+  "DGX_scale_Vista_SUs": 0
+}
