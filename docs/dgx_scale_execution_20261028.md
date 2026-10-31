@@ -1,12 +1,19 @@
 # Two-model8B scale extension
 
-**October29 evening status:** control analysis28974 passed. Lossless storage
-rotation29449 reduced home usage from40,174,997,504 to21,710,651,392 bytes.
-Qwen preparation29450 and real both-task GPU preflight29451 completed;
-Qwen parent29452_0 is running and has finished label collection, with final
-scoring underway. Llama's preparation and GPU array remain dependent on the
-complete Qwen block. Parent reservations are protective ceilings, not measured
-completion estimates; no full8B cohort result is available yet.
+**October31, 20:06 IST status:** Qwen parents29452_0 through29452_4 completed
+successfully: all four code parents (7h13m to8h01m each) and the first math
+parent (13h13m). Parent29452_5, the second math parent, is running (11h54m
+elapsed at check); two math parents remain queued under the one-GPU limit.
+Its collection has finished and final scoring has recorded3/13 checkpoints.
+All five downloaded completion receipts match the frozen source and plan hash:
+each has all13 scored checkpoints, K=3 candidates, nine continuation draws,
+zero terminal draws and a passing lossless-retention receipt.
+Local receipts: `runs/deployment/evidence/dgx_scale_20261030/` and
+`runs/deployment/evidence/dgx_scale_20261031/`.
+Llama's preparation and GPU array remain dependent on the complete Qwen block
+and analysis. No failed scale jobs were reported. One completed math parent is
+insufficient for a tight completion estimate; Llama runtimes remain unmeasured.
+No balanced8B cohort conclusion is available before the complete-model analysis.
 
 October28,2026. Execute on DGX after complete paired-control analysis28974.
 Use the existing one-A100,32-CPU/256GB association limits,50GB home policy,
