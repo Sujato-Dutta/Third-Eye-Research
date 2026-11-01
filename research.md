@@ -34,8 +34,10 @@ October29: SmolLM16 completed. Selected continuation loss is-4.262pp,
 harm across a third family, without universal immediate harmlessness or a
 mechanism claim. [Results](docs/smollm16_results_20261029.md). Completed Vista
 revision usage is218.1069/500 SUs. DGX controls and their analysis completed;
-mechanism and mitigation contrasts remain inconclusive. Qwen8B is running;
-Llama8B follows. [Control results](docs/dgx_controls_results_20261029.md).
+mechanism and mitigation contrasts remain inconclusive.
+October31: Qwen8B continues on DGX; unchanged Llama8B moves to Vista array1112144,
+up to eight GPUs. Duplicate DGX Llama jobs were cancelled. Revision charges plus
+reservations are476.377/500 SUs. [Placement](docs/vista_llama8_execution_20261031.md).
 Preserve original primary tests and separate cohorts.
 
 ## 1. Question, contribution and claim boundaries

@@ -5,6 +5,7 @@ import gc
 import hashlib
 import json
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import time
@@ -35,6 +36,8 @@ def read(path):
 def checked(path):
     require_compute_allocation()
     request = read(path)
+    if request.get("execution_site", "dgx") not in {"dgx", "vista"}:
+        raise ValueError("Known scale execution site required")
     sha = source_inventory()["source_tree_sha256"]
     validation = read(request["validation"])
     if request["source_tree_sha256"] != sha or not validation["passed"] or validation["source_tree_sha256"] != sha:
@@ -55,6 +58,18 @@ def headroom(extra=2_500_000_000):
     if used + extra > 50_000_000_000:
         raise ValueError("50GB home policy lacks required model/output headroom")
     return used
+
+
+def storage_headroom(request, extra=2_500_000_000):
+    if request.get("execution_site", "dgx") == "dgx":
+        return headroom(extra)
+    root = Path(request["root"]).resolve()
+    if not str(root).startswith("/scratch/"):
+        raise ValueError("Vista model/output storage must use scratch")
+    space = shutil.disk_usage(root)
+    if space.free < extra:
+        raise ValueError("Vista scratch lacks required model/output headroom")
+    return {"filesystem_used_bytes": space.used, "filesystem_free_bytes": space.free}
 
 
 def evict_weights(folder, weights, root):
@@ -107,7 +122,10 @@ def prepare(request, model):
     from huggingface_hub import hf_hub_download
 
     root, output = Path(request["root"]), Path(request["output"]) / model
-    if not read(Path(request["output"]) / "rotation_completed.json")["passed"]:
+    independent_vista = request.get("execution_site", "dgx") == "vista"
+    if independent_vista and model != "llama3.1-8b":
+        raise ValueError("Only the authorized Llama cohort may move to Vista")
+    if not independent_vista and not read(Path(request["output"]) / "rotation_completed.json")["passed"]:
         raise ValueError("Allocated storage rotation required")
     output.mkdir(exist_ok=False)
     identity, catalog = MODELS[model], read(request["catalog"])
@@ -118,7 +136,7 @@ def prepare(request, model):
     weights = {n: v for n, v in official["files"].items() if n.endswith(".safetensors")}
     if not weights or any(source["files"].get(n, {}).get("sha256") != v["sha256"] for n, v in weights.items()):
         raise ValueError("Public source weights must match every official shard")
-    if model == "llama3.1-8b":
+    if model == "llama3.1-8b" and not independent_vista:
         previous = Path(request["output"]) / "qwen3-8b"
         done = read(previous / "evidence/completed.json")
         if not done["passed"] or file_digest(previous / "evidence/report.json") != done["report_sha256"]:
@@ -130,13 +148,13 @@ def prepare(request, model):
         "config.json", "generation_config.json", "tokenizer.json", "tokenizer_config.json",
         "special_tokens_map.json", "model.safetensors.index.json", "vocab.json", "merges.txt",
     } or "chat_template" in n}
-    headroom(sum(source["files"][n]["bytes"] for n in names) + 2_500_000_000)
+    storage_headroom(request, sum(source["files"][n]["bytes"] for n in names) + 2_500_000_000)
     folder = root / "models/scale" / model
     folder.mkdir(parents=True, exist_ok=False)
     metadata = {}
     for name in sorted(names):
         item = source["files"][name]
-        headroom(item["bytes"] + 500_000_000)
+        storage_headroom(request, item["bytes"] + 500_000_000)
         path = Path(hf_hub_download(identity["repository"], name,
                                    revision=identity["source_revision"], local_dir=folder, token=False))
         if item["sha256"]:
@@ -159,8 +177,13 @@ def prepare(request, model):
     payload = Path(request["payload"])
     frozen, tasks = {}, []
 
-    def bind(path):
-        frozen[str(path)] = file_digest(path)
+    def bind(path, original=False):
+        sha = file_digest(path)
+        if original:
+            relative = Path(path).relative_to(payload).as_posix()
+            if registry["files"][relative]["sha256"] != sha:
+                raise ValueError("Original scale input changed: " + relative)
+        frozen[str(path)] = sha
 
     seeds = {s for values in identity["seeds"].values() for s in values}
     if len(seeds) != 8:
@@ -176,9 +199,10 @@ def prepare(request, model):
         if {r: len(v) for r, v in final.items()} != DECLARATION["scoring_items"]:
             raise ValueError("Original independent scoring sizes required")
         for path, meta in [(manifest, dev_meta), (final_manifest, final_meta)]:
-            bind(path)
+            bind(path, original=True)
             for entry in meta["splits"].values():
-                bind(path.parent / entry["path"])
+                bind(path.parent / entry["path"], original=True)
+        bind(payload / original["config"], original=True)
         for seed in identity["seeds"][task_name]:
             cfg = deepcopy(read(payload / original["config"]))
             cfg["model"].update(name=identity["official"], revision=identity["revision"],
@@ -199,9 +223,11 @@ def prepare(request, model):
                           "output": str(output / "parents" / task_name / str(seed))})
     plan = {"source_tree_sha256": request["source_tree_sha256"], "declaration": DECLARATION,
             "model": model, "tasks": tasks, "frozen_files": frozen,
-            "catalog_sha256": request["catalog_sha256"], "automatic_expansion": False}
+            "catalog_sha256": request["catalog_sha256"], "automatic_expansion": False,
+            "execution_placement": {"site": request.get("execution_site", "dgx"),
+                                    "relocates_original_declaration_scheduling_only": independent_vista}}
     write_json(output / "plan.json", plan)
-    write_json(output / "prepared.json", {"passed": True, "plan_sha256": file_digest(output / "plan.json"), "home_used_bytes": usage()})
+    write_json(output / "prepared.json", {"passed": True, "plan_sha256": file_digest(output / "plan.json"), "storage": storage_headroom(request)})
     print(json.dumps({"scale_model_prepared": model, "parents": 8}))
 
 
@@ -279,7 +305,7 @@ def preflight(request, model):
         torch.cuda.empty_cache()
     write_json(output / "runtime_coverage.json", observations)
     if any(v["required_seconds"] > v["reserved_seconds"] for v in observations):
-        raise ValueError("Complete estimated parent runtime exceeds seven-day reservation")
+        raise ValueError("Complete estimated parent runtime exceeds declared reservation")
     ready = {"passed": True, "source_tree_sha256": request["source_tree_sha256"],
              "plan_sha256": plan["plan_sha256"], "model": model,
              "discarded_fixture": True, "runtime_coverage": observations}
@@ -304,12 +330,12 @@ def collect(request, model, index):
     ready = read(output / "preflight/completed.json")
     if not ready["passed"] or ready["plan_sha256"] != plan["plan_sha256"]:
         raise ValueError("Matching GPU and runtime validation required")
-    headroom()
+    storage_headroom(request)
     task = plan["tasks"][index]
     run_task(request, plan, task, decision_rule=actions,
              scale_authorization=output / "authorized_scale.json")
     compact_checkpoints(task["output"])
-    headroom(500_000_000)
+    storage_headroom(request, 500_000_000)
 
 
 def review(request, model):
@@ -352,7 +378,8 @@ def review(request, model):
                        "artifacts": artifacts, "ids": {r: [(e.id, e.prompt_hash) for e in xs] for r, xs in final.items()}})
     output = Path(request["output"]) / model / "evidence"
     summarize(states, model, output, {"source_tree_sha256": request["source_tree_sha256"],
-                                     "plan_sha256": plan["plan_sha256"], "input_hashes": hashes})
+                                     "plan_sha256": plan["plan_sha256"], "input_hashes": hashes,
+                                     "execution_placement": plan.get("execution_placement", {"site": "dgx"})})
     write_json(output / "completed.json", {"passed": True, "parents": 8,
                                            "report_sha256": file_digest(output / "report.json")})
 

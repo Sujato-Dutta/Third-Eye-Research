@@ -1,5 +1,14 @@
 # Third Eye: review-driven revision implementation plan
 
+**October31 parallel execution:** Qwen3-8B has five verified complete parents
+and its sixth running on DGX. The eight unchanged Llama3.1-8B parents are
+submitted to Vista as array1112144 (concurrency8), with source/model/GPU
+validation and final analysis in the same dependency chain. The pending DGX
+Llama chain was cancelled to prevent duplicates. This reserves258.270 more
+Vista SUs: total revision charged plus reserved476.376944/500, with23.623056
+unreserved. [Execution and budget](docs/vista_llama8_execution_20261031.md).
+No scientific setting, seed grid or endpoint changed.
+
 **October29 evening:** all16 [matched controls and their analysis](docs/dgx_controls_results_20261029.md)
 completed. Shorter-step, pooling and recipient-state contrasts remain
 inconclusive. A reference-solution source effect is significant but confounded

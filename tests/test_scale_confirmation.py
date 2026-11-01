@@ -13,6 +13,91 @@ from third_eye.experiments.scale import (
 from third_eye.io import digest, file_digest, write_json
 
 
+def test_vista_storage_uses_scratch_capacity_without_home_scan(monkeypatch):
+    import scale_confirmation as driver
+
+    monkeypatch.setattr(driver, "headroom", lambda *a: pytest.fail("DGX quota scan on Vista"))
+    monkeypatch.setattr(driver.shutil, "disk_usage", lambda p: SimpleNamespace(used=100, free=4000))
+    assert driver.storage_headroom({"execution_site": "vista", "root": "/scratch/example"}, 3000)["filesystem_free_bytes"] == 4000
+    with pytest.raises(ValueError, match="headroom"):
+        driver.storage_headroom({"execution_site": "vista", "root": "/scratch/example"}, 5000)
+    with pytest.raises(ValueError, match="scratch"):
+        driver.storage_headroom({"execution_site": "vista", "root": "/home/example"}, 1)
+
+
+def test_vista_relocation_cannot_expand_to_qwen(tmp_path):
+    import scale_confirmation as driver
+
+    request = {"execution_site": "vista", "root": str(tmp_path), "output": str(tmp_path)}
+    with pytest.raises(ValueError, match="Only.*Llama"):
+        driver.prepare(request, "qwen3-8b")
+
+
+def test_independent_vista_prepare_keeps_frozen_seeds_and_suites(tmp_path, monkeypatch):
+    import hashlib
+    import huggingface_hub
+    import scale_confirmation as driver
+
+    root = tmp_path
+    output = root / "runs/campaign"
+    output.mkdir(parents=True)
+    payload = root / "payload"
+    payload.mkdir()
+    model = "llama3.1-8b"
+    identity = MODELS[model]
+    registry = {"files": {}, "tasks": []}
+
+    def original(name, value):
+        path = payload / name
+        write_json(path, value)
+        registry["files"][name] = {"sha256": file_digest(path)}
+        return name
+
+    metadata = {}
+    for task in ("code", "math"):
+        cfg = Config().to_dict()
+        cfg["protocol"].update(candidate_size=2, correction_attempts=8, correction_seed_stride=16)
+        config = original(task + "_config.json", cfg)
+        dev = {"splits": {"train": {"path": original(task + "_train.json", [])}}}
+        final = {"splits": {r: {"path": original(task + "_" + r + ".json", [])}
+                            for r in DECLARATION["scoring_items"]}}
+        manifest = original(task + "_dev.json", dev)
+        final_manifest = original(task + "_final.json", final)
+        metadata[str(payload / manifest)] = dev
+        metadata[str(payload / final_manifest)] = final
+        registry["tasks"].append({"stream": "qwen3-4b/" + task, "config": config,
+                                  "manifest": manifest, "final_manifest": final_manifest})
+    registry_path = root / "registry.json"
+    write_json(registry_path, registry)
+    blob = b"pinned weight fixture"
+    weights = {"model.safetensors": {"sha256": hashlib.sha256(blob).hexdigest(), "bytes": len(blob)}}
+    catalog = {identity["official"]: {"revision": identity["revision"], "files": weights},
+               identity["repository"]: {"revision": identity["source_revision"], "files": weights}}
+    catalog_path = root / "catalog.json"
+    write_json(catalog_path, catalog)
+
+    def download(repo, name, *, revision, local_dir, token):
+        assert repo == identity["repository"] and revision == identity["source_revision"] and token is False
+        path = local_dir / name
+        path.write_bytes(blob)
+        return str(path)
+
+    monkeypatch.setattr(huggingface_hub, "hf_hub_download", download)
+    monkeypatch.setattr(driver, "storage_headroom", lambda *a: {"free": 10**12})
+    monkeypatch.setattr(driver, "load_manifest", lambda p: (metadata[str(p)], {}))
+    monkeypatch.setattr(driver, "load_final_manifest", lambda p, m: (metadata[str(p)], {r: [None] * n for r, n in DECLARATION["scoring_items"].items()}))
+    request = {"execution_site": "vista", "root": str(root), "output": str(output),
+               "registry": str(registry_path), "catalog": str(catalog_path),
+               "payload": str(payload), "source_tree_sha256": "source", "catalog_sha256": file_digest(catalog_path)}
+    driver.prepare(request, model)
+    plan = json.loads((output / model / "plan.json").read_text())
+    assert len(plan["tasks"]) == 8
+    assert {t["seed"] for t in plan["tasks"]} == {s for seeds in identity["seeds"].values() for s in seeds}
+    assert plan["declaration"] == DECLARATION
+    assert plan["execution_placement"]["site"] == "vista"
+    assert not (output / "qwen3-8b").exists()
+
+
 def test_scale_seed_grid_and_development_only_selection():
     seeds = [v for m in MODELS.values() for group in m["seeds"].values() for v in group]
     assert len(seeds) == len(set(seeds)) == 16

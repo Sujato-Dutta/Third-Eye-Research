@@ -1,5 +1,14 @@
 # Two-model8B scale extension
 
+**October31,20:17 IST relocation:** Llama's eight unchanged parents are now
+submitted to Vista as array1112144, preceded by validation1112141,
+preparation1112142 and GPU verification1112143, followed by analysis1112145.
+The unstarted DGX Llama chain29454--29458 was cancelled after verifying zero
+allocated nodes. Qwen29452 and its analysis29453 continue unchanged on DGX.
+The original serial submission below is historical. The relocation reserves
+258.270 Vista SUs and stays within the500-additional-SU revision cap.
+See [the parallel execution record](vista_llama8_execution_20261031.md).
+
 **October31, 20:06 IST status:** Qwen parents29452_0 through29452_4 completed
 successfully: all four code parents (7h13m to8h01m each) and the first math
 parent (13h13m). Parent29452_5, the second math parent, is running (11h54m

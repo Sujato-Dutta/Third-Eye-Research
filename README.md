@@ -19,21 +19,25 @@ The [SmolLM3-3B confirmation](docs/smollm16_results_20261029.md) is complete:
 H2-H1 utility is-4.262pp,95% interval[-6.163,-2.581]. H1 is already negative:
 this extends continuation loss without reproducing the earlier near-neutral
 immediate aggregate. Actual completed revision usage, including checks,
-failures and export, is218.107 SUs. Vista retains281.893 under the500-SU cap;
-the earlier426-SU figure was a conservative reservation, not actual spending.
+failures and export, is218.107 SUs. The Llama8B relocation reserves258.270 more:
+revision charges plus reservations are476.377/500 SUs, leaving23.623 unreserved.
+Reservations are protective ceilings, not actual spending.
 DGX handles overflow under the same fixed protocol. The authorized
 [DGX continuation and recipe controls](docs/dgx_revision_execution_20261026.md)
 completed all16 paired follow-ups and272 scored cells. Their
 [results and format/exposure audit](docs/dgx_controls_results_20261029.md)
 leave the recipient-state mechanism and shorter-step/pooling benefits
-unresolved. The one-A100 dependency chain now runs the8B extension.
+unresolved. The one-A100 DGX chain now runs Qwen8B.
 Only their required frozen inputs are transferred; the Vista project and
 model cache stay in place. The live budget ledger now directly enforces
 the500-additional-SU cap.
 The authorized [Qwen3-8B and Llama3.1-8B extension](docs/dgx_scale_execution_20261028.md)
 adds eight fresh parents per model, four per task, after the DGX controls.
-The dependency chain uses one GPU at a time and lossless adapter retention
-within50GB. These models remain excluded from results until completed.
+Qwen uses one DGX GPU and lossless adapter retention within50GB. The unchanged
+[eight-parent Llama8B block](docs/vista_llama8_execution_20261031.md) is queued
+on Vista as array1112144, up to eight GPUs in parallel after validation.
+Its duplicate DGX jobs were cancelled. Both models remain excluded from
+cohort results until their complete analyses pass.
 
 ## Implementation
 
