@@ -1,5 +1,20 @@
 # Third Eye: review-driven revision implementation plan
 
+**November2:** Qwen8B completed all eight parents and analysis. Its primary
+continuation-change estimate is-0.681pp,97.5% interval[-1.914,+0.629], so this
+scale check is inconclusive. [Verified results](docs/qwen8_results_20261102.md).
+Four of five model cohorts are complete, totaling56 of64 planned fresh parents.
+Llama's CPU checks passed; timing1114000 is pending Vista priority, followed by
+the eight parent runs and automatic analysis. No new research arm is introduced.
+
+**November1:** seven Qwen8B parents are verified complete; the eighth runs on
+DGX. Llama's32h Vista pricing check stopped before research collection; the
+user removed the500-SU cap for completing the same eight Llama parents.
+Replacement runtime check1113999, full-pool calibration1114000, code/math
+arrays1114001/1114002 and final review1114003 are submitted. Parents retain
+all frozen scientific settings and run up to eight GPUs concurrently, with
+32h/code and48h/math ceilings. [Details and accounting](docs/vista_llama8_execution_20261031.md).
+
 **October31 parallel execution:** Qwen3-8B has five verified complete parents
 and its sixth running on DGX. The eight unchanged Llama3.1-8B parents are
 submitted to Vista as array1112144 (concurrency8), with source/model/GPU

@@ -1,5 +1,23 @@
 # Two-model8B scale extension
 
+**November2,10:56 IST complete Qwen cohort:** all eight Qwen parents and
+analysis29453 completed successfully. The verified report covers104 scored
+checkpoints and72 continuations. Selected H2-H1 is-0.681pp, declared97.5%
+interval[-1.914,+0.629]; the primary result is inconclusive. See the
+[complete results](qwen8_results_20261102.md). No Third Eye job remains active
+on DGX. Vista calibration1114000 remains pending priority; its eight Llama
+parents and final analysis are queued on their dependencies, with no new failure.
+
+**November1,17:19 IST:** Qwen has seven verified complete parents, each with
+K=3, nine continuation draws, all13 final checkpoint scores and zero terminal
+draws. Its final math parent29452_7 is running (7h23m at inspection), still
+collecting labels; prior math parents took12h35m--13h13m. Analysis29453 will
+start after it completes. New completion/retention receipts are in
+`runs/deployment/evidence/dgx_scale_20261101/`.
+Llama remains on Vista under [the corrected runtime chain](vista_llama8_execution_20261031.md);
+its original32h pricing check stopped before research collection. The user has
+removed the500-SU ceiling for completing those eight Llama parents.
+
 **October31,20:17 IST relocation:** Llama's eight unchanged parents are now
 submitted to Vista as array1112144, preceded by validation1112141,
 preparation1112142 and GPU verification1112143, followed by analysis1112145.

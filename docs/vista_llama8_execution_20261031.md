@@ -1,5 +1,69 @@
 # Parallel Llama3.1-8B confirmation
 
+**November2,10:56 IST:** CPU supplement validation1113999 passed. GPU timing
+1114000 is still pending priority; its expected start is unavailable. Code
+array1114001, math array1114002 and analysis1114003 remain pending dependencies.
+No replacement job has failed and no research parent has started. This is a
+scheduler wait, not a new scientific decision. Live metadata shows the regular
+and development GPU partitions are heavily allocated; idle node count alone
+does not imply availability at this job's priority or walltime.
+
+## November1 runtime recovery and spending authorization
+
+The user removed the500-SU revision ceiling **for completion of the existing
+eight Llama parents**. This does not authorize extra models, seeds, recipes or
+other experimental arms. The live account reported1278 SUs available at the
+November1 check. Reservation bookkeeping continues; actual runtime is billed.
+
+Original source validation1112141 passed233 tests/lint, and preparation1112142
+completed. GPU check1112143 finished both task compatibility paths but stopped
+at its runtime guard: code required25.62h and math77.94h under the16-prompt
+extrapolation, versus32h reserved. Original arrays1112144 were automatically
+cancelled with zero allocated nodes. Preserve this as timing evidence, not a
+failed research result. Vista's live QOS permits **48h maximum per job**.
+
+The runtime supplement retains the original code estimate and measures two
+complete1024-prompt math harvests, on discarded parent/50-step-fixture states.
+Use the slower full-pool timing in the same ten-harvest,13-checkpoint, three-draw
+formula with the original50% margin. Discard every calibration correction.
+Authorize collection only if the complete estimate fits32h/code and48h/math.
+No scientific data, seed, optimizer, inference or scoring budget changes.
+
+The frozen source remains`8282f1d02158`; only an explicitly hash-bound
+operational supplement is added. The prior failed16-prompt report is immutable.
+A scheduler-ID parsing error was corrected while retaining held CPU job1113992;
+its synthetic success fixture then failed because its code timing exceeded the
+fixture's declared budget. Only that synthetic timing value was corrected.
+All failed descendants had zero allocated GPU nodes. Those logs and accounting
+remain in`runtime_adjustment_20261101`; no scientific parent was restarted.
+
+The corrected supplement's three pure unit tests passed locally and are repeated
+in the allocated CPU validation before calibration. **Accepted replacement
+chain, November1,17:32 IST:**
+
+| Stage | Job | Successful predecessor |
+| --- | --- | --- |
+| Runtime supplement/input checks |1113999| Scheduler allocation |
+| Full-pool discarded GPU timing |1114000|1113999|
+| Four code parents,0--3%4,32h each |1114001|1114000|
+| Four math parents,4--7%4,48h each |1114002|1114000|
+| Complete eight-parent analysis |1114003|1114001 and1114002|
+
+Maximum new reservation is326.440 SUs:320 for parents,6 for calibration,
+0.110 for CPU checks and0.330 for analysis. Actual revision charges before this
+replacement are218.629444 SUs, including failed checks. Charges plus new
+reservations are545.069444 SUs; the earlier500 ceiling is superseded only for
+this Llama completion. Original32-parent, SmolLM and DGX scientific evidence
+remain unchanged. Qwen continues independently on DGX.
+
+Operation: `runtime_adjustment_20261101_v2` in the existing Vista campaign.
+Local receipt: `runs/deployment/vista_llama8_20261101_v2/submissions.json`.
+At17:34 IST,1113999 completed successfully in11 seconds with all three
+supplement tests passing and frozen-input/source checks intact. Calibration
+1114000 is pending priority; both four-parent arrays and analysis are pending
+their declared dependencies. No research parent has started on Vista yet.
+The October31 sections below document the original launch and historical cap.
+
 October31,2026. Relocate the eight unstarted Llama3.1-8B parents to Vista,
 while Qwen3-8B continues on DGX. This changes placement and scheduling only.
 It does not add seeds, candidates, continuations, training steps or evaluation

@@ -13,31 +13,36 @@ forecasting and recursive-policy implementations remain available as development
 records; the current paper does not claim a forecasting or controller advantage.
 
 The [review-driven revision plan](revision_plan.md) includes matched controls,
-recipe checks and a balanced third-model extension within500 additional SUs.
+recipe checks and a balanced third-model extension under recorded compute authorizations.
 The [SmolLM3-3B confirmation](docs/smollm16_results_20261029.md) is complete:
 16 fresh parents,208 scored checkpoints and144 continuation draws. Selected
 H2-H1 utility is-4.262pp,95% interval[-6.163,-2.581]. H1 is already negative:
 this extends continuation loss without reproducing the earlier near-neutral
 immediate aggregate. Actual completed revision usage, including checks,
-failures and export, is218.107 SUs. The Llama8B relocation reserves258.270 more:
-revision charges plus reservations are476.377/500 SUs, leaving23.623 unreserved.
-Reservations are protective ceilings, not actual spending.
+failures and export, was218.107 SUs at the SmolLM closeout. On November1 the
+500-SU revision ceiling was removed for completing the existing eight Llama8B
+parents. Their corrected runtime chain reserves326.440 SUs; including failed
+checks, revision charges plus reservations are545.069 SUs. These reservations
+are protective ceilings, not actual spending.
 DGX handles overflow under the same fixed protocol. The authorized
 [DGX continuation and recipe controls](docs/dgx_revision_execution_20261026.md)
 completed all16 paired follow-ups and272 scored cells. Their
 [results and format/exposure audit](docs/dgx_controls_results_20261029.md)
 leave the recipient-state mechanism and shorter-step/pooling benefits
-unresolved. The one-A100 DGX chain now runs Qwen8B.
+unresolved. The one-A100 DGX chain completed Qwen8B.
 Only their required frozen inputs are transferred; the Vista project and
 model cache stay in place. The live budget ledger now directly enforces
-the500-additional-SU cap.
+the authorized campaign reservations and their accounting.
 The authorized [Qwen3-8B and Llama3.1-8B extension](docs/dgx_scale_execution_20261028.md)
 adds eight fresh parents per model, four per task, after the DGX controls.
-Qwen uses one DGX GPU and lossless adapter retention within50GB. The unchanged
+The [Qwen8B cohort](docs/qwen8_results_20261102.md) completed all eight parents:
+selected H2-H1 is-0.681pp,97.5% interval[-1.914,+0.629], an inconclusive scale
+check. Its lossless adapter archives are retained within the DGX50GB policy.
+The unchanged
 [eight-parent Llama8B block](docs/vista_llama8_execution_20261031.md) is queued
-on Vista as array1112144, up to eight GPUs in parallel after validation.
-Its duplicate DGX jobs were cancelled. Both models remain excluded from
-cohort results until their complete analyses pass.
+on Vista as arrays1114001/1114002, up to eight GPUs after full-pool timing.
+Its duplicate DGX jobs were cancelled. Llama remains excluded from cohort
+results until its complete analysis passes.
 
 ## Implementation
 

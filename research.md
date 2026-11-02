@@ -35,9 +35,10 @@ harm across a third family, without universal immediate harmlessness or a
 mechanism claim. [Results](docs/smollm16_results_20261029.md). Completed Vista
 revision usage is218.1069/500 SUs. DGX controls and their analysis completed;
 mechanism and mitigation contrasts remain inconclusive.
-October31: Qwen8B continues on DGX; unchanged Llama8B moves to Vista array1112144,
-up to eight GPUs. Duplicate DGX Llama jobs were cancelled. Revision charges plus
-reservations are476.377/500 SUs. [Placement](docs/vista_llama8_execution_20261031.md).
+November2: Qwen8B completed; primary change-0.681pp,97.5% interval[-1.914,+0.629],
+inconclusive. [Results](docs/qwen8_results_20261102.md). Llama arrays1114001/1114002
+await Vista timing allocation; duplicate DGX jobs were cancelled. The user
+removed the500-SU cap for completing Llama only. [Placement](docs/vista_llama8_execution_20261031.md).
 Preserve original primary tests and separate cohorts.
 
 ## 1. Question, contribution and claim boundaries
