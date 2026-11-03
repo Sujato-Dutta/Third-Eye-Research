@@ -1,4 +1,4 @@
-# Third Eye: When to Commit Recursive Parameter Updates
+# Third Eye: Beyond Immediate Gains in Recursive Self-Improvement
 
 Research direction revised October 22, 2026. This is the active forward plan;
 historical protocols, failures and results remain immutable. The study combines
@@ -39,7 +39,8 @@ November2: Qwen8B completed; primary change-0.681pp,97.5% interval[-1.914,+0.629
 inconclusive. [Results](docs/qwen8_results_20261102.md). Llama arrays1114001/1114002
 await Vista timing allocation; duplicate DGX jobs were cancelled. The user
 removed the500-SU cap for completing Llama only. [Placement](docs/vista_llama8_execution_20261031.md).
-Preserve original primary tests and separate cohorts.
+Present one coherent study organized by questions and findings. Preserve
+prespecified tests and explicit cohort design differences. [Writing direction](paper/README.md).
 
 ## 1. Question, contribution and claim boundaries
 
