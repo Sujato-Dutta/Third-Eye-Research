@@ -40,7 +40,8 @@ selected H2-H1 is-0.681pp,97.5% interval[-1.914,+0.629], an inconclusive scale
 check. Its lossless adapter archives are retained within the DGX50GB policy.
 The unchanged
 [eight-parent Llama8B block](docs/vista_llama8_execution_20261031.md) is queued
-on Vista as arrays1114001/1114002, up to eight GPUs after full-pool timing.
+on Vista as arrays1114001/1114002, up to eight GPUs. Full-pool timing passed;
+the eight research parents are waiting scheduler priority as of November4.
 Its duplicate DGX jobs were cancelled. Llama remains excluded from cohort
 results until its complete analysis passes.
 

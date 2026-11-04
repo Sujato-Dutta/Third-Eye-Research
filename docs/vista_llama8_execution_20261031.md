@@ -1,5 +1,34 @@
 # Parallel Llama3.1-8B confirmation
 
+**November4,10:57 IST live status:** all eight research parents remain pending
+priority, with dependencies cleared and no start estimate. Their current
+replacement chain has no failure: CPU1113999 and GPU timing1114000 completed;
+arrays1114001/1114002 await allocation, and review1114003 awaits both arrays.
+Both arrays retain their original submission and eligibility timestamps.
+
+The completed GPU timing took1h30m54s. Its source/plan-bound readiness and
+authorization checksums were verified after download on November3. Two full
+1024-prompt math harvests took2476.835s and2748.561s on discarded parent/updated
+fixtures. With the unchanged50% margin, the complete per-parent estimates are
+25.620h/code and22.586h/math. These are pricing estimates, not observed research
+parent runtimes.
+
+On November3, only the pending scheduler walltime requests were shortened to
+**28h/code and26h/math**, retaining additional headroom above those estimates.
+No model/data/seed/update/evaluation setting, array index, job ID or dependency
+changed, and no job was cancelled or resubmitted. Readback on November4 confirms
+the new limits and four concurrent elements per array. The original ledger
+reservations remain conservative upper bounds until final accounting.
+The operation is recorded in
+`runtime_adjustment_20261101_v2/scheduling_rightsize_20261103.json` remotely and
+`runs/deployment/vista_dgx_requests_20261026/086-llama-backfill-rightsize.response.json`
+locally. Readiness evidence is in
+`runs/deployment/evidence/vista_llama8_20261103/`.
+
+Qwen8B and its analysis are complete; four model cohorts and56/64 planned fresh
+parents are finished. The remaining research execution is the eight Llama
+parents and automatic complete-model analysis, followed by manuscript synthesis.
+
 **November2,10:56 IST:** CPU supplement validation1113999 passed. GPU timing
 1114000 is still pending priority; its expected start is unavailable. Code
 array1114001, math array1114002 and analysis1114003 remain pending dependencies.

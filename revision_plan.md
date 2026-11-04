@@ -1,5 +1,12 @@
 # Third Eye: review-driven revision implementation plan
 
+**November4:** Llama's full-pool GPU timing passed. All eight parents are
+eligible and waiting Vista priority, with no start estimate or new failure.
+Their unchanged arrays1114001/1114002 now request28h/code and26h/math based on
+complete timing coverage, retaining the50% margin and further headroom. Review
+1114003 will start automatically after both arrays. Four model cohorts and
+56/64 planned fresh parents remain complete. [Live execution record](docs/vista_llama8_execution_20261031.md).
+
 **November2:** Qwen8B completed all eight parents and analysis. Its primary
 continuation-change estimate is-0.681pp,97.5% interval[-1.914,+0.629], so this
 scale check is inconclusive. [Verified results](docs/qwen8_results_20261102.md).
