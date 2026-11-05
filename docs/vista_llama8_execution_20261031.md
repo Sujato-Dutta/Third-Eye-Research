@@ -1,5 +1,20 @@
 # Parallel Llama3.1-8B confirmation
 
+**November5,10:54 IST:** all eight Llama parents are RUNNING on eight distinct
+Vista GPU nodes: four code tasks1114001_0--3 and four math tasks1114002_4--7.
+Code element0 has elapsed5h36m; the remaining seven have elapsed4h24m. No
+research parent has completed or failed. Bounded tails of all eight allocated
+job logs show active correction harvesting and development evaluation beyond
+model initialization, with no traceback in those tails. These partial logs are
+execution evidence, not sealed final results. Analysis1114003 remains pending
+the successful completion of both arrays and will run automatically.
+
+This clears the allocation blocker reported below. Other model cohorts remain
+complete:56/64 planned fresh parents finished, with the final eight now active.
+Scheduler and bounded-log evidence are saved in local queue responses089/090;
+the verified status snapshot is in
+`runs/deployment/evidence/vista_llama8_20261105/verified_status.json`.
+
 **November4,10:57 IST live status:** all eight research parents remain pending
 priority, with dependencies cleared and no start estimate. Their current
 replacement chain has no failure: CPU1113999 and GPU timing1114000 completed;

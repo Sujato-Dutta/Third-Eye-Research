@@ -1,5 +1,11 @@
 # Third Eye: review-driven revision implementation plan
 
+**November5:** all eight Llama8B parents are running in parallel on Vista,
+with4h24m--5h36m elapsed and no failed parent. Their bounded logs show correction
+harvesting and development scoring. Analysis1114003 will follow both complete
+arrays automatically. The other56 planned fresh parents are complete; no final
+Llama cohort result is claimed from partial execution logs.
+
 **November4:** Llama's full-pool GPU timing passed. All eight parents are
 eligible and waiting Vista priority, with no start estimate or new failure.
 Their unchanged arrays1114001/1114002 now request28h/code and26h/math based on
