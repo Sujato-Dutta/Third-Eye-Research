@@ -1,5 +1,15 @@
 # Third Eye: review-driven revision implementation plan
 
+**November5 completion:** all64 planned fresh parents across five models,
+their model-level analyses and the16 paired control follow-ups are complete.
+Llama8B selected H2-H1 is-2.501pp,97.5% interval[-4.411,-0.583], with harm
+already visible at H1. Qwen8B remains inconclusive. [Llama results](docs/llama8_results_20261105.md).
+Additional Vista revision usage is296.372500 SUs including failed checks,
+separate from historical project costs and DGX time. The execution index is
+`experiments/revision_scale_20261028/completed_20261105.json`.
+No further GPU run is scheduled. Finish the integrated saved-data analyses,
+unified manuscript, figures/tables and reproducibility checks described below.
+
 **November5:** all eight Llama8B parents are running in parallel on Vista,
 with4h24m--5h36m elapsed and no failed parent. Their bounded logs show correction
 harvesting and development scoring. Analysis1114003 will follow both complete
