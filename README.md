@@ -1,11 +1,12 @@
 # Third Eye
 
 **Measuring the immediate and downstream consequences of verified language-model
-self-updates.** The fresh32-run confirmation and automatic analysis are complete.
-The current paper studies future utility, model differences and update-versus-hold
-decisions under a fixed small-batch LoRA protocol.
+self-updates.** The five-model study and manuscript synthesis are complete:
+64 fresh runs, 192 candidates, 576 continuations and 832 scored checkpoints,
+plus 16 separately reported reused-parent controls.
 
-Read the [manuscript PDF](paper/main.pdf), edit the [LaTeX source](paper/main.tex),
+Read the [author PDF](paper/main.pdf) or [anonymous review PDF](paper/main_review.pdf),
+edit the [LaTeX manuscript](paper/manuscript.tex),
 or consult the [paper build guide](paper/README.md). The
 [completed results](docs/final_confirmation_results_20261024.md) and
 [active research scope](research.md) document the supported claims. Historical
@@ -21,9 +22,9 @@ this extends continuation loss without reproducing the earlier near-neutral
 immediate aggregate. Actual completed revision usage, including checks,
 failures and export, was218.107 SUs at the SmolLM closeout. On November1 the
 500-SU revision ceiling was removed for completing the existing eight Llama8B
-parents. Their corrected runtime chain reserves326.440 SUs; including failed
-checks, revision charges plus reservations are545.069 SUs. These reservations
-are protective ceilings, not actual spending.
+parents. Final additional Vista revision usage is296.373 SUs including failed
+checks. The earlier545.069 figure included conservative reservations, now
+reconciled against complete scheduler accounting.
 DGX handles overflow under the same fixed protocol. The authorized
 [DGX continuation and recipe controls](docs/dgx_revision_execution_20261026.md)
 completed all16 paired follow-ups and272 scored cells. Their
@@ -39,11 +40,11 @@ The [Qwen8B cohort](docs/qwen8_results_20261102.md) completed all eight parents:
 selected H2-H1 is-0.681pp,97.5% interval[-1.914,+0.629], an inconclusive scale
 check. Its lossless adapter archives are retained within the DGX50GB policy.
 The unchanged
-[eight-parent Llama8B block](docs/vista_llama8_execution_20261031.md) is queued
-on Vista as arrays1114001/1114002. All eight research parents are running on
-eight GPU nodes as of November5, following successful full-pool timing.
-Its duplicate DGX jobs were cancelled. Llama remains excluded from cohort
-results until its complete analysis passes.
+[eight-parent Llama8B block](docs/llama8_results_20261105.md) completed with
+selected H2-H1 of-2.501pp,97.5% interval[-4.411,-0.583]. H1 was already negative.
+All64 planned fresh parent runs across five models, their model-level analyses
+and the sixteen reused-parent controls are complete. Integrated saved-data
+analysis and the five-model manuscript are complete; no new GPU experiment is scheduled.
 
 ## Implementation
 
