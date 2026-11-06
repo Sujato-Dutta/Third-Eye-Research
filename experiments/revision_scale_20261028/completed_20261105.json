@@ -1,0 +1,58 @@
+{
+  "study_title": "Third Eye: Beyond Immediate Gains in Recursive Self-Improvement",
+  "planned_fresh_parent_runs": 64,
+  "completed_fresh_parent_runs": 64,
+  "model_count": 5,
+  "parents_by_model": {
+    "Qwen3-4B": 16,
+    "Llama3.2-3B-Instruct": 16,
+    "SmolLM3-3B": 16,
+    "Qwen3-8B": 8,
+    "Llama3.1-8B-Instruct": 8
+  },
+  "scale_declaration_identical": true,
+  "scale_development_and_final_manifest_hashes_match_by_task": true,
+  "scientific_core_source_files_identical_between_scale_sites": true,
+  "scale_reports": {
+    "qwen3-8b": {
+      "path": "runs\\deployment\\evidence\\dgx_scale_20261102\\qwen_report.json",
+      "sha256": "3df09f8249a26282ed0dbf2d0a436aacad9c873ddb6cb0aa80a157969311d0d7",
+      "source_tree_sha256": "8777e39cac291e8cdcee09d41e7a1b54d9d4ef1ccec78caf4429f71ad9ab7fde",
+      "plan_sha256": "66e9eb5ad25571a2e0820303d9e806a7d133fbe9eb4ca7676e16a8d005b408cc",
+      "parents": 8,
+      "selected_change": {
+        "ci95_pp": [
+          -1.7578803168402781,
+          0.4448784722222216
+        ],
+        "ci975_pp": [
+          -1.913825141059028,
+          0.6293402777777772
+        ],
+        "mean_pp": -0.6808810763888893
+      }
+    },
+    "llama3.1-8b": {
+      "path": "runs\\deployment\\evidence\\vista_llama8_20261105_final\\report.json",
+      "sha256": "9e2695d9813ebf0ad52108de7594f18632c83dd7b0e36d87c5e6775c84db2713",
+      "source_tree_sha256": "8282f1d02158f3489c2791d1c2f492040e12eff44c197cf424b61e7a499a0ef8",
+      "plan_sha256": "47a7e9ff91e464c1d45406a798e1a0a5122f690c700470df927ae473b0ec66a4",
+      "parents": 8,
+      "selected_change": {
+        "ci95_pp": [
+          -4.1559516059027795,
+          -0.8407931857638917
+        ],
+        "ci975_pp": [
+          -4.410807291666667,
+          -0.5830213758680597
+        ],
+        "mean_pp": -2.501085069444446
+      }
+    }
+  },
+  "additional_Vista_revision_actual_SUs": 296.3724999999995,
+  "experiments_complete": true,
+  "manuscript_revision_complete": false,
+  "new_experiments_automatically_authorized": false
+}
