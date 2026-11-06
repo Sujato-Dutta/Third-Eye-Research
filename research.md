@@ -15,12 +15,9 @@ tests; no forecasters were fitted. The bounded ledger is542.5736 SUs used/reserv
 complete C cost was309.0019 SUs. Freeze evidence and write the scoped empirical
 paper. No further experiment is queued or launched automatically.
 
-October24 review follow-up: [the revision plan](revision_plan.md) uses the new
-500-additional-SU allowance. The16-run SmolLM3 extension is approved for immediate
-execution; other revision controls remain planned. Qwen3-8B and Llama-3.1-8B
-are future DGX extensions when access returns. The eventual five-model study
-would span family and scale; unrun models are not counted as results.
-The original confirmation and its endpoints remain unchanged.
+October24: [the revision](revision_plan.md) authorized SmolLM and matched
+controls under500 additional SUs. Both8B models were subsequently authorized.
+The original confirmation and endpoints remain unchanged.
 
 October28 extension: execute the two authorized8B models serially on DGX after
 the matched controls. Freeze eight fresh parents per model, four per task,
@@ -35,10 +32,11 @@ harm across a third family, without universal immediate harmlessness or a
 mechanism claim. [Results](docs/smollm16_results_20261029.md). Completed Vista
 revision usage is218.1069/500 SUs. DGX controls and their analysis completed;
 mechanism and mitigation contrasts remain inconclusive.
-November2: Qwen8B completed; primary change-0.681pp,97.5% interval[-1.914,+0.629],
-inconclusive. [Results](docs/qwen8_results_20261102.md). Llama arrays1114001/1114002
-await Vista timing allocation; duplicate DGX jobs were cancelled. The user
-removed the500-SU cap for completing Llama only. [Placement](docs/vista_llama8_execution_20261031.md).
+November5: all64 fresh runs across five models completed. Qwen8B change-0.681pp
+[-1.914,+0.629] is inconclusive; Llama8B change-2.501pp[-4.411,-0.583] is negative,
+with H1 already negative. Both intervals are97.5%. [Results](docs/llama8_results_20261105.md).
+Additional Vista revision usage is296.373 SUs including failed checks. Complete
+integrated saved-data analyses and manuscript revision; no new GPU run is planned.
 Present one coherent study organized by questions and findings. Preserve
 prespecified tests and explicit cohort design differences. [Writing direction](paper/README.md).
 
