@@ -1,5 +1,15 @@
 # Parallel Llama3.1-8B confirmation
 
+**Complete, November5,19:41 IST:** all eight parents and analysis1114003
+completed successfully. The verified report contains104 scored checkpoints
+and72 continuation draws, with zero terminal draws. Selected H2-H1 is-2.501pp,
+declared97.5% interval[-4.411,-0.583]; H1 is already negative. See the
+[complete results](llama8_results_20261105.md).
+The replacement chain consumed77.743056 SUs; complete additional Vista revision
+usage is296.372500 including prior failed checks. Unused reservations were
+released after complete accounting. No Third Eye job remains active on either
+cluster. The records below describe execution history.
+
 **November5,10:54 IST:** all eight Llama parents are RUNNING on eight distinct
 Vista GPU nodes: four code tasks1114001_0--3 and four math tasks1114002_4--7.
 Code element0 has elapsed5h36m; the remaining seven have elapsed4h24m. No
