@@ -4,6 +4,12 @@ November 6, 2026. Additional Vista hard limit: **200 SUs**, including validation
 minimum billing, allocated failures and retries. The previous completed study
 and its Overleaf archive remain unchanged.
 
+**November 8 allocation change:** new work moved to DGX at the user's request.
+Vista array `1125744` was cancelled before starting. The current job chain,
+one-A100 limit, storage checks, and automatic eight-parent review are recorded
+in [DGX execution](dgx_next_round_20261108.md). The Vista tables below are retained
+as execution history; no new Vista GPU work remains queued for this round.
+
 ## Submitted jobs
 
 Saved-analysis source: `91176162e2017eb82ccfe0e9b125258f486a7acb7374502a580c05cb838a84c5`.
