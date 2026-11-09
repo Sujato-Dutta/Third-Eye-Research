@@ -34,6 +34,17 @@ Qwen waits for the one-GPU array slot. The six remaining parents and review
 retain their dependencies. The Vista reservation was released after accounting
 confirmed zero GPU runtime, and its SSH helper was closed.
 
+**November 8, approximately 15:50 IST:** Llama parent `2026110600` completed
+successfully. All four recipes were available, all three paired continuation
+timing draws finished, and lossless retention passed. Development alone took
+5,747 seconds (about 1 h 36 min); the pilot including continuations took 13,021
+seconds (about 3 h 37 min), with Slurm reporting 3 h 37 min 35 s including
+retention. Qwen task `35036_1` is running on `dgxa`, about 1 h 11 min elapsed at
+inspection, still without complete development records. The six remaining
+parents and final development review remain queued on their dependencies.
+No pilot failure was reported. These are one-parent preliminary results;
+the four-parent-per-model positive-regime screen has not been evaluated.
+
 Initial setup found Python had cached the new release path before extraction.
 The corrected launcher invalidates import caches and verifies already staged
 files before resuming setup. Failed job logs and the original driver remain;
