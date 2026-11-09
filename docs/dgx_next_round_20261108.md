@@ -45,6 +45,27 @@ parents and final development review remain queued on their dependencies.
 No pilot failure was reported. These are one-parent preliminary results;
 the four-parent-per-model positive-regime screen has not been evaluated.
 
+**November 9, approximately 11:17 IST:** all eight development parents and
+review `35038` completed successfully. No research job remains running or
+queued on DGX. The frozen screen selected **Qwen3-4B, r1**: eight unique verified
+corrections, LR 3e-5, 25 optimizer steps. Across its four development parents,
+mean equal-role G1 was **+2.132 pp**, and retention was **+0.342 pp**. These are
+development-screen estimates, not confirmed held-out benefits or evidence of
+delayed harm in the new recipe. Fresh paired continuation confirmation is the
+next stage; none was submitted automatically.
+
+All 16 Llama recipe arms and eight Qwen arms were available. Qwen's two
+32-correction recipes were unavailable in all four parents because the verified
+pool was too small; these eight unavailable arms are retained, not treated as
+trained results. Qwen r1 was available in all four parents and met the declared
+screen. Llama's initial optional timing draws completed; Qwen's initial timing
+draws did not all complete within their predeclared timing allowance. That
+does not make the development cohort incomplete, but those timings cannot be
+reported as a complete H2 confirmation.
+
+The full compute-generated review is retained locally at
+`runs/deployment/next_round_20261106/dgx_migration/development_review.json`.
+
 Initial setup found Python had cached the new release path before extraction.
 The corrected launcher invalidates import caches and verifies already staged
 files before resuming setup. Failed job logs and the original driver remain;
