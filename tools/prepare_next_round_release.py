@@ -1,5 +1,6 @@
 """Stage a private frozen source release; no scientific execution."""
 import hashlib
+import argparse
 import json
 from pathlib import Path
 import sys
@@ -9,7 +10,12 @@ ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/"src"))
 from third_eye.provenance import source_inventory  # noqa: E402
 
-DEST=ROOT/"runs/deployment/next_round_20261106"
+parser = argparse.ArgumentParser()
+parser.add_argument("--output", default="runs/deployment/next_round_20261106")
+args = parser.parse_args()
+DEST=ROOT/args.output
+if not DEST.resolve().is_relative_to(ROOT.resolve()):
+    raise ValueError("Source package must stay within workspace")
 DEST.mkdir(parents=True,exist_ok=True)
 inventory=source_inventory(ROOT)
 paths=[]
