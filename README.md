@@ -44,7 +44,22 @@ The unchanged
 selected H2-H1 of-2.501pp,97.5% interval[-4.411,-0.583]. H1 was already negative.
 All64 planned fresh parent runs across five models, their model-level analyses
 and the sixteen reused-parent controls are complete. Integrated saved-data
-analysis and the five-model manuscript are complete; no new GPU experiment is scheduled.
+analysis and the five-model manuscript are complete.
+
+The [positive-regime confirmation](docs/positive_regime_confirmation_20261109.md)
+is now queued separately on DGX. Eight development parents identified Qwen3-4B
+with eight verified corrections, 25 steps and LR3e-5 as an eligible positive
+immediate-gain recipe. Twenty fresh parent experiments test that recipe with
+matched native/direct continuations and one LR-decay mitigation on expanded
+evaluation pools. [Execution and job IDs](docs/dgx_positive_regime_20261109.md)
+record the validated dependency chain. Development gains are not yet confirmed;
+the existing paper results remain unchanged.
+
+The [longer-horizon extension](docs/long_horizon_20261109.md) adds four paired
+seeds per backbone for Qwen3-4B, Llama-3.2-3B, Qwen3-8B and Llama-3.1-8B. Each
+trajectory provides both T=3 and T=5 scores. Its [DGX execution chain](docs/long_horizon_execution_20261109.md)
+uses the additional account while the primary confirmation continues, with
+CPU verification and archival work overlapping GPU inference.
 
 ## Implementation
 
