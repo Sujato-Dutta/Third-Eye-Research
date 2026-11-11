@@ -72,3 +72,19 @@ checks remain mandatory; the watcher is not an enforced filesystem quota.
 The original manuscript and Overleaf archive remain unchanged until results are
 available and reviewed. Four seeds per backbone are a sensitivity design, not
 a guarantee of precise individual-model effects.
+
+## November 11 progress
+
+The first two Llama3B paired trajectories completed, including both policies
+through T=5 and the frozen T=3/T=5 scoring points. Jobs `35069` and `35071`
+took 14:10:25 and 23:09:36 respectively; their dependent artifact-inspection
+and lossless-archive jobs `35070` and `35072` also completed successfully.
+The third trajectory, `35073`, is running. The remaining trajectory and 8B jobs
+remain queued under the account resource limits. Four-model inference awaits
+the fixed cohorts; these execution completions do not establish an efficacy claim.
+
+The storage watcher measured 40,066,170,880 bytes in the additional account,
+below its 50-billion-byte cap. The original-account confirmation chain was
+released again after a successful repeated storage check, preserving the exact
+array elements on which the later Qwen4B extensions depend. No seeds, policies,
+scientific sources, or trajectory budgets were changed.

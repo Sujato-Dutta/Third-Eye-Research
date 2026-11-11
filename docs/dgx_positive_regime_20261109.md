@@ -57,3 +57,43 @@ No confirmatory scientific result is available at launch. The earlier +2.132 pp
 immediate gain is a development estimate. The larger-pool first pair will
 establish a defensible runtime estimate. The old manuscript and Overleaf archive
 remain unchanged until the complete confirmation is reviewed.
+
+## November 11 operational check
+
+Both fixed operational pilots completed, passed artifact inspection, and were
+losslessly archived: `35051_0` took 15:52:19 and `35051_1` took 17:03:14.
+All three continuation draws were available in the first pilot. These are
+execution checks, not a cohort-level scientific conclusion.
+
+The dependent storage check `35052` correctly stopped before releasing the
+remaining eighteen parents: its projected whole-home requirement was
+51,849,257,984 bytes, including a two-billion-byte scratch reservation. The
+failed check and its report are retained as
+`timing_review_storage_stop_35052.json`; no completed experiment is restarted.
+
+CPU maintenance jobs `35330` and `35333` inspected storage. Job `35331`
+inventoried identical historical artifacts; `35332` recovered 755,957,760
+allocated bytes by sharing identical inodes. The broader follow-up inventory
+`35335` identified additional byte-identical tokenizer/checkpoint copies in
+completed historical work. Job `35336` applies that plan with SHA-256 checks
+before and after every replacement. All scientific file contents, paths,
+archival receipts, frozen sources, seeds and optimizer settings are preserved.
+The unused narrower inventory `35334` changed no files.
+
+The original timing script is resubmitted after successful maintenance. Only a
+successful repeated storage check may release the existing `35053` array. Its
+array task IDs must remain unchanged because the longer-horizon Qwen extensions
+depend on those exact completed parents. All scans, hashing and inode sharing
+run inside CPU Slurm allocations; login-node work remains scheduler/transport
+activity only.
+
+Maintenance completed successfully. The two deduplication applications recovered
+approximately 1.97 GB without deleting any research path or changing its bytes.
+Whole-home allocation is now 38,332,022,784 bytes. Replacement timing/storage job
+`35337` passed: the projected completed cohort, including its two-GB scratch
+reservation, is 49,877,738,496 bytes, below the unchanged 50-billion-byte limit.
+The existing `35053` array dependency was repaired from failed `35052` to
+successful `35337`; no array element or scientific setting was replaced.
+`storage_repair_20261111.json` records the scheduler and storage repair.
+The repaired array was verified running as `35053_2` (raw Slurm ID `35338`)
+on `dgxb`; tasks 3--19 remain pending under the intended one-task array limit.
