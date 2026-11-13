@@ -97,3 +97,19 @@ successful `35337`; no array element or scientific setting was replaced.
 `storage_repair_20261111.json` records the scheduler and storage repair.
 The repaired array was verified running as `35053_2` (raw Slurm ID `35338`)
 on `dgxb`; tasks 3--19 remain pending under the intended one-task array limit.
+
+## November 12 progress
+
+Three of twenty parents have completed successfully. The third (`35053_2`)
+took 18:07:28, including inspection and archival. The fourth (`35053_3`, seed
+`2026110903`) is running on `dgxb`, with eight saved checkpoint states reported
+and final scoring still pending. Remaining tasks and the final review retain
+their automatic dependencies. No new execution failure appears in the queue.
+
+On November 12, pending indices 14--19 were delegated to the temporary account's
+two-GPU pool. Original running index 3 and pending indices 4--13 stay on this
+account. Review `35054` now waits for the retained original tasks and six
+owning-account handoffs, with automatic same-seed fallback if a delegated job
+cannot complete before November 17 EOD. See
+[temporary-worker execution](dgx_temporary_worker_20261112.md) for job IDs,
+validation, quota guards and cutoff handling. Scientific settings are unchanged.

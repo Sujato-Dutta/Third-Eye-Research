@@ -88,3 +88,39 @@ below its 50-billion-byte cap. The original-account confirmation chain was
 released again after a successful repeated storage check, preserving the exact
 array elements on which the later Qwen4B extensions depend. No seeds, policies,
 scientific sources, or trajectory budgets were changed.
+
+## November 12 progress
+
+Three of sixteen paired trajectories are complete. The third Llama3B trajectory
+(`35073`) finished in 16:02:37, and archive/inspection job `35074` completed
+successfully. The fourth Llama3B trajectory (`35075`) is running on `dgxa`;
+seven of its eight scored checkpoints are recorded. The eight 8B trajectories
+and four Qwen4B extensions remain queued. The account watcher reports
+40,542,445,568 bytes used, below the 50-billion-byte policy limit. Model and
+integrated statistical reports remain dependent on their complete cohorts.
+
+Later on November 12, all four Llama3B trajectories and their archive jobs had
+completed; Qwen8B index 0 (`35078`) was running. Pending Qwen8B indices 2/3 and
+Llama8B indices 2/3 were delegated to the temporary two-GPU account. Their
+original archive jobs now wait for owning-account handoffs. Model and final
+review dependencies remain connected. The same fixed seeds, T=3/T=5 scoring,
+policies and optimizer budgets are preserved. See
+[temporary-worker execution](dgx_temporary_worker_20261112.md) for the exact
+dispatch map, storage safeguards and automatic post-lease fallback.
+
+## November 12, 17:39 IST check
+
+All four Llama3B paired trajectories, artifact checks and model review `35077`
+are complete. The saved review reports equal-role utility changes relative to
+the unchanged parent of -0.212 pp after the first update, -7.113 pp at T=3 and
+-16.080 pp at T=5 under the native policy. The T=5 simultaneous interval is
+[-20.073, -12.288] pp. Half-LR continuation improves T=5 utility by +6.703 pp
+relative to native continuation (simultaneous interval [3.222, 9.784] pp);
+this is not a positive gain relative to holding the parent. These are the
+exploratory four-seed Llama3B math results, not a completed cross-model finding.
+
+Qwen8B trajectory `35078` remains running at 6:15 elapsed. The main confirmation
+remains at 3/20 complete, with `35053_3` running at 12:00 elapsed. The temporary
+GPU preflight still awaits allocation. Slurm's current estimated start is
+November 13, 19:23 IST; that estimate can change. All ten delegated jobs remain
+connected behind preflight, and the three autonomous safeguards are running.

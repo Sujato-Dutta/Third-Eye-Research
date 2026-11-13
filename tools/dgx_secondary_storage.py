@@ -13,6 +13,7 @@ import time
 HARD_LIMIT = 50_000_000_000
 WARNING_LIMIT = 45_000_000_000
 ADMISSION_LIMIT = 48_000_000_000
+MEASURE_TIMEOUT = 180
 
 
 def write(path, value):
@@ -26,7 +27,7 @@ def measure(root, apparent=False, depth=None):
     command = ["du", "-x", "-B1"]
     command += ["--apparent-size"] if apparent else []
     command += ["--max-depth="+str(depth)] if depth is not None else ["-s"]
-    result = subprocess.run(command+[str(root)], capture_output=True, text=True, timeout=180)
+    result = subprocess.run(command+[str(root)], capture_output=True, text=True, timeout=MEASURE_TIMEOUT)
     if result.returncode:
         raise RuntimeError("Incomplete account storage scan; refuse to admit new writes")
     rows = []
@@ -86,7 +87,7 @@ def snapshot(output, reserve_bytes=0, breakdown=False):
 
 
 def main():
-    global HARD_LIMIT, WARNING_LIMIT, ADMISSION_LIMIT
+    global HARD_LIMIT, WARNING_LIMIT, ADMISSION_LIMIT, MEASURE_TIMEOUT
     parser = argparse.ArgumentParser()
     parser.add_argument("mode", choices=("snapshot", "check", "watch"))
     parser.add_argument("--output", required=True)
@@ -96,8 +97,12 @@ def main():
     parser.add_argument("--limit-bytes", type=int, default=HARD_LIMIT)
     parser.add_argument("--warning-bytes", type=int, default=WARNING_LIMIT)
     parser.add_argument("--admission-limit-bytes", type=int, default=ADMISSION_LIMIT)
+    parser.add_argument("--measure-timeout", type=int, default=MEASURE_TIMEOUT)
     args = parser.parse_args()
     HARD_LIMIT, WARNING_LIMIT, ADMISSION_LIMIT = args.limit_bytes, args.warning_bytes, args.admission_limit_bytes
+    MEASURE_TIMEOUT = args.measure_timeout
+    if MEASURE_TIMEOUT < 60:
+        raise ValueError("Storage measurement timeout must be at least sixty seconds")
     if not 0 < WARNING_LIMIT < ADMISSION_LIMIT < HARD_LIMIT:
         raise ValueError("Storage thresholds must retain headroom under the hard limit")
     if not os.environ.get("SLURM_JOB_ID") or "login" in socket.gethostname().lower():
