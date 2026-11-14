@@ -124,3 +124,18 @@ remains at 3/20 complete, with `35053_3` running at 12:00 elapsed. The temporary
 GPU preflight still awaits allocation. Slurm's current estimated start is
 November 13, 19:23 IST; that estimate can change. All ten delegated jobs remain
 connected behind preflight, and the three autonomous safeguards are running.
+
+## November 13, 09:29 IST check
+
+Five of sixteen paired trajectories are now complete: four Llama3B and the
+first Qwen8B. Qwen8B job `35078` completed in 19:26:48, and artifact inspection
+and archive `35079` completed successfully. The second Qwen8B trajectory,
+`35080`, is running at approximately 2:39 elapsed. Its model review still waits
+for all four fixed seeds; no cross-model result is inferred from one seed.
+
+The main confirmation has advanced to 4/20 complete; index 4 is running at
+approximately 10:49 elapsed. The temporary preflight remains pending for GPU
+availability, and Slurm's estimate has moved to November 14, 15:57 IST. This is
+an estimate, not a reserved allocation. All ten delegated jobs remain queued
+behind preflight, with quota/deadline safeguards running and no reported block.
+Whole-home usage is 39.28/50 GB, 41.25/50 GB and 121.10/200 GB respectively.

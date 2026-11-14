@@ -113,3 +113,9 @@ owning-account handoffs, with automatic same-seed fallback if a delegated job
 cannot complete before November 17 EOD. See
 [temporary-worker execution](dgx_temporary_worker_20261112.md) for job IDs,
 validation, quota guards and cutoff handling. Scientific settings are unchanged.
+
+At November 13, 09:29 IST, index 3 had completed successfully in 17:01:57,
+bringing the fixed confirmation cohort to 4/20 complete. Index 4 is running
+at approximately 10:49 elapsed; indices 5--13 and the six delegated parents
+remain queued. Whole-home storage is 39,281,143,808 bytes, with fresh safe
+monitoring snapshots. Review dependencies remain intact.
