@@ -28,6 +28,37 @@ def test_mutated_task_identity_is_rejected():
         runtime.find_task({'tasks': [row]}, row['key'])
 
 
+def test_default_resources_keep_existing_full_gpu_budget():
+    task = {**runtime.tasks()[-1], 'worker_job': '40000'}
+    profile = runtime.resource_profile(task, {'jobs': {}})
+    assert profile['type'] == 'a100' and profile['hours'] == task['hours']
+    assert profile['preflight_job'] == '35441'
+
+
+def test_mig_resources_are_limited_to_qwen4_confirmation():
+    entry = {'type': 'a100_3g.20gb', 'hours': 40, 'preflight_job': '35960'}
+    resources = {'jobs': {'40000': entry}}
+    task = {**runtime.tasks()[-1], 'worker_job': '40000'}
+    assert runtime.resource_profile(task, resources)['hours'] == 40
+    with pytest.raises(ValueError, match='Only unchanged'):
+        runtime.resource_profile({**runtime.tasks()[0], 'worker_job': '40000'}, resources)
+
+
+def test_mig_proof_requires_original_batches_and_full_training():
+    task = {**runtime.tasks()[-1], 'worker_job': '40000'}
+    profile = runtime.resource_profile(task, {'jobs': {'40000': {
+        'type': 'a100_3g.20gb', 'hours': 40, 'preflight_job': '35960'}}})
+    proof = {'passed': True, 'resource_type': 'a100_3g.20gb', 'model': 'qwen3-4b',
+             'job_id': '35960', 'exact_rollback': True, 'quantization': 'none', 'dtype': 'bfloat16',
+             'generation_batch_size': 32, 'sampled_batch_size': 16, 'steps': 25,
+             'final_items_evaluated': 0, 'source_tree_sha256': runtime.PROFILES['positive']['sha'],
+             'stages': {name: {} for name in ('load', 'train_25_steps',
+                 'greedy_batch32_tokens512', 'sampled_batch16_tokens512', 'mcq_batch32')}}
+    runtime.validate_resource_proof(task, profile, proof)
+    with pytest.raises(ValueError, match='Matched model'):
+        runtime.validate_resource_proof(task, profile, {**proof, 'generation_batch_size': 1})
+
+
 def test_lease_ends_at_november_17_eod_ist():
     end = runtime.DEADLINE.astimezone(dt.timezone(dt.timedelta(hours=5, minutes=30)))
     assert (end.day, end.hour, end.minute, end.second) == (17, 23, 59, 59)
