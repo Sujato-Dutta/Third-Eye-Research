@@ -115,6 +115,8 @@ def state(job):
 
 
 def runner_for(kind):
+    if kind == 'positive':
+        os.environ['HF_HUB_CACHE'] = str(PRIMARY / 'models/hf_cache/hub')
     profile = PROFILES[kind]
     sys.path[:0] = [str(profile['source'] / 'src'), str(profile['source'] / 'experiments')]
     runner = importlib.import_module(profile['module'])
@@ -160,6 +162,37 @@ def find_task(plan, key):
     return selected
 
 
+def resource_profile(task, resources=None):
+    if resources is None:
+        path = AUDIT / 'parallel/resource_plan.json'
+        resources = read(path) if path.exists() else {'jobs': {}}
+    selected = resources.get('jobs', {}).get(task['worker_job'])
+    if selected is None:
+        return {'type': 'a100', 'hours': task['hours'], 'preflight_job': '35441',
+                'proof': AUDIT / 'gpu_preflight.json'}
+    if (task['kind'] != 'positive' or task['model'] != 'qwen3-4b'
+            or selected.get('type') != 'a100_3g.20gb' or selected.get('hours') != 40
+            or not re.fullmatch(r'\d+', str(selected.get('preflight_job', '')))):
+        raise ValueError('Only unchanged Qwen4B confirmation may use validated 20-GB MIG')
+    return {**selected, 'proof': AUDIT / ('mig_preflight_' + selected['preflight_job'] + '.json')}
+
+
+def validate_resource_proof(task, profile, proof):
+    if not proof.get('passed'):
+        raise ValueError('Successful GPU resource validation required')
+    if profile['type'] == 'a100':
+        return
+    if (proof.get('resource_type') != profile['type'] or proof.get('model') != task['model']
+            or proof.get('job_id') != profile['preflight_job'] or not proof.get('exact_rollback')
+            or proof.get('quantization') != 'none' or proof.get('dtype') != 'bfloat16'
+            or proof.get('generation_batch_size') != 32 or proof.get('sampled_batch_size') != 16
+            or proof.get('steps') != 25 or proof.get('final_items_evaluated') != 0
+            or proof.get('source_tree_sha256') != PROFILES[task['kind']]['sha']
+            or set(proof.get('stages', {})) != {'load', 'train_25_steps',
+                'greedy_batch32_tokens512', 'sampled_batch16_tokens512', 'mcq_batch32'}):
+        raise ValueError('Matched model, frozen batches, full steps and inference validation required')
+
+
 def verify_site(kind):
     if os.getuid() != 1189:
         raise RuntimeError('Temporary account required')
@@ -197,6 +230,7 @@ def verify_site(kind):
 
 def worker(plan, key):
     task = find_task(plan, key)
+    resource = resource_profile(task)
     if not plan.get('armed'):
         raise RuntimeError('Delegation must be armed after retiring original pending jobs')
     validation = read(AUDIT / 'parallel/validation_completed.json')
@@ -204,12 +238,15 @@ def worker(plan, key):
         raise RuntimeError('Matching compute-node operational validation required')
     if os.getuid() != 1189 or str(os.environ['SLURM_JOB_ID']) != task['worker_job']:
         raise RuntimeError('Named faculty task allocation required')
-    if remaining_hours() < task['hours'] + .5:
+    if remaining_hours() < resource['hours'] + .5:
         raise RuntimeError('Protective runtime no longer fits the authorized lease')
     if state(task['original_job']) != 'CANCELLED':
         raise RuntimeError('Original unstarted job must be retired before delegation')
-    if not read(AUDIT / 'gpu_preflight.json')['passed']:
-        raise ValueError('Real temporary-account GPU validation required')
+    validate_resource_proof(task, resource, read(resource['proof']))
+    import torch
+    gpu = torch.cuda.get_device_properties(0)
+    if resource['type'] != 'a100' and ('MIG' not in gpu.name or gpu.total_memory < 19_000_000_000):
+        raise RuntimeError('Validated 20-GB MIG allocation required')
     runner, request = runner_for(task['kind'])
     profile = PROFILES[task['kind']]
     storage = read(profile['root'] / 'temporary_worker_20261112/status/storage.json')
@@ -235,7 +272,9 @@ def worker(plan, key):
           'worker_job': task['worker_job'], 'completed_sha256': sha(folder / 'completed.json'),
           'request_sha256': sha(profile['root'] / 'request.json'),
           'source_tree_sha256': request['source_tree_sha256'],
-          'original_job_retired_before_start': task['original_job'], 'scientific_settings_changed': False})
+          'original_job_retired_before_start': task['original_job'], 'scientific_settings_changed': False,
+          'resource_type': resource['type'], 'resource_validation_job': resource['preflight_job'],
+          'gpu': gpu.name, 'gpu_memory_bytes': gpu.total_memory})
 
 
 def pending_dependencies(jobs):
@@ -343,18 +382,22 @@ def watchdog(plan_path):
     while True:
         plan = read(plan_path)
         if plan.get('armed'):
+            profiles = {t['worker_job']: resource_profile(t) for t in plan['tasks']}
+            preflights = sorted({p['preflight_job'] for p in profiles.values()})
             rows = command(['sacct', '-S', '2026-11-12', '-j',
-                            ','.join(['35441'] + [t['worker_job'] for t in plan['tasks']]),
+                            ','.join(preflights + [t['worker_job'] for t in plan['tasks']]),
                             '-X', '-n', '-P', '--format=JobID,State'])
             states = {row.split('|')[0]: row.split('|')[1].split()[0].rstrip('+')
                       for row in rows.splitlines() if '|' in row}
-            failed_check = states.get('35441') in {'FAILED', 'CANCELLED', 'TIMEOUT', 'DEADLINE', 'NODE_FAIL'}
             active = False
             for task in plan['tasks']:
+                resource = profiles[task['worker_job']]
+                failed_check = states.get(resource['preflight_job']) in {
+                    'FAILED', 'CANCELLED', 'TIMEOUT', 'DEADLINE', 'NODE_FAIL'}
                 current = states.get(task['worker_job'], 'UNKNOWN')
                 if current in {'PENDING', 'RUNNING', 'COMPLETING', 'CONFIGURING', 'UNKNOWN'}:
                     active = True
-                if current == 'PENDING' and (failed_check or remaining_hours() < task['hours'] + .5):
+                if current == 'PENDING' and (failed_check or remaining_hours() < resource['hours'] + .5):
                     # Filter atomically at Slurm: do not interrupt a task that just started.
                     command(['scancel', '--state=PENDING', task['worker_job']])
                 elif current == 'RUNNING' and remaining_hours() <= 0:

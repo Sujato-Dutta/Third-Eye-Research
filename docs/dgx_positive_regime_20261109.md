@@ -119,3 +119,28 @@ bringing the fixed confirmation cohort to 4/20 complete. Index 4 is running
 at approximately 10:49 elapsed; indices 5--13 and the six delegated parents
 remain queued. Whole-home storage is 39,281,143,808 bytes, with fresh safe
 monitoring snapshots. Review dependencies remain intact.
+
+At November 15, 10:40 IST, the confirmation had reached 8/20 complete. Parent
+8 remains running on the original full A100. Parents 14/15 additionally started
+on validated 20-GB A100 MIG slices at 10:37:40, retaining GPU IDs `35465` and
+`35466` and their existing handoff dependencies. Parents 16--19 are queued
+for MIG, subject to the temporary lease. The training/scoring recipe, precision,
+data and seeds are unchanged; the MIG scheduler limit is 40 hours. See
+[current progress](current_progress.md) for compatibility tests, measured
+memory and the hardware-specific provenance/fallback rules.
+
+## November 16, 11:00 IST check
+
+The fixed cohort is now 9/20 complete; original parent 9 is running on a full
+A100. All six delegated MIG attempts failed during M0 final retention scoring
+after approximately 6--7 hours. Their short development-fixture validation
+did not cover the full final-scoring memory demand. The failures and partial
+outputs are preserved; they are not completed scientific outcomes.
+
+Owning-account handoffs registered same-seed fallback arrays 36073, 36096,
+36211, 36209, 36245 and 36247 for parents 14--19 respectively. These remain
+pending. Read-only CPU audit 36281 verified all eleven sealed checkpoint
+weight files for each failed attempt. Scoring-only recovery is therefore
+worth validating before duplicating their training. No recovery is yet
+launched, and no pending fallback has been replaced. Primary whole-home
+usage is 46.88/50 GB, so duplicated artifacts must be avoided.

@@ -14,7 +14,9 @@ walltime does not extend the temporary authorization ending November 17.
 
 At connection, the account had no running or pending jobs. The allowance is a
 resource limit; it does not guarantee immediate allocation of two full A100s.
-Request full A100 devices explicitly and retain Slurm's CUDA visibility mask.
+Request the explicitly validated GPU resource type and retain Slurm's CUDA
+visibility mask. The November 15 section records the approved 20-GB MIG
+alternative alongside the original full-A100 requests.
 
 ## Owner data and cleanup boundary
 
@@ -162,3 +164,78 @@ Canonical deployment metadata and test receipts are under
 `runs/deployment/dgx_parallel_secondary_requests_20261112/`, and
 `runs/deployment/dgx_parallel_faculty_requests_20261112/`.
 Do not restart dispatchers against the retired queues.
+
+## November 15: 20-GB MIG dispatch
+
+Full A100s remained occupied, so the available hardware was inspected under
+the authorized alternative-resource request. Both nodes expose an unused
+`gpu:a100_3g.20gb:1` allocation. Compatibility job `35960` completed on one
+slice in 4:03 with the original BF16 Qwen4B model, all 25 optimizer steps,
+exact rollback, batch-32 greedy inference, batch-16 sampled inference and
+batch-32 conditional-likelihood retention scoring. Peak live tensors reached
+16.16 GB; no sealed final items were evaluated. CPU job `35961` passed 11
+operational tests and verified the 24 existing batch scripts.
+
+Jobs `35465` and `35466` started at **November 15, 10:37:40 IST** on `dgxa`
+and `dgxb`. Jobs `35467`, `35468`, `35469` and `35471` are also eligible for
+the validated MIG profile, under the shared two-GPU account limit. All six
+retain their canonical job IDs and original owning-account handoffs. Their
+scheduler walltime is now 40 hours; training steps, LR, precision, batches,
+evaluation, source hashes and seeds are unchanged. The per-job resource
+overrides in `parallel/resource_plan.json` supersede the original full-A100
+SBATCH resource/time comments; the frozen scientific runners are unchanged.
+
+The 8B jobs retain their original full-A100 profile. The lease watchdog now
+checks the relevant preflight for each resource profile: a failed or expired
+full-A100 preflight cannot cancel a MIG task that passed its own validation.
+The 40-hour MIG limit is used when deciding whether pending jobs still fit
+before the cutoff. Complete/partial-result handling remains unchanged.
+
+An initial five-second MIG probe (`35959`) exposed an empty-cache lookup,
+before model loading or training. The preflight and positive worker now set
+`HF_HUB_CACHE` to the existing shared pinned Qwen4 cache, while other runtime
+caches stay in the audit directory. No weights are copied into the owner's
+home. The failed receipt is preserved; `35960` is the successful replacement.
+
+Activation `35964` completed after correcting two scheduler-only issues: the
+original five-day monitor walltime no longer fit the remaining lease, and
+completed dependency IDs had aged out of Slurm's active job memory. The
+matching successful validation/preflight receipts are explicitly checked;
+only already satisfied dependencies are cleared. The early CPU activation
+failure `35962` and its progress receipt remain preserved. Research jobs
+were held during these staging operations.
+
+Active faculty safeguards are now deadline watchdog **35965**, quota guard
+**35966**, and whole-home storage monitor **35967**. Their replacement time
+limits fit the remaining authorization window. The original source-account
+storage monitors remain active. Model hardware and resource-validation IDs
+are recorded in the delegated result provenance.
+
+See [current progress](current_progress.md) for counts and measured memory.
+
+## November 16: full-workload MIG failures and full-A100 recheck
+
+All six 20-GB research attempts failed with CUDA OOM during M0 final retention
+scoring. The earlier functional preflight passed but did not establish full
+final-workload memory compatibility. No failed attempt is counted as complete.
+Owning-account handoffs preserved partial folders under `failure_evidence`
+and registered same-seed fallback jobs; see the current-progress job map.
+
+Read-only CPU job 36281 verified all 66 sealed adapter checkpoint files against
+their original commitments. Training had finished before final scoring failed.
+These checkpoints remain preserved for possible scoring-only recovery; no
+such recovery has been released. The failed scoring outputs are preserved.
+
+Direct scheduler inspection shows all seven full A100s allocated (dgxa 2/2,
+dgxb 5/5). Faculty association muef2320 allows two GPUs, 64 CPUs and 512 GB RAM;
+the original two student associations allow one GPU, 32 CPUs and 256 GB each.
+Faculty and student GPU partitions share dgxa/dgxb and the same full devices.
+Faculty partition QoS priority is 100 versus student 50; this is not a reserved
+pool. Full-A100 preflight 35441 remains in the correct faculty partition.
+
+Watchdog 35965 failed on a Slurm accounting query. Replacement CPU guard
+36280 passed four boundary checks and is running using live squeue queries,
+with retries for transient scheduler errors. It manages only the named
+delegated jobs and has not cancelled any at this check. Quota guard 35966
+and faculty storage monitor 35967 remain running. No original running job
+or owner project was changed. The November 17 EOD access cutoff is unchanged.

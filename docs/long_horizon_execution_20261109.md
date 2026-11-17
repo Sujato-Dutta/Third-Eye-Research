@@ -139,3 +139,18 @@ availability, and Slurm's estimate has moved to November 14, 15:57 IST. This is
 an estimate, not a reserved allocation. All ten delegated jobs remain queued
 behind preflight, with quota/deadline safeguards running and no reported block.
 Whole-home usage is 39.28/50 GB, 41.25/50 GB and 121.10/200 GB respectively.
+
+## November 16, 11:00 IST check
+
+Eleven of sixteen paired seeds are complete and archived: Llama3B 4/4,
+Qwen8B 2/4, Llama8B 2/4, and Qwen4B 3/4. The last Qwen4B extension is running
+as 35102; its preceding three extensions each took approximately nine hours.
+Whole-home usage is 44.25/50 GB. Four delegated 8B jobs remain pending behind
+full-A100 preflight 35441. All seven full A100s are currently allocated.
+
+The faculty login has a two-GPU concurrency allowance, but its partition uses
+the same physical full-A100 pool as the student partition. It has no reserved
+idle pair. Replacement lease monitor 36280 is running after accounting-query
+failure stopped 35965. Pending delegated jobs return to their original-account
+queue if their 32-hour protective runtime no longer fits before November 17
+EOD. No running original trajectory was interrupted.

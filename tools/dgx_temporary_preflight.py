@@ -16,6 +16,7 @@ def main():
     if (not os.environ.get('SLURM_JOB_ID') or not os.environ.get('CUDA_VISIBLE_DEVICES')
             or 'login' in socket.gethostname().lower() or os.getuid() != 1189):
         raise RuntimeError('Named temporary account and allocated GPU required')
+    os.environ['HF_HUB_CACHE'] = str(PRIMARY / 'models/hf_cache/hub')
     import torch
     import positive_regime_confirmation as runner
     from third_eye.data.schema import Correction

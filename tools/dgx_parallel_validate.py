@@ -47,7 +47,7 @@ def main():
                     if not target.is_absolute() or not directory.is_dir():
                         raise ValueError('Batch path does not resolve: ' + str(path))
     record = {'passed': True, 'job_id': os.environ['SLURM_JOB_ID'], 'host': socket.gethostname(),
-              'runtime_sha256': digest(RUNTIME), 'operational_test_cases': 8,
+              'runtime_sha256': digest(RUNTIME), 'operational_test_cases': 11,
               'scripts_checked': len(scripts), 'script_sha256': {str(p): digest(p) for p in scripts},
               'bindings': {kind: json.loads((AUDIT / ('parallel_' + kind + '_access.json')).read_text())
                            for kind in OWNERS}, 'scientific_settings_changed': False}
