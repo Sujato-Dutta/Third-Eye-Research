@@ -1,6 +1,6 @@
 # Third Eye: current execution progress
 
-Last research-job snapshot: **November 17, 2026, approximately 09:15 IST**.
+Last research-job snapshot: **November 18, 2026, approximately 10:20 IST**.
 Lonestar6 preparation/queue updates below were checked this morning. The
 full-device DGX inventory retains its
 earlier timestamps; they have not been relabelled as new measurements.
@@ -16,12 +16,13 @@ temporary path had not been created. Their dependent GPU requests were
 cancelled before GPU execution. The operational fix creates that directory;
 the frozen scientific sources and protocol remain unchanged.
 
-Replacement CPU preparation `3588141` is running on a compute node. CUDA
-validation `3588142`, held ownership verification `3588143`, production
+Replacement CPU preparation `3588141` **completed successfully**, including
+the two frozen test invocations (5 and 15 tests). Three-model full-workload
+CUDA validation `3588142` also **completed successfully** in 10 minutes 49
+seconds. Held ownership verification `3588143`, production
 `3588144`/`3588145`, and final archive checking `3588146` are submitted with
-verified dependencies. The first frozen CPU suite passed (5 tests); the
-second suite was still running at the last log check. Full validation has
-not yet passed.
+verified dependencies. Production is still blocked by input/ownership
+verification, not a currently failed CPU or CUDA validation.
 The production requests pack independent tasks onto **six full A100s across
 two nodes**, with a total new reservation below **197 SUs**.
 
@@ -38,32 +39,43 @@ GPU research is submitted to the temporary DGX account. All six sealed
 checkpoint bundles reached the local machine. Four reached Lonestar6;
 the final two uploads have resumed. Keep this machine connected until
 transfer and ownership handoff complete. The authenticated TACC connection
-was restored using the saved MFA code this morning.
+was restored using the saved MFA code this morning. The previous connection
+ended with a partial parent-18 upload. Uploads now resume from verified boundary
+bytes, record progress, and use a bounded channel timeout; full archive and
+member checksums remain mandatory on the receiving compute node. The handoff
+coordinator has restarted. The temporary account's access window has ended;
+no further login to that account is used.
 
 ## Completed and running experiments
 
-### Main confirmation: 11 of 20 parents complete
+### Main confirmation: 12 of 20 parents complete
 
 The fixed Qwen3-4B math confirmation uses eight unique corrections, 25 optimizer
 steps and three continuation draws per parent. Target, OOD and retention are
 scored on the frozen enlarged evaluation pools.
 
-- Parents 0--10 completed, including their dependent inspection/archive jobs.
-- Parent 11 (`35053_11`) is running on a full A100; elapsed time at the
-  morning check was approximately 6 hours 46 minutes. Parents 12--13 remain queued.
+- Parents 0--11 completed, including their dependent inspection/archive jobs.
+- Parent 11 completed in 13 hours 42 minutes. Parents 12--13 and the original
+  six fallback attempts refused to start research because whole-home storage
+  left less than the fixed 2-GB scratch reserve. No quota breach occurred.
+- Same-seed replacement arrays `38021` (12) and `38022` (13) are bound to a
+  successful CPU headroom check before GPU release. The six migration fallbacks
+  below remain held for exclusive Lonestar6 handoff. Original failure logs and
+  scientific outcomes remain preserved; no completed parent is restarted.
 - Six temporary-account MIG attempts, parents 14--19, failed during final
   scoring. These are operational failures, not completed scientific results.
-- Same-seed owning-account fallback jobs are pending. Final review `35054`
-  remains connected to the fixed cohort through the dependency registry.
+- Final review `35054` had become dependency-blocked by failed attempts. Its
+  dependency registry now refers to the replacement jobs; strict cohort review
+  still checks all 20 fixed parents, including completed original parents.
 
-| Parent index | Failed MIG job | Pending fallback array job |
+| Parent index | Failed MIG job | Held replacement fallback array job |
 | --- | --- | --- |
-| 14 | 35465 | 36073 |
-| 15 | 35466 | 36096 |
-| 16 | 35467 | 36211 |
-| 17 | 35468 | 36209 |
-| 18 | 35469 | 36245 |
-| 19 | 35471 | 36247 |
+| 14 | 35465 | 38023 |
+| 15 | 35466 | 38024 |
+| 16 | 35467 | 38025 |
+| 17 | 35468 | 38026 |
+| 18 | 35469 | 38027 |
+| 19 | 35471 | 38028 |
 
 ### Longer trajectories: 12 of 16 paired seeds complete
 
@@ -74,16 +86,18 @@ through T=5, with frozen T=3/T=5 scoring points.
 | --- | ---: | ---: | ---: |
 | Llama-3.2-3B-Instruct | 4 | 0 | 0 |
 | Qwen3-8B | 2 | 0 | 2 |
-| Llama-3.1-8B-Instruct | 2 | 0 | 2 |
+| Llama-3.1-8B-Instruct | 2 | 1 | 1 |
 | Qwen3-4B | 4 | 0 | 0 |
-| **Total** | **12** | **0** | **4** |
+| **Total** | **12** | **1** | **3** |
 
 The completed trajectories passed their dependent inspection/archive jobs.
 Qwen4B's final seed (`35102`) completed in 8 hours 48 minutes; its archive
 and complete-cohort review `35104` also passed. The four temporary-account 8B requests returned
 through their owning-account handoffs. Registered original-account fallbacks
-are `36443`, `36444`, `36445`, `36446`; all were pending this morning. They remain
-eligible until the verified TACC handoff. Model reviews and integrated review
+are `36443`, `36444`, `36445`, `36446`. Llama8B seed index 3 (`36443`) is running
+on a full A100, approximately 12 hours 48 minutes elapsed at the morning check.
+The other three remain eligible until the verified TACC handoff. Running or
+completed seeds will be skipped on TACC. Model reviews and integrated review
 `35105` still require their complete fixed cohorts.
 
 The completed four-seed Qwen4B math cohort has immediate gain +1.060 pp,
@@ -96,11 +110,16 @@ below its parent here. Results support investigating backbone dependence;
 they do not establish universal downstream harm. No final four-backbone
 comparison is available until both 8B cohorts finish.
 
-The morning storage monitor reports 48.413 GB allocated on the primary
-50.000-GB account and 44.467 GB on the second account. Primary storage is
+The latest storage snapshots report approximately 48.347 GB allocated on the
+primary 50.000-GB account and 44.755 GB on the second account. Primary storage is
 below the hard quota but above the monitor's safety threshold. No new large
 result import is authorized by those snapshots; consolidation must check
-headroom first. Scientific outputs and original failure evidence remain intact.
+headroom first. CPU inventory `38019` completed. CPU maintenance `38034` is
+attempting lossless inode sharing of byte-identical artifacts in the twelve
+completed, owning-account parent folders. Delegated failure artifacts and
+unrelated projects are excluded. GPU retries depend on a passed fresh storage
+check; their scratch requirement is unchanged. Scientific outputs and original
+failure evidence remain intact.
 
 ## Full A100 availability and account allowances
 
@@ -201,7 +220,7 @@ and small metadata reads.
 
 ## Remaining work
 
-1. Complete 10 confirmation parents and five paired trajectories, preserving
+1. Complete eight confirmation parents and four paired trajectories, preserving
    all fixed seeds and protocol settings.
 2. Finish TACC preparation, saved-state staging and exclusive seed handoff;
    execute the queued work and verify its returned artifacts.
