@@ -383,8 +383,18 @@ def ownership():
     for key,entry in record['tasks'].items():
         if entry['run_on_lonestar'] and entry['dgx_state']!='PENDING_HELD':
             raise ValueError('Only an explicitly held DGX seed can be migrated')
-        if not entry['run_on_lonestar'] and entry['dgx_state'] not in ('RUNNING','COMPLETING','COMPLETED'):
+        if not entry['run_on_lonestar'] and entry['dgx_state'] not in ('RUNNING','COMPLETING','COMPLETED','PENDING_RECOVERY'):
             raise ValueError('Original execution must remain attributable')
+        if entry['dgx_state']=='PENDING_RECOVERY':
+            proof = entry.get('recovery_proof',{})
+            row = task(key)
+            if (entry['run_on_lonestar'] or row['model']!='llama3.1-8b'
+                    or not proof.get('passed') or proof.get('states')!=10
+                    or proof.get('seed')!=2026111200+row['index']
+                    or proof.get('training_repeated') is not False
+                    or proof.get('source_tree_sha256')!=SOURCES['horizon']
+                    or proof.get('request_sha256')!=read(CONTROL/'binding.json')['original_request_sha256']['horizon']):
+                raise ValueError('Verified same-seed sealed scoring recovery required')
     for index in FAILED:
         if record['tasks'][f'positive-{index}']['run_on_lonestar']:
             exported = unpack(f'lonestar_parent_{index}_20261116')
