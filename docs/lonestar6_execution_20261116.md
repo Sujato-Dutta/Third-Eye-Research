@@ -197,3 +197,99 @@ DGX has meanwhile completed 11/20 confirmation parents and 12/16 longer
 trajectory seeds. Both four-seed smaller-backbone trajectory cohorts are
 complete; the four remaining 8B seeds were pending at the morning check.
 See `docs/current_progress.md` for the new Qwen4B results and storage limits.
+
+## November 18 execution check
+
+The authenticated SSH session and upload had ended before handoff. Four of six
+sealed archives were acknowledged; parent 18 had only a partial upload and
+parent 19 had not started. A fresh MFA code restored access. The upload helper
+now resumes verified partial boundaries, records bytes transferred, publishes
+responses atomically and bounds SFTP channel waits. Full receiving-side archive
+and member hashes remain mandatory on compute nodes. The coordinator has
+restarted and uses only the original two DGX accounts; temporary faculty access
+expired November 17 EOD and is not used again.
+
+Both preparation `3588141` (12:55) and CUDA validation `3588142` (10:49)
+completed successfully. CPU test invocations passed 5 and 15 tests. Production
+`3588144`/`3588145` remains dependency-blocked by held ownership verification
+`3588143`, which awaits the remaining archives and exclusive seed handoff.
+The fifth archive was approximately 317/502 MB uploaded at 10:32 IST; the
+sixth remained pending. No production GPU execution is claimed.
+
+DGX confirmation reached 12/20 complete. Subsequent original attempts refused
+research execution because usage exceeded 48/50 GB, leaving less than the fixed
+2-GB scratch reserve. Their logs are preserved. CPU-only, checked maintenance
+recovered 945,438,720 bytes through lossless inode sharing and regenerable
+download/build-cache retirement, reducing home usage to 47,401,684,992 bytes.
+Model weights, environments, unrelated project data and all scientific results
+remain preserved. Fixed-seed retries 12/13 are `38039`/`38040`, dependent on the
+successful storage check and each other, respectively. Six held migration
+fallbacks are now `38023`--`38028`; their registry and review dependencies were
+updated while preserving earlier failed job IDs in history.
+
+Longer trajectories remain 12/16 complete; Llama8B index 3 (`36443`) is running
+on DGX and must be excluded from TACC execution at handoff. The other three
+8B fallbacks remain eligible until ownership assignment. No new scientific
+cohort-level result is claimed from incomplete collections.
+
+## November 18 afternoon: durable transport and sealed-state recovery
+
+The earlier tool-session SSH transport ended before completing archive 18.
+The separate handoff coordinator survived, waiting for its response. A new
+MFA code restored authentication through a separate hidden background SSH
+process. Archive 18 finished; archive 19 was approximately 112/502 MB at
+16:33 IST. Five of six staging acknowledgements now exist. The local machine
+must stay awake and connected until the handoff receipt is committed.
+
+DGX Llama8B index 3 (`36443`) failed after 16:00:50 with a 1.91-GiB CUDA
+allocation failure during final scoring. All ten trajectory states had been
+sealed beforehand. CPU audit `38276` passed all state/weight/donor identity
+checks, preserving original request/source hashes. DGX GPU **`38278`** performs
+scoring-only recovery in fresh per-checkpoint processes, retaining the frozen
+batch geometry, precision, outputs, verifier and checkpoint restoration checks.
+It uses expandable allocator segments and checks available allocated-GPU memory
+before loading. No harvesting or optimizer update is repeated. Failed partial
+scoring remains archived beside the run. Original archive `35094` now depends
+on `38278`.
+
+The running Llama8B index 2 is `36444`, approximately 2:36 elapsed at 16:07.
+CPU follow-up `38277`, after any exit of that worker, inspects a completed
+result or admits scoring recovery only if all ten trained states are sealed.
+The two initially proposed long CPU controllers were cancelled before running;
+short CPU admissions avoid occupying a CPU while a GPU is queued.
+
+Pending, audited scoring recovery is explicitly retained on DGX at handoff.
+The ownership validator now accepts `PENDING_RECOVERY` only with the complete
+same-seed, original-source/request proof and `training_repeated=false`; it is
+never treated as scientific completion. This changes operational ownership
+routing, not the frozen experiments. Because the runtime hash changes, repeat
+CPU setup and CUDA validation are queued for submission after the active
+upload. The coordinator reads the resulting current registration and waits
+for both before releasing ownership verification. Existing production job IDs
+are retained, with updated dependencies. Failed validation still prevents
+production.
+
+Conservative completed-job accounting plus full remaining walltime reservations
+gives **196.3215 SUs**, below the operating ceiling 197 and budget limit 200.
+`reroute_budget_20261118.json` records the allocation. No new scientific seed,
+architecture sweep, forecaster or outcome-dependent sample selection is added.
+
+## November 18, 17:14: staging and scheduler handoff complete
+
+All six archive uploads are acknowledged, the ownership manifest is uploaded,
+and ownership verification `3588143` is released with dependency
+`afterok:3592177`. Routing CPU setup **`3592177`** is running; replacement
+CUDA preflight **`3592178`** waits for it. Production `3588144`/`3588145`
+explicitly depends on `3592178` and `3588143`. No production GPU has started.
+The manifest assigns eight tasks to TACC (two Qwen8B trajectories and six
+confirmation scoring recoveries), retaining the running Llama8B trajectory
+and audited scoring recovery on DGX.
+
+The local coordinator encountered an earlier successful preflight receipt
+while the replacement validation was running and committed ownership early.
+No scheduler validation dependency was bypassed: CPU verification and GPU
+production remain guarded by their current job IDs. This exact-ID readiness
+check is now also enforced in the local coordinator for future handoffs.
+The current remote dependency chain can run without the local machine;
+fresh validation failures still stop production. Result return and complete
+cohort consolidation remain downstream work.

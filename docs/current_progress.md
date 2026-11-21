@@ -1,6 +1,116 @@
 # Third Eye: current execution progress
 
-Last research-job snapshot: **November 18, 2026, approximately 10:20 IST**.
+## November 20, 09:58 IST
+
+- **Longer trajectories: 16/16 complete.** DGX Llama-8B scoring jobs `38278`
+  and `39390` passed, then both archive jobs and the Llama-8B model review
+  passed. The two Qwen-8B archives on Lonestar6 were also verified. All four
+  models are ready for the combined trajectory review, queued as `3597817`.
+- **Confirmation: 19/20 verified.** DGX parent 12 completed in 15:33:09.
+  Lonestar6 CPU job `3594910` verified and exported all six recovered
+  parents. DGX parent 13 (`38040_13`) failed at the storage admission check
+  before training or writing a run directory. The same fixed seed is queued
+  on Lonestar6 as `3597813`, using the pinned scientific runner and existing
+  validated inputs. The scheduler has not given a start time.
+- DGX CPU jobs `42014` and `42015` inspected and exported the data needed for
+  the two reviews. Lonestar6 has the exported per-item contrasts and their
+  checksum receipts. The full 20-parent review (`3597819`) waits for a
+  successful exit from `3597813` and applies the frozen analysis. The smaller
+  review inputs avoid copying adapter tensors into the DGX home quota.
+
+## November 19, 10:25 IST
+
+- **Longer trajectories: 14/16 runs complete across both clusters.** Both
+  transferred Qwen3-8B trajectories finished on Lonestar6 and their result
+  archives passed verification. The complete cohort review is still pending.
+  Both remaining Llama-8B seeds finished training on DGX and failed during
+  scoring with CUDA out of memory. Their checkpoint audits passed and
+  scoring-only jobs `39390` and `38278` are awaiting GPUs.
+- **Confirmation: 12/20 previously complete, six more scored and awaiting
+  final archive verification.** All six Lonestar6 recoveries (parents
+  14–19) wrote their complete scores and passed the scientific artifact
+  checks. The two bundle jobs exited with errors because scratch rejected
+  tokenizer hard links during archival. CPU job `3594910` is verifying
+  the existing raw or compressed tensors against their training seals and
+  exporting the completed results without hard links. It has started the
+  first export. No training or scoring is repeated.
+- **DGX confirmation:** parent 12 (`38039_12`) is running with about 14 hours
+  elapsed. Parent 13 (`38040_13`) waits for parent 12. Full-cohort analyses
+  and cross-cluster consolidation remain pending.
+
+## Latest transfer and scheduler check: November 18, approximately 17:14 IST
+
+**All six saved-state bundles are uploaded to Lonestar6.** The ownership
+manifest is uploaded and ownership job `3588143` has been released into its
+dependency chain. Production `3588144`/`3588145` is pending; it has not started.
+
+Routing CPU setup **`3592177`** is running. Routing CUDA preflight
+**`3592178`** waits for that setup. Both production jobs explicitly depend on
+the new CUDA job and ownership verification; ownership verification depends on
+the new CPU job. Earlier passed validation receipts are not a report that
+these replacement jobs have passed. The local handoff committed ownership
+before the replacement validations finished, but the scheduler dependencies
+still prevent production from starting early. Future coordinator runs now
+also require exact current job IDs in completed readiness proofs.
+
+The handoff assigns two Qwen8B trajectories and six sealed-state scoring
+recoveries to Lonestar6. DGX retains its running Llama8B index-2 trajectory
+and audited index-3 scoring recovery. Only the two pending Qwen8B DGX
+fallbacks were newly held. The transferred inputs, ownership and scheduler
+dependencies are now remote: these submitted jobs can continue without the
+local transfer process. Subsequent result collection/consolidation still
+requires a connection.
+
+Scientific counts remain **12/20 confirmation parents** and **12/16 longer
+trajectory seeds** complete. Primary retries `38039`/`38040` are still pending;
+Llama8B `36444` is running (about 3:41 elapsed at 17:14), and scoring recovery
+`38278` is pending. No new complete-cohort scientific result is claimed.
+
+## Latest afternoon check: November 18, approximately 16:30 IST
+
+- **Confirmation: 12/20 complete.** Fixed-seed retries `38039`/`38040` are
+  pending GPU priority/dependency, respectively. Neither has started. The
+  10:32 storage check passed at 47.402/50 GB after recovery of about 945 MB;
+  that is a timestamped storage measurement, not a new afternoon scan.
+- **Longer trajectories: 12/16 complete.** Llama8B index 3 (`36443`) failed
+  after 16 hours with CUDA OOM during final scoring on a 40-GB A100. It is
+  not counted complete. Llama8B index 2 (`36444`) is running, approximately
+  2 hours 36 minutes elapsed at the 16:07 check. The two Qwen8B seeds remain
+  pending for the verified TACC handoff.
+- **Training preservation:** CPU audit `38276` passed for all ten sealed
+  Llama8B index-3 checkpoints and donor commitments. Scoring-only recovery
+  **`38278`** is queued on DGX; training and harvesting are not repeated.
+  Eight frozen scoring checkpoints are evaluated with a fresh backend process
+  for each, unchanged configuration, exact restore and a free-GPU-memory
+  check before loading. Partial scoring evidence remains intact. Archive
+  `35094` now waits for recovery `38278`.
+- **Automatic follow-up:** CPU admission `38277` waits for any exit of the
+  running Llama8B index-2 job. It exits after inspection if the seed succeeded.
+  If scoring failed, it may queue recovery only after a complete training seal
+  passes its integrity audit. It does not repeat unfinished training.
+  Initial long CPU-controller requests `38274`/`38275` were cancelled before
+  execution; the replacement CPU admissions request 20 minutes and release
+  the CPU after scheduling, rather than holding it throughout a GPU wait.
+- **Transfer: 5/6 archives acknowledged on Lonestar6.** Archive 19 is uploading
+  (approximately 112/502 MB at 16:33). The earlier SSH transport stopped with
+  archive 18 incomplete. A fresh MFA code restored access, and the transport
+  now runs as a separate hidden background process, like the handoff
+  coordinator. Both require an awake, connected local machine until staging
+  and handoff finish. Temporary-account access expired and is not used again.
+- **TACC production has not started.** Initial CPU `3588141` and CUDA
+  `3588142` validations passed. An operational routing extension explicitly
+  retains a pending, audited DGX scoring recovery without duplicating it on
+  TACC. Repeat CPU setup and CUDA preflight are prepared for submission after
+  the current upload, before ownership release. The same production node
+  jobs `3588144`/`3588145` remain queued. Seeds, training budgets, data,
+  endpoints and frozen scientific sources are unchanged.
+
+No new complete-cohort scientific result is claimed this afternoon. The
+latest work repairs execution and preserves already completed training.
+
+## Earlier morning snapshot
+
+Last research-job snapshot: **November 18, 2026, approximately 10:33 IST**.
 Lonestar6 preparation/queue updates below were checked this morning. The
 full-device DGX inventory retains its
 earlier timestamps; they have not been relabelled as new measurements.
@@ -29,7 +139,7 @@ two nodes**, with a total new reservation below **197 SUs**.
 The task grid contains four remaining 8B trajectories and scoring-only recovery
 of confirmation parents 14--19. A coordinator leaves DGX work eligible while
 TACC prepares; at handoff, only pending DGX fallbacks are held. Running/completed
-DGX seeds stay on DGX and are skipped on TACC. The two original running jobs
+DGX seeds stay on DGX and are skipped on TACC. Original running jobs
 are untouched. Saved-state transfer and ownership activation are still in
 progress; this is not a report that production GPUs have started.
 
@@ -58,8 +168,10 @@ scored on the frozen enlarged evaluation pools.
 - Parent 11 completed in 13 hours 42 minutes. Parents 12--13 and the original
   six fallback attempts refused to start research because whole-home storage
   left less than the fixed 2-GB scratch reserve. No quota breach occurred.
-- Same-seed replacement arrays `38021` (12) and `38022` (13) are bound to a
-  successful CPU headroom check before GPU release. The six migration fallbacks
+- Same-seed replacement arrays `38039` (12) and `38040` (13) are bound to the
+  successful CPU headroom check `38037`; parent 13 also depends on parent 12.
+  Parent 12 is pending GPU priority, not blocked by storage validation.
+  The six migration fallbacks
   below remain held for exclusive Lonestar6 handoff. Original failure logs and
   scientific outcomes remain preserved; no completed parent is restarted.
 - Six temporary-account MIG attempts, parents 14--19, failed during final
@@ -110,16 +222,20 @@ below its parent here. Results support investigating backbone dependence;
 they do not establish universal downstream harm. No final four-backbone
 comparison is available until both 8B cohorts finish.
 
-The latest storage snapshots report approximately 48.347 GB allocated on the
+The latest storage snapshots report approximately 47.402 GB allocated on the
 primary 50.000-GB account and 44.755 GB on the second account. Primary storage is
-below the hard quota but above the monitor's safety threshold. No new large
-result import is authorized by those snapshots; consolidation must check
-headroom first. CPU inventory `38019` completed. CPU maintenance `38034` is
-attempting lossless inode sharing of byte-identical artifacts in the twelve
+below the hard quota and passes the unchanged 2-GB scratch-reserve check.
+Consolidation must check headroom before any large result import.
+CPU inventory `38019` completed. CPU maintenance `38034` completed
+lossless inode sharing of byte-identical artifacts in the twelve
 completed, owning-account parent folders. Delegated failure artifacts and
-unrelated projects are excluded. GPU retries depend on a passed fresh storage
-check; their scratch requirement is unchanged. Scientific outputs and original
-failure evidence remain intact.
+unrelated project data are excluded. It recovered 708,788,224 allocated bytes.
+CPU job `38037` retired 236,650,496 bytes of regenerable pip, Hugging Face Xet
+download-chunk and Tectonic build caches. All model weights, environments,
+research outputs and original failure evidence remain intact. Its fresh
+whole-home snapshot was 47,401,684,992 bytes and its storage check passed.
+The interim dependency-held requests `38021`/`38022` were replaced by
+`38039`/`38040` before research execution; no completed seed was restarted.
 
 ## Full A100 availability and account allowances
 
