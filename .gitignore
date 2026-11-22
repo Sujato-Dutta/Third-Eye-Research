@@ -27,6 +27,8 @@ models/*
 !models/README.md
 runs/
 outputs/
+overleaf_paper
+final_revision_plan.md
 logs/
 *.safetensors
 *.pt

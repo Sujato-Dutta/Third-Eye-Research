@@ -1,5 +1,43 @@
 # Third Eye: current execution progress
 
+## November 22, 10:24 IST
+
+The last confirmation parent (`3597813`) and the 20-parent review (`3597819`)
+both completed successfully on November 21 IST. The GPU job took 11:35:04.
+The confirmation includes all 20 Qwen3-4B math parents and three continuation
+draws per parent, with no terminal draws. The four-model trajectory cohort
+was already complete. Allocation `IRI23021` shows **5,242 available SUs**.
+
+The first update improved mean utility by **+2.22 pp** (simultaneous 95% CI
+[+1.05, +3.39]). The same continuation batch produced **2.03 pp less
+incremental gain** when applied after that first update than when applied
+directly to the parent ([-3.33, -0.77]). The sequential second update added
+**+0.44 pp** ([-0.25, +1.14]), and its final advantage over the direct update
+was **+0.19 pp** ([-0.35, +0.80]). Half-rate continuation changed utility by
+**+0.02 pp** ([-0.29, +0.34]). The confirmation supports reduced returns to
+the next update with the donor batch held fixed. A decline after the second
+update was inconclusive in this positive-gain regime.
+
+The verified review is saved at
+`runs/deployment/lonestar_20261116/confirmation_review_20261122.json`.
+
+## November 21, 08:52 IST
+
+The last confirmation parent, Slurm job `3597813`, remains pending on GPU
+priority. Slurm estimates a start at **19:43 IST on November 21**. At the
+observed 14–18 hour runtime of comparable parents, that would put completion
+around **10:00–14:00 IST on November 22**. Start estimates can move. The
+20-parent review `3597819` remains queued after successful completion.
+Allocation `IRI23021` shows **5,475 available SUs**.
+
+The four-model trajectory review `3597817` passed. At update five, the
+native-policy utility changes versus holding were −16.08 pp for Llama-3.2-3B
+(simultaneous 95% CI [−20.07, −12.29]), −14.77 pp for Llama-3.1-8B
+([−21.11, −10.07]), +1.75 pp for Qwen3-4B ([−0.24, +3.73]) and −3.64 pp
+for Qwen3-8B ([−8.51, +2.61]). These are four paired seeds per backbone on
+one math stream. The integrated review is saved locally at
+`runs/deployment/lonestar_20261116/integrated_cross_cluster_review_20261121.json`.
+
 ## November 20, 09:58 IST
 
 - **Longer trajectories: 16/16 complete.** DGX Llama-8B scoring jobs `38278`
