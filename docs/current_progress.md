@@ -1,5 +1,64 @@
 # Third Eye: current execution progress
 
+## November 23, 11:11 IST
+
+All remaining revision work moved to Lonestar6. DGX jobs 42795 and 42800
+were cancelled before starting. The archived input for seed 2026110900
+was transferred without base weights or final scores. Lonestar6 CPU job
+3606571 verified the transfer checksums and all three overlap doses. The
+pilots retain seeds 2026110900 and 2026110913.
+
+The original Lonestar6 probe 3603934 expected a GPU-mask variable that the
+full-node queue did not provide. Probe 3606547 discovered the three A100s and
+then stopped at an import error caused by mixing two frozen source releases.
+Both stopped before training. The blocked original timing job 3603948 was
+cancelled. CPU job 3606576 verified the exact worker import order against a
+single release, byte-identical core training and evaluation files, and
+checksum-valid extraction of both archived adapters for each pilot seed.
+
+Lonestar6 job **3606581** is pending for resources on the A100 development
+queue, with a two-hour limit and no confirmed start time. The job runs the
+CUDA probe and then launches both timing pilots on separate A100s within the
+same allocation. A probe failure prevents pilot launch. The fresh-seed
+cohort still depends on successful GPU validation and observed pilot cost.
+
+## November 22, 11:38 IST
+
+The paired-probe batch selector is implemented and the
+[final revision plan](../final_revision_plan.md) includes its objective,
+baseline comparisons and release sequence. The primary DGX account measured
+50.54 GB against its 50 GB operating limit. It supplied a read-only CPU
+export using node-local scratch. The second DGX account measured 45.49 GB
+and passed the 2 GB reserve check. Lonestar6 reported 5,242 available SUs
+at the start of this round. New files there are on scratch. Scientific
+execution uses Slurm compute allocations.
+
+The merged CPU review verified all 20 saved parents. On GSM8K, 85.2% of
+the direct arm's fixes were already correct after the first update.
+The corresponding overlap was 52.7% on MATH-500 and 47.8% on MMLU.
+Strict GSM8K extraction failures fell from 8.87% to 3.69%. Held-out
+retrospective checkpoint selection improved on always carrying by +0.03 pp
+(95% CI [−0.20, +0.28]). This redirects the revision toward choosing the
+next corrections. See the [saved audit](../runs/deployment/revision_20261122/saved_audit_review.json).
+
+The CPU feasibility check produced matched low, medium and high doses in
+56 of 60 archived draws with shared examples across batches and eight
+unique examples within each. The earlier disjoint-dose variant was scarce.
+The first CPU attempt encountered a token-label counting error and was
+corrected and rerun. Lonestar6's first CPU audit request also needed the
+queue's default memory specification. Both corrected workflows and the
+per-site pilot input validations passed.
+
+| Site | CPU admission | Pilot input validation | CUDA probe | Development pilot |
+| --- | --- | --- | --- | --- |
+| Lonestar6 | 3603913 passed | 3603946 passed | 3603934 pending priority | 3603948 waits for probe |
+| DGX second account | 42794 passed | 42799 passed | 42795 pending priority | 42800 waits for probe |
+
+Slurm estimated probe starts at 13:30 IST on November 22 for Lonestar6 and
+19:52 IST on November 23 for DGX at this snapshot. Both can move. The probes
+request 45 minutes and the timing pilots request 90 minutes. Fresh-seed
+arrays await observed runtimes and successful GPU validation.
+
 ## November 22, 10:24 IST
 
 The last confirmation parent (`3597813`) and the 20-parent review (`3597819`)
