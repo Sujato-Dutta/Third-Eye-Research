@@ -1,5 +1,60 @@
 # Third Eye: current execution progress
 
+## November 24, 09:30 IST
+
+Lonestar6 job **3607550** completed all eight archived Qwen3-4B probes
+in 33 min 55 s on three A100s. The fresh two-seed timing job **3607551**
+is still pending on scheduler priority.
+
+The workstation-to-Lonestar6 transfer stopped after one archive and part
+of the second. The new SSH session authenticated and the second archive
+resumed at byte 9,895,936. The relay is running again. It will submit the
+remaining replay jobs after each group of six archives lands and set up
+the 20-seed review to run once all replay jobs succeed. The eight completed
+seeds remain on scratch and will be reused.
+
+## November 23, 22:42 IST
+
+This round uses Lonestar6 for all scientific computation. CPU validation
+job **3607549** passed in 4 min 24 s. Eight archived
+Qwen3-4B probes (**3607550**) and two fresh timing seeds (**3607551**) were
+released by validation and were waiting on GPU queue priority. The fresh seeds time
+two full correction harvests, their updates when corrections are
+available, and one full scoring pass per seed. They retain timings and
+harvest counts.
+
+All files for the other 12 archived parents reached the workstation
+from DGX storage. The first archive reached Lonestar6 scratch, and the
+second upload was in progress. The relay submits a checksum validation and one
+three-GPU replay job for each six-parent group. A CPU analysis follows
+the three replay jobs. It compares the paired-checkpoint selector with
+the same two-step probe on M1 alone, using identical archived candidate
+batches and disjoint development and final scoring items. Each of the
+20 held-out scores uses a penalty weight chosen on the other seeds.
+This is retrospective development evidence. The fresh confirmation
+cohort has yet to be sized and submitted.
+
+## November 23, 22:22 IST
+
+Lonestar6 job **3606581 completed successfully** at 11:56 IST in 31 min
+40 s. The CUDA probe verified exact rollback on an A100. Both archived
+Qwen3-4B timing pilots ran concurrently and completed, including all
+matched updates and pooled controls. Seeds 2026110913 and 2026110900 took
+24 min 54 s and 26 min 28 s, respectively.
+
+High overlap gave the best native increment on seed 2026110913 (0.00 pp
+against −1.39 pp for low and medium). Medium overlap led on seed 2026110900
+(+6.94 pp against +4.17 pp for low and +5.56 pp for high). The paired score
+ranked low and medium first, respectively. Each pilot used 24 development
+items per role in its scoring split and found one first-step fix in the
+probe split. These observations are exploratory and the runtime estimates
+apply to archived inputs and the compact development suites. A fresh
+cohort requires pricing of new harvesting and full scoring. At this
+snapshot the Lonestar6 queue is empty.
+
+Verified reports are retained locally under
+[revision_20261122](../runs/deployment/revision_20261122/).
+
 ## November 23, 11:11 IST
 
 All remaining revision work moved to Lonestar6. DGX jobs 42795 and 42800
