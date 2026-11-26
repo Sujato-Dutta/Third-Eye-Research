@@ -7,8 +7,8 @@ mode=$1
 shift
 base=/scratch/11617/sujato_ts/third_eye_ls6_20261116
 work="$base/revision_20261122"
-source_dir="$work/overlap_sources_20261124"
-output="$work/fresh_overlap_20261124"
+source_dir="$work/overlap_sources_20261126"
+output="$work/fresh_overlap_20261126"
 python="$base/.venv/bin/python"
 cd "$source_dir"
 sha256sum -c overlap_release.sha256
@@ -36,7 +36,8 @@ pids=()
 for seed in "$@"; do
   lane=${#pids[@]}
   printf '%s seed %s on GPU %s\n' "$mode" "$seed" "${lanes[lane]}"
-  CUDA_VISIBLE_DEVICES="${lanes[lane]}" "$python" revision_overlap_confirmation.py "$mode" +    "${common[@]}" --seed "$seed" > "$work/logs/overlap-$mode-$seed-$SLURM_JOB_ID.out" 2>&1 &
+  worker_args=("$mode" "${common[@]}" --seed "$seed")
+  CUDA_VISIBLE_DEVICES="${lanes[lane]}" "$python" revision_overlap_confirmation.py "${worker_args[@]}" > "$work/logs/overlap-$mode-$seed-$SLURM_JOB_ID.out" 2>&1 &
   pids+=("$!")
 done
 status=0
