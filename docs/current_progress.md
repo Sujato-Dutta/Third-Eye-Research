@@ -1,5 +1,137 @@
 # Third Eye: current execution progress
 
+## November 27, 18:40 IST
+
+Lonestar6 has scored 53 of 94 checkpoint evaluations. The two seeds
+without matched doses finished both baseline evaluations. Seven
+matched seeds have scored seven of nine checkpoints each on nine A100s
+across jobs **3615341–3615343**. The last three seeds, in job **3615344**,
+are waiting on GPU priority without a scheduled start. The final review
+**3615345** waits for all scoring jobs.
+
+## November 27, 09:10 IST
+
+All 12 Lonestar6 harvests completed successfully. CPU freeze **3615340**
+sealed the batches at 22:27 IST on November 26. Ten seeds supplied all
+three matched overlap levels. Seed 2026112506 had no budget-matched
+medium batch, and seed 2026112507 had insufficient distinct matched
+batches. Both remain in the intended cohort under the frozen scarcity rule.
+The four scoring jobs **3615341–3615344** are waiting on scheduler priority.
+The review **3615345** depends on them. Scoring has yet to begin.
+
+## November 26, 20:38 IST
+
+Lonestar6 preflight **3615346** completed successfully. All four harvest
+jobs (**3615336–3615339**) are running on 12 A100s. Each seed has passed
+model loading and reached verified-correction generation. The first
+group started at 20:00 IST and the other groups at 20:13–20:14 IST.
+The CPU freeze and all scoring and review jobs are queued behind the
+harvests. No fresh seed has completed harvesting yet.
+
+## November 26, DGX backup and storage
+
+At 12:30 IST both workstation transfers were paused at the user's request.
+DGX 2 automated cleanup was stopped before it submitted any jobs. Verified
+files, manifests and partial downloads are available for a later resume.
+
+DGX CPU inventories **43645** and **43646** found 50.19 GB on account 1
+and 45.49 GB on account 2. Account 1 had 27.37 GB of Third Eye runs,
+8.07 GB of model caches, and a 6.59 GB Python environment. Account 2
+had 38.90 GB in downloaded model directories and 6.56 GB of research runs.
+
+The [local backup](../runs/deployment/dgx_backup_20261126/README.md)
+preserves Third Eye research artifacts with per-file checksums. CPU jobs
+**43650** and **43651** published manifests for 27.55 GB and 44.98 GB
+of unique content, respectively.
+Account 2 transfer resumed after retrying a delayed manifest read.
+Account 1 cleanup **43668** removed three pinned Qwen3-4B download shards
+and verified that they were absent, reclaiming 8.04 GB. Cleanup on account 2 requires
+matching SHA-256 checks for every archived shard of the selected model
+and an idle account. Historical research runs are retained on both accounts.
+
+## November 26, 08:26 IST
+
+The overnight harvest jobs **3611193–3611196** exited before model
+loading. The GPU launcher passed a literal `+` to the worker's argument
+parser. No seed produced a harvest or started scoring. The old blocked
+downstream jobs were cancelled and the original logs were retained.
+
+The launcher was corrected in a new release with the same experiment
+code, seeds and settings. A checksum mismatch in the newly added
+preflight test was caught on the CPU and corrected before GPU release.
+Preflight **3615346** passed the exact worker argument check for both
+harvest and scoring across three lanes. Full input validation was running
+at the last check.
+Harvest jobs **3615336–3615339** depend on that preflight. Freeze
+**3615340**, scoring **3615341–3615344**, and review **3615345** remain
+queued in order.
+
+## November 25, 11:21 IST
+
+CPU validation **3611192** completed successfully. All four harvest jobs
+are waiting on GPU queue priority, with tentative starts of 17:10, 20:40,
+20:57 and 21:00 IST. No fresh harvest or scoring outputs have been
+produced. The CPU freeze, scoring jobs and final review remain queued
+behind their dependencies.
+
+## November 24, 23:14 IST
+
+The 12-seed prospective Qwen3-4B overlap experiment is queued on Lonestar6.
+CPU validation **3611192** wrote a passing receipt with all six release
+checksums verified and arithmetic profiles for 1,001 of 1,024 prompts.
+The historical precision simulation estimated a 1.02 pp half-width at
+12 seeds. Harvest jobs **3611193–3611196** then produce and retain the
+training pools and initial adapters across up to 12 A100s. CPU job
+**3611197** reproduces and seals the matched batches without using final
+outcomes. Scoring jobs **3611198–3611201** wait for that seal and run the
+paired updates and pooled control. CPU review **3611202** waits for all
+scoring jobs.
+
+The GPU requests total at most 138 SUs. Allocation `IRI23021` reported
+5,126 available SUs at submission. All new artifacts are on scratch.
+The [prospective design](../final_revision_plan.md#november-24-prospective-overlap-experiment)
+specifies the overlap intervention, scarcity handling and primary contrast.
+
+## November 24, 23:04 IST
+
+All 20 archived Qwen3-4B replays and the two fresh timing seeds are complete.
+The two final replay jobs (**3609764**, **3609802**) took 19 min 41 s and
+17 min 13 s. CPU review **3609805** completed at 21:59 IST.
+All 20 leave-one-seed-out folds chose a redundancy weight of zero from
+the tested grid (0, 0.25, 0.5, 1). The penalty changed no selections, so
+observed utility and retention differences from the single-checkpoint
+probe were both exactly 0.00 pp. Each seed had six to nine first-step
+fixes among its 128 target development items. The replay therefore gives
+no empirical case for expanding this selector to fresh seeds. It used
+the same archived candidates for both selectors. The causal effect of
+deliberately varying skill overlap remains an open question.
+
+## November 24, 21:16 IST
+
+Fresh timing job **3607551** completed both seeds in 2 h 52 min 52 s
+with two A100s running in parallel. Per seed, the two harvests took
+122–125 minutes combined, one full 2,843-item checkpoint evaluation
+took 41–43 minutes, and each training step sequence of 25 optimizer
+steps took 81–86 seconds. Both seeds had 20 eligible corrections at
+the initial checkpoint, with 22 and 11 after the first update. Each
+had enough for one eight-example continuation. Matched-dose feasibility
+and accuracy were outside the timing pilot.
+
+Eight archived replays remain complete. The two six-seed jobs
+**3609764** and **3609802** are pending with tentative 22:39 IST starts.
+The pooled review **3609805** is queued behind both.
+
+## November 24, 10:31 IST
+
+All 12 remaining archives reached Lonestar6 scratch by 10:30 IST.
+Both checksum-validation jobs (**3609763**, **3609801**) passed. Replay jobs
+**3609764** and **3609802** cover six seeds each and are queued independently.
+The first eight replays are complete. Slurm rejected the initial CPU review
+submission, which included the historical replay job as a dependency.
+Accounting confirmed that replay had completed successfully, and Slurm
+accepted CPU review **3609805** with dependencies on the two pending replays.
+Fresh timing job **3607551** remains pending on scheduler priority.
+
 ## November 24, 09:30 IST
 
 Lonestar6 job **3607550** completed all eight archived Qwen3-4B probes
